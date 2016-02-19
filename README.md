@@ -1,0 +1,1 @@
+Closed source iText 7 code
