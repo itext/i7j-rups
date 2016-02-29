@@ -94,6 +94,7 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
 		setModel(new DefaultTreeModel(new FormTreeNode()));
 		addTreeSelectionListener(this);
 		xfaTree = new XfaTree();
+		xfaTree.clear();
 		xfaTextArea = new XfaTextArea();
 	}
 
