@@ -44,10 +44,6 @@
  */
 package com.itextpdf.rups.view.models;
 
-import com.itextpdf.io.source.PdfTokenizer;
-import com.itextpdf.io.source.RandomAccessFileOrArray;
-import com.itextpdf.io.source.RandomAccessSourceFactory;
-import com.itextpdf.kernel.parser.PdfContentStreamParser;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfLiteral;
@@ -55,7 +51,6 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 
 import javax.swing.table.AbstractTableModel;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**

@@ -55,7 +55,7 @@ import com.itextpdf.kernel.PdfException;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.io.source.RandomAccessFileOrArray;
 import com.itextpdf.io.source.PdfTokenizer;
-import com.itextpdf.kernel.parser.PdfContentStreamParser;
+import com.itextpdf.kernel.parser.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 
 import javax.imageio.ImageIO;
@@ -120,7 +120,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
                     PdfTokenizer tokeniser = new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
 
-                    PdfContentStreamParser ps = new PdfContentStreamParser(tokeniser);
+                    PdfCanvasParser ps = new PdfCanvasParser(tokeniser);
                     ArrayList<PdfObject> tokens = new ArrayList<PdfObject>();
                     while (ps.parse(tokens).size() > 0){
                         // operator is at the end
