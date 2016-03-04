@@ -104,6 +104,9 @@ public class RupsController extends Observable
 	/** Contains all other components: the page panel, the outline tree, etc. */
 	protected JSplitPane masterComponent;
 
+    protected JPanel masterPanel;
+
+    protected JPanel treePanel;
 
 	// constructor
 	/**
@@ -117,6 +120,7 @@ public class RupsController extends Observable
 		addObserver(console);
 		readerController = new PdfReaderController(this, this);
 		addObserver(readerController);
+        masterPanel = new JPanel(new BorderLayout());
 
         // creating the master component
 		masterComponent = new JSplitPane();
@@ -167,7 +171,9 @@ public class RupsController extends Observable
 		content.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 		content.setDividerLocation((int)(dimension.getWidth() * .6));
 		content.setDividerSize(1);
-        content.add(new JScrollPane(readerController.getPdfTree()), JSplitPane.LEFT);
+        treePanel = new JPanel(new BorderLayout());
+        treePanel.add(new JScrollPane(readerController.getPdfTree()), BorderLayout.CENTER);
+        content.add(treePanel, JSplitPane.LEFT);
 		content.add(readerController.getNavigationTabs(), JSplitPane.RIGHT);
 
 		info.setDividerLocation((int) (dimension.getWidth() * .3));
@@ -180,6 +186,7 @@ public class RupsController extends Observable
 		editorPane.setSelectedComponent(cons);
 		info.add(editorPane, JSplitPane.RIGHT);
 
+        masterPanel.add(masterComponent, BorderLayout.CENTER);
 	}
 
 	/**
@@ -196,8 +203,12 @@ public class RupsController extends Observable
 
 	/** Getter for the master component. */
 	public Component getMasterComponent() {
-		return masterComponent;
+		return masterPanel;
 	}
+
+    public Component getTreePanel() {
+        return treePanel;
+    }
 
 	// Observable
 

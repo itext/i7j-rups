@@ -102,7 +102,7 @@ public class Rups {
 		}
     }
 
-    public static void startApplication(PdfDocument document, final int onCloseOperation) {
+    public static void startPlugin(PdfDocument document, final int onCloseOperation) {
         JFrame frame = null;
         RupsController controller = null;
         createFrame(frame, controller, onCloseOperation);
@@ -127,6 +127,11 @@ public class Rups {
         frame.setJMenuBar(controller.getMenuBar());
         frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
         frame.setVisible(true);
+    }
+
+    public static void startPlugin(Frame frame) {
+        RupsController controller = new RupsController(frame.getSize());
+        frame.add(controller.getTreePanel());
     }
 
 }
