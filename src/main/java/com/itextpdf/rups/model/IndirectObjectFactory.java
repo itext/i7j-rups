@@ -44,10 +44,14 @@
  */
 package com.itextpdf.rups.model;
 
-import java.util.ArrayList;
-
 import com.itextpdf.io.util.IntHashtable;
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNull;
+import com.itextpdf.kernel.pdf.PdfObject;
+
+import java.util.ArrayList;
 
 /**
  * A factory that can produce all the indirect objects in a PDF file.
@@ -141,8 +145,7 @@ public class IndirectObjectFactory {
 		} else {
 			isLoaded.add(false);
 		}
-		//Todo: Return release, after it fixed
-		//object.release();
+		object.release();
 		objects.add(PdfNull.PdfNull);
 	}
 	
