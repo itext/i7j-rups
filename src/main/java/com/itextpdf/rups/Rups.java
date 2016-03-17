@@ -65,6 +65,7 @@ public class Rups {
       */
     public static int CLOSE_OPERATION = WindowConstants.EXIT_ON_CLOSE;
 
+    static RupsController cont;
 	// main method
 	/**
 	 * Main method. Starts the RUPS application.
@@ -81,10 +82,28 @@ public class Rups {
 		SwingUtilities.invokeLater(
 		        new Runnable(){
 		            public void run() {
-		                startApplication(f, CLOSE_OPERATION);
+		                cont = startApplication(f, CLOSE_OPERATION);
 		            }
 		        }
 		        );
+        /*SwingUtilities.invokeLater(
+                new Runnable(){
+                    public void run() {
+                        cont.loadFile(f);
+                    }
+                }
+        );
+        /*new Thread() {
+            @Override
+            public void start() {
+                startApplication(f, CLOSE_OPERATION);
+            }
+        }.start();
+        /*new Runnable(){
+            public void run() {
+                startApplication(f, CLOSE_OPERATION);
+            }
+        };*/
 	}
 
 	// methods
@@ -93,45 +112,38 @@ public class Rups {
      * Initializes the main components of the Rups application.
      * @param f a file that should be opened on launch
      */
-    public static void startApplication(File f, final int onCloseOperation) {
-        JFrame frame = null;
-        RupsController controller = null;
-    	createFrame(frame, controller, onCloseOperation);
+    public static RupsController startApplication(File f, final int onCloseOperation) {
+        JFrame frame = new JFrame();
+        initFrameDim(frame);
+        RupsController controller = new RupsController(frame.getSize());
+        initApplication(frame, controller, onCloseOperation);
 		if (null != f && f.canRead()) {
 			controller.loadFile(f);
 		}
+        return controller;
     }
 
-    public static void startPlugin(PdfDocument document, final int onCloseOperation) {
-        JFrame frame = null;
-        RupsController controller = null;
-        createFrame(frame, controller, onCloseOperation);
-        if (null != document && !document.isClosed()) {
-            controller.loadDocument(document);
-        }
-    }
-
-    protected static void createFrame(JFrame frame, RupsController controller, final int onCloseOperation) {
-        // creates a JFrame
-        frame = new JFrame();
-        // defines the size and location
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setSize((int)(screen.getWidth() * .90), (int)(screen.getHeight() * .90));
-        frame.setLocation((int)(screen.getWidth() * .05), (int)(screen.getHeight() * .05));
-        frame.setResizable(true);
+    protected static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
         frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content
-        controller = new RupsController(frame.getSize());
         frame.setJMenuBar(controller.getMenuBar());
         frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
         frame.setVisible(true);
     }
 
-    public static void startPlugin(Frame frame) {
-        RupsController controller = new RupsController(frame.getSize());
-        frame.add(controller.getTreePanel());
+    // defines the size and location
+    protected static void initFrameDim(JFrame frame) {
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setSize((int)(screen.getWidth() * .90), (int)(screen.getHeight() * .90));
+        frame.setLocation((int)(screen.getWidth() * .05), (int)(screen.getHeight() * .05));
+        frame.setResizable(true);
     }
 
+    public static RupsController startAsPlugin(JComponent comp) {
+        RupsController controller = new RupsController(comp.getSize());
+        comp.add(controller.getTreePanel());
+        return controller;
+    }
 }

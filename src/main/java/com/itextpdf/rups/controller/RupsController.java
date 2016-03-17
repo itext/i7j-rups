@@ -44,9 +44,6 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.io.source.*;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.rups.io.FileChooserAction;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.model.PdfFile;
@@ -55,7 +52,6 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
-import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.kernel.PdfException;
@@ -64,7 +60,6 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -229,7 +224,7 @@ public class RupsController extends Observable
 			return;
 		}
 		if (obj instanceof FileCloseAction) {
-            close();
+            closeRoutine();
 			return;
 		}
 	}
@@ -238,40 +233,46 @@ public class RupsController extends Observable
 	 * @param file the file to load
 	 */
 	public void loadFile(File file) {
-        close();
 		try {
             byte[] contents = readFileToByteArray(file);
-
-            pdfFile = new PdfFile(contents);
-            pdfFile.setDirectory(file.getParentFile());
-            pdfFile.setFilename(file.getName());
-
-            setChanged();
-			super.notifyObservers(RupsMenuBar.OPEN);
-			readerController.startObjectLoader(pdfFile);
-            readerController.addNonObserverTabs(pdfFile);
+            loadRawContent(contents, file.getName(), file.getParentFile());
 		}
 		catch(IOException ioe) {
 			JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
 		}
-		catch (PdfException de) {
-			JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+	}
+
+    public void loadFileFromStream(InputStream is, String fileName) {
+        try {
+            byte[] contents = readStreamToByteArray(is);
+            loadRawContent(contents, fileName, null);
+        }
+        catch(IOException ioe) {
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public void loadRawContent(byte[] contents, String fileName, File directory) {
+        closeRoutine();
+        try {
+            pdfFile = new PdfFile(contents);
+            pdfFile.setFilename(fileName);
+            pdfFile.setDirectory(directory);
+
+            setChanged();
+            super.notifyObservers(RupsMenuBar.OPEN);
+            readerController.startObjectLoader(pdfFile);
+            readerController.addNonObserverTabs(pdfFile);
+        }
+        catch(IOException ioe) {
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (PdfException de) {
+            JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         }
         catch (com.itextpdf.io.IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         }
-	}
-
-    public void loadDocument(PdfDocument document) {
-        close();
-        pdfFile = new PdfFile(document);
-        pdfFile.setFilename(document.getDocumentInfo().getTitle());
-        pdfFile.setDirectory(null);
-
-        setChanged();
-        super.notifyObservers(RupsMenuBar.OPEN);
-        readerController.startObjectLoader(pdfFile);
-        readerController.addNonObserverTabs(pdfFile);
     }
 
     /**
@@ -282,27 +283,33 @@ public class RupsController extends Observable
      * @throws IOException
      */
     private byte[] readFileToByteArray(File file) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = null;
+        byte[] res = null;
         InputStream inputStream = null;
         try {
-            byte[] buffer = new byte[4096];
-            byteArrayOutputStream = new ByteArrayOutputStream();
             inputStream = new FileInputStream(file);
-            int read = 0;
+            res = readStreamToByteArray(inputStream);
+        } finally {
+            try {
+                if ( inputStream != null )
+                    inputStream.close();
+            } catch ( IOException e) {
+                e.printStackTrace(); // log to console
+            }
+        }
+        return res;
+    }
+
+    private byte[] readStreamToByteArray(InputStream inputStream) throws IOException{
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int read = 0;
+        byte[] buffer = new byte[4096];
+        try {
             while ( (read = inputStream.read(buffer)) != -1 ) {
                 byteArrayOutputStream.write(buffer, 0, read);
             }
         } finally {
             try {
-                if ( byteArrayOutputStream != null )
-                    byteArrayOutputStream.close();
-            } catch ( IOException e) {
-                e.printStackTrace(); // log to console
-            }
-
-            try {
-                if ( inputStream != null )
-                    inputStream.close();
+                byteArrayOutputStream.close();
             } catch ( IOException e) {
                 e.printStackTrace(); // log to console
             }
@@ -315,6 +322,7 @@ public class RupsController extends Observable
      * @param file java.io.File file to save
      */
     public void saveFile(File file) {
+        FileOutputStream fos = null;
         try {
             if ( !file.getName().endsWith(".pdf") ) {
                 file = new File(file.getPath() + ".pdf");
@@ -329,26 +337,33 @@ public class RupsController extends Observable
 
             ByteArrayOutputStream bos = pdfFile.getByteArrayOutputStream();
             pdfFile.getPdfDocument().setFlushUnusedObjects(false);
-            close();
+            closeRoutine();
             if (bos != null) {
-                bos.writeTo(new FileOutputStream(file));
+                bos.close();
+                fos = new FileOutputStream(file);
+                bos.writeTo(fos);
             }
 
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
-
-
             loadFile(file);
         } catch (PdfException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (com.itextpdf.io.IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    protected void close() {
+    protected void closeRoutine() {
         PdfDocument docToClose = null;
         if (pdfFile != null && pdfFile.getPdfDocument() != null)
             docToClose = pdfFile.getPdfDocument();
