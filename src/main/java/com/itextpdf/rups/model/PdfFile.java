@@ -83,6 +83,8 @@ public class PdfFile {
     protected String rawContent = null;
 
 	protected ByteArrayOutputStream baos = null;
+
+	protected boolean readOnly = false;
 	
 	// constructors
 	/**
@@ -97,17 +99,11 @@ public class PdfFile {
 		directory = file.getParentFile();
 		filename = file.getName();
 		try {
-			readFile(new FileInputStream(file), false);
+			readFile(new FileInputStream(file), false, readOnly);
 		}
 		catch(BadPasswordException bpe) {
-			readFile(new FileInputStream(file), true);
+			readFile(new FileInputStream(file), true, readOnly);
 		}
-	}
-
-	public PdfFile(PdfDocument document) {
-		this.document = document;
-		baos = null;
-		permissions = null;
 	}
 	
 	/**
@@ -116,14 +112,14 @@ public class PdfFile {
 	 * @throws IOException 
 	 * @throws PdfException
 	 */
-	public PdfFile(byte[] file) throws IOException, PdfException {
+	public PdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
         rawContent = new String(file, "Cp1252");
 
 		try {
-			readFile(new ByteArrayInputStream(file), false);
+			readFile(new ByteArrayInputStream(file), false, readOnly);
 		}
 		catch(BadPasswordException bpe) {
-			readFile(new ByteArrayInputStream(file), true);
+			readFile(new ByteArrayInputStream(file), true, readOnly);
 		}
 	}
 	
@@ -132,7 +128,7 @@ public class PdfFile {
 	 * @throws IOException
 	 * @throws PdfException
 	 */
-	protected void readFile(InputStream fis, boolean checkPass) throws IOException, PdfException {
+	protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
 		// reading the file into PdfReader
 		PdfReader reader;
 		PdfWriter writer;
@@ -169,8 +165,12 @@ public class PdfFile {
 			permissions.setEncrypted(false);
 		}
 		baos = new ByteArrayOutputStream();
-		writer = new PdfWriter(baos); //TODO: change writer mechanism
-		document = new PdfDocument(reader, writer);
+		if (readOnly) {
+			document = new PdfDocument(reader);
+		} else {
+			writer = new PdfWriter(baos); //TODO: change writer mechanism
+			document = new PdfDocument(reader, writer);
+		}
 	}
 
 	/**

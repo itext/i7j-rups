@@ -148,7 +148,7 @@ public class RupsController extends Observable
                     if ( files == null || files.size() != 1 ) {
                         JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
-                        loadFile(files.get(0));
+                        loadFile(files.get(0), false);
                     }
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -189,7 +189,7 @@ public class RupsController extends Observable
 	 */
 	public RupsController(Dimension dimension, File f) {
 		this(dimension);
-		loadFile(f);
+		loadFile(f, false);
 	}
 	/** Getter for the menubar. */
 	public RupsMenuBar getMenuBar() {
@@ -219,7 +219,7 @@ public class RupsController extends Observable
             if ( ((FileChooserAction)obj).isNewFile() ) {
                 saveFile(file);
             } else {
-                loadFile(file);
+                loadFile(file, false);
             }
 			return;
 		}
@@ -232,30 +232,30 @@ public class RupsController extends Observable
 	/**
 	 * @param file the file to load
 	 */
-	public void loadFile(File file) {
+	public void loadFile(File file, boolean readOnly) {
 		try {
             byte[] contents = readFileToByteArray(file);
-            loadRawContent(contents, file.getName(), file.getParentFile());
+            loadRawContent(contents, file.getName(), file.getParentFile(), readOnly);
 		}
 		catch(IOException ioe) {
 			JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
-    public void loadFileFromStream(InputStream is, String fileName) {
+    public void loadFileFromStream(InputStream is, String fileName, File directory, boolean readOnly) {
         try {
             byte[] contents = readStreamToByteArray(is);
-            loadRawContent(contents, fileName, null);
+            loadRawContent(contents, fileName, directory, readOnly);
         }
         catch(IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    public void loadRawContent(byte[] contents, String fileName, File directory) {
+    public void loadRawContent(byte[] contents, String fileName, File directory, boolean readOnly) {
         closeRoutine();
         try {
-            pdfFile = new PdfFile(contents);
+            pdfFile = new PdfFile(contents, readOnly);
             pdfFile.setFilename(fileName);
             pdfFile.setDirectory(directory);
 
@@ -345,7 +345,7 @@ public class RupsController extends Observable
             }
 
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
-            loadFile(file);
+            loadFile(file, false);
         } catch (PdfException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (com.itextpdf.io.IOException ioe) {

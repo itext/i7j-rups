@@ -40,7 +40,7 @@ public class Rups {
                 RupsController controller = new RupsController(frame.getSize());
                 initApplication(frame, controller, onCloseOperation);
                 if (null != f && f.canRead()) {
-                    controller.loadFile(f);
+                    controller.loadFile(f, false);
                 }
                 rups.setController(controller);
             }
@@ -60,26 +60,26 @@ public class Rups {
         return rups;
     }
 
-    public void loadDocumentFromFile(final File f) {
+    public void loadDocumentFromFile(final File f, final boolean readOnly) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                controller.loadFile(f);
+                controller.loadFile(f, readOnly);
             }
         });
     }
 
-    public void loadDocumentFromStream(final InputStream inputStream, final String name, final File directory) {
+    public void loadDocumentFromStream(final InputStream inputStream, final String name, final File directory, final boolean readOnly) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                controller.loadFileFromStream(inputStream, name, directory);
+                controller.loadFileFromStream(inputStream, name, directory, readOnly);
             }
         });
     }
 
-    public void loadDocumentFromRawContent(final byte[] bytes, final String name, final File directory) {
+    public void loadDocumentFromRawContent(final byte[] bytes, final String name, final File directory, final boolean readOnly) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                controller.loadRawContent(bytes, name, directory);
+                controller.loadRawContent(bytes, name, directory, readOnly);
             }
         });
     }
