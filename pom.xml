@@ -118,7 +118,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>com.itextpdf.rups.Rups</mainClass>
+							<mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -132,7 +132,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.itextpdf.rups.Rups</mainClass>
+							<mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -187,7 +187,7 @@
 									<errTitle>Rups</errTitle>
 									<icon>config/logo.ico</icon>
 									<classPath>
-										<mainClass>com.itextpdf.rups.Rups</mainClass>
+										<mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
 										<addDependencies>true</addDependencies>
 										<preCp>anything</preCp>
 									</classPath>

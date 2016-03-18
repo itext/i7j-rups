@@ -363,7 +363,7 @@ public class RupsController extends Observable
         }
     }
 
-    protected void closeRoutine() {
+    public void closeRoutine() {
         PdfDocument docToClose = null;
         if (pdfFile != null && pdfFile.getPdfDocument() != null)
             docToClose = pdfFile.getPdfDocument();
