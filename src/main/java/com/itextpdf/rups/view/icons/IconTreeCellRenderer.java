@@ -46,6 +46,7 @@ package com.itextpdf.rups.view.icons;
 
 import java.awt.Component;
 
+import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
@@ -64,11 +65,14 @@ public class IconTreeCellRenderer extends DefaultTreeCellRenderer {
 	public Component getTreeCellRendererComponent(JTree tree, Object value,
 			boolean selected, boolean expanded, boolean leaf, int row,
 			boolean hasFocus) {
-		super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+		JLabel displayedLabel = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 		if (value instanceof IconTreeNode) {
 			IconTreeNode node = (IconTreeNode) value;
-			setIcon(node.getIcon());
+			displayedLabel.setIcon(node.getIcon());
+			if (node.getTextColor() != null) {
+				displayedLabel.setForeground(node.getTextColor());
+			}
 		}
-		return this;
+		return displayedLabel;
 	}
 }

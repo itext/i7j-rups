@@ -44,8 +44,10 @@
  */
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.io.listeners.PdfTreeExpansionListener;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
+import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
@@ -55,6 +57,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Stack;
 
 /**
  * A JTree that shows the object hierarchy of a PDF document.
@@ -96,6 +99,12 @@ public class PdfTree extends JTree implements Observer {
 	public void update(Observable observable, Object obj) {
 		if (obj == null) {
 			root = new PdfTrailerTreeNode();
+
+		}
+		if (obj instanceof CompareTool.CompareResult) {
+			//showChanges((CompareTool.CompareResult)obj);
+		} else {
+
 		}
 		setModel(new DefaultTreeModel(root));
 		repaint();
@@ -117,5 +126,5 @@ public class PdfTree extends JTree implements Observer {
 
 	/** a serial version UID */
 	private static final long serialVersionUID = 7545804447512085734L;
-	
+
 }

@@ -1,14 +1,16 @@
 package com.itextpdf.rups;
 
 import com.itextpdf.kernel.Version;
+import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.rups.controller.RupsController;
-
-import javax.swing.*;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.InputStream;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Rups {
 
@@ -28,6 +30,7 @@ public class Rups {
 
     /**
      * Initializes the main components of the Rups application.
+     *
      * @param f a file that should be opened on launch
      */
     public static Rups startNewApplication(final File f, final int onCloseOperation) {
@@ -100,6 +103,14 @@ public class Rups {
         });
     }
 
+    public void compareWith(final PdfDocument document) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                controller.compareWith(document);
+            }
+        });
+    }
+
     protected static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
         frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
@@ -112,8 +123,8 @@ public class Rups {
 
     protected static void initFrameDim(JFrame frame) {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setSize((int)(screen.getWidth() * .90), (int)(screen.getHeight() * .90));
-        frame.setLocation((int)(screen.getWidth() * .05), (int)(screen.getHeight() * .05));
+        frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
+        frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
         frame.setResizable(true);
     }
 }

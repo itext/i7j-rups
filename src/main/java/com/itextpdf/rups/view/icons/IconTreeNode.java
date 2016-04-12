@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view.icons;
 
+import java.awt.Color;
 import javax.swing.Icon;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -54,7 +55,8 @@ public class IconTreeNode extends DefaultMutableTreeNode {
 
 	/** The icon that has to be used for this TreeNode. */
 	protected Icon icon;
-	
+	protected Color textColor;
+
 	/**
 	 * Constructs an IconTreeNode.
 	 * @param	icon	the filename of the icon to use for this node.
@@ -77,6 +79,18 @@ public class IconTreeNode extends DefaultMutableTreeNode {
 	/** Getter for the icon. */
 	public Icon getIcon() {
 		return icon;
+	}
+
+	public void setCustomTextColor(Color color) {
+		textColor = color;
+	}
+
+	public void restoreDefaultTextColor() {
+		textColor = null;
+	}
+
+	public Color getTextColor() {
+		return textColor;
 	}
 
 	/** A Serial Version UID. */

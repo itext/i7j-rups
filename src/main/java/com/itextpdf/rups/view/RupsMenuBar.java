@@ -47,6 +47,7 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.io.FileChooserAction;
 import com.itextpdf.rups.io.FileCloseAction;
+import com.itextpdf.rups.io.FileCompareAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.PdfFile;
 
@@ -77,6 +78,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	public static final String HELP_MENU = "Help";
 	/** Caption for "Help about". */
 	public static final String ABOUT = "About";
+
+	public static final String COMPARE_WITH = "Compare with...";
 	/**
 	 * Caption for "Help versions".
 	 * @since iText 5.0.0 (renamed from VERSIONS)
@@ -91,7 +94,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	protected FileChooserAction fileSaverAction;
 	/** The HashMap with all the actions. */
 	protected HashMap<String, JMenuItem> items;
-	
+
+	protected FileCompareAction fileCompareAction;
 	/**
 	 * Creates a JMenuBar.
 	 * @param observable	the controller to which this menu bar is added
@@ -101,12 +105,14 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		items = new HashMap<String, JMenuItem>();
 		fileChooserAction = new FileChooserAction(observable, "Open", PdfFilter.INSTANCE, false);
 		fileSaverAction = new FileChooserAction(observable, "Save As...", PdfFilter.INSTANCE, true);
+		fileCompareAction = new FileCompareAction(observable, COMPARE_WITH, PdfFilter.INSTANCE, false);
 		MessageAction message = new MessageAction();
 		JMenu file = new JMenu(FILE_MENU);
 		addItem(file, OPEN, fileChooserAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
 		addItem(file, CLOSE, new FileCloseAction(observable), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
-        file.addSeparator();
+        addItem(file, COMPARE_WITH, fileCompareAction, KeyStroke.getKeyStroke('Q', KeyEvent.CTRL_DOWN_MASK));
+		file.addSeparator();
         addItem(file, OPENINVIEWER, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (Desktop.isDesktopSupported()) {
@@ -179,6 +185,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 		enableItem(CLOSE, enabled);
         enableItem(SAVE_AS, enabled);
         enableItem(OPENINVIEWER, enabled);
+		enableItem(COMPARE_WITH, enabled);
 	}
 	
 	/**

@@ -51,6 +51,7 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Allows you to browse the file system and forwards the file
@@ -67,7 +68,7 @@ public class FileChooserAction extends AbstractAction {
 	/** The file that was chosen. */
 	protected File file;
 	
-	private File lastSelectedFolder;
+	private static File lastSelectedFolder;
 	
 	/**
 	 * Creates a new file chooser action.
