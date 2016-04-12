@@ -101,11 +101,6 @@ public class PdfTree extends JTree implements Observer {
 			root = new PdfTrailerTreeNode();
 
 		}
-		if (obj instanceof CompareTool.CompareResult) {
-			//showChanges((CompareTool.CompareResult)obj);
-		} else {
-
-		}
 		setModel(new DefaultTreeModel(root));
 		repaint();
 	}

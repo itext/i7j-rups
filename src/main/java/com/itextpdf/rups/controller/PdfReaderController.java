@@ -55,6 +55,7 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
+import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.rups.view.itext.*;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
@@ -63,11 +64,13 @@ import java.awt.Color;
 import java.awt.event.KeyListener;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Stack;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 
 /**
  * Controls the GUI components that get their content from iText's PdfReader.
@@ -119,6 +122,8 @@ public class PdfReaderController extends Observable implements Observer {
      * The factory producing tree nodes.
      */
     protected TreeNodeFactory nodes;
+
+    private Stack<IconTreeNode> highlights = new Stack<IconTreeNode>();
 
     /**
      * Constructs the PdfReaderController.
@@ -248,7 +253,7 @@ public class PdfReaderController extends Observable implements Observer {
         }
         if (obj instanceof CompareTool.CompareResult) {
             highlightChanges((CompareTool.CompareResult) obj);
-            setChanged();
+            return;
         }
         super.notifyObservers(obj);
     }
@@ -360,6 +365,7 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     protected void highlightChanges(CompareTool.CompareResult compareResult) {
+        clearHighlights();
         for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
             PdfObjectTreeNode currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
             while (!path.getPath().empty() && currentNode != null) {
@@ -373,8 +379,16 @@ public class PdfReaderController extends Observable implements Observer {
                 }
             }
             if (currentNode != null) {
+                pdfTree.expandPath(new TreePath(currentNode.getPath()));
                 currentNode.setCustomTextColor(Color.ORANGE);
+                highlights.add(currentNode);
             }
+        }
+    }
+
+    protected void clearHighlights() {
+        while (!highlights.empty()) {
+            highlights.pop().restoreDefaultTextColor();
         }
     }
 }
