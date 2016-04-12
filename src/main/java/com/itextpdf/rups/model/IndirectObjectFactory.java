@@ -146,7 +146,7 @@ public class IndirectObjectFactory {
 			isLoaded.add(false);
 		}
 		object.release();
-		objects.add(PdfNull.PdfNull);
+		objects.add(PdfNull.PDF_NULL);
 	}
 	
 	/**

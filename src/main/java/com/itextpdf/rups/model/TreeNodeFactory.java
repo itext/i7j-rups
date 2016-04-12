@@ -76,7 +76,7 @@ public class TreeNodeFactory {
 		this.objects = objects;
 		for (int i = 0; i < objects.size(); i++) {
 			int ref = objects.getRefByIndex(i);
-			nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PdfNull, ref));
+			nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDF_NULL, ref));
 		}
 	}
 
