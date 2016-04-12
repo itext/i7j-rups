@@ -170,7 +170,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
             }
         }
-        if(object != null && object.getType() == PdfObject.Stream){
+        if(object != null && object.getType() == PdfObject.STREAM){
             //Check if stream is image
             PdfStream stream = (PdfStream)object;
             if(PdfName.Image.equals(stream.getAsName(PdfName.Subtype))){
@@ -241,7 +241,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	}
     protected void append(StringBuilder sb, PdfObject obj) {
         switch(obj.getType()) {
-            case PdfObject.String:
+            case PdfObject.STRING:
                 PdfString str = (PdfString) obj;
                 if (str.isHexWriting()) {
                     sb.append("<");
@@ -262,7 +262,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     sb.append(") ");
                 }
                 break;
-            case PdfObject.Dictionary:
+            case PdfObject.DICTIONARY:
             	PdfDictionary dict = (PdfDictionary)obj;
             	sb.append("<<");
 				for (PdfName key : dict.keySet()) {

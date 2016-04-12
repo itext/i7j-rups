@@ -57,8 +57,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -126,19 +124,19 @@ public class PdfObjectPanel extends JPanel implements Observer {
 			return;
 		}
 		switch(object.getType()) {
-		case PdfObject.Dictionary:
-		case PdfObject.Stream:
+		case PdfObject.DICTIONARY:
+		case PdfObject.STREAM:
 			table.setModel(new DictionaryTableModel((PdfDictionary)object));
             table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
 			layout.show(this, TABLE);
 			this.repaint();
 			break;
-		case PdfObject.Array:
+		case PdfObject.ARRAY:
 			table.setModel(new PdfArrayTableModel((PdfArray)object));
 			layout.show(this, TABLE);
 			this.repaint();
 			break;
-		case PdfObject.String:
+		case PdfObject.STRING:
 			text.setText(((PdfString)object).toUnicodeString());
 			layout.show(this, TEXT);
 			break;

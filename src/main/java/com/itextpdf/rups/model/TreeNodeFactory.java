@@ -118,14 +118,14 @@ public class TreeNodeFactory {
 		PdfObjectTreeNode leaf;
 
 		switch (object.getType()) {
-			case PdfObject.IndirectReference:
+			case PdfObject.INDIRECT_REFERENCE:
 				PdfIndirectReference ref = (PdfIndirectReference)object;
 				leaf = getNode(ref.getObjNumber());
 				addNodes(node, leaf);
 				if (leaf instanceof PdfPagesTreeNode)
 					expandNode(leaf);
 				return;
-			case PdfObject.Array:
+			case PdfObject.ARRAY:
 				PdfArray array = (PdfArray)object;
 				for (Iterator<PdfObject> it = array.listIterator(); it.hasNext(); ) {
 					leaf = PdfObjectTreeNode.getInstance(it.next());
@@ -134,8 +134,8 @@ public class TreeNodeFactory {
 					expandNode(leaf);
 				}
 				return;
-			case PdfObject.Dictionary:
-			case PdfObject.Stream:
+			case PdfObject.DICTIONARY:
+			case PdfObject.STREAM:
 				PdfDictionary dict = (PdfDictionary)object;
 				for (PdfName element : dict.keySet()) {
 					leaf = PdfObjectTreeNode.getInstance(dict, element);

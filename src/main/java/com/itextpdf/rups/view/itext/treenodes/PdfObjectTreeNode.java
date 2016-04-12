@@ -73,34 +73,34 @@ public class PdfObjectTreeNode extends IconTreeNode {
 		super(null, getCaption(object));
 		this.object = object;
 		switch(object.getType()) {
-			case PdfObject.IndirectReference:
+			case PdfObject.INDIRECT_REFERENCE:
 				if (isRecursive())
 					icon = IconFetcher.getIcon("ref_recursive.png");
 				else
 					icon = IconFetcher.getIcon("ref.png");
 				return;
-			case PdfObject.Array:
+			case PdfObject.ARRAY:
 				icon = IconFetcher.getIcon("array.png");
 				return;
-			case PdfObject.Dictionary:
+			case PdfObject.DICTIONARY:
 				icon = IconFetcher.getIcon("dictionary.png");
 				return;
-			case PdfObject.Stream:
+			case PdfObject.STREAM:
 				icon = IconFetcher.getIcon("stream.png");
 				return;
-			case PdfObject.Boolean:
+			case PdfObject.BOOLEAN:
 				icon = IconFetcher.getIcon("boolean.png");
 				return;
-			case PdfObject.Name:
+			case PdfObject.NAME:
 				icon = IconFetcher.getIcon("name.png");
 				return;
-			case PdfObject.Null:
+			case PdfObject.NULL:
 				icon = IconFetcher.getIcon("null.png");
 				return;
-			case PdfObject.Number:
+			case PdfObject.NUMBER:
 				icon = IconFetcher.getIcon("number.png");
 				return;
-			case PdfObject.String:
+			case PdfObject.STRING:
 				icon = IconFetcher.getIcon("string.png");
 				return;
 		}
@@ -253,21 +253,21 @@ public class PdfObjectTreeNode extends IconTreeNode {
 			return "null";
 		PdfName type = null;
 		switch (object.getType()) {
-			case PdfObject.IndirectReference:
+			case PdfObject.INDIRECT_REFERENCE:
 			{
 				String reffedCaption = getCaption( ((PdfIndirectReference) object).getRefersTo(false) );
 				return object.toString() + " -> " + reffedCaption;
 			}
-			case PdfObject.Array:
+			case PdfObject.ARRAY:
 				return "Array";
-			case PdfObject.Stream:
+			case PdfObject.STREAM:
 				type = ((PdfDictionary)object).getAsName(PdfName.Type);
 				if (type == null)
 					return "Stream";
 				return "Stream of type: " + type;
-			case PdfObject.String:
+			case PdfObject.STRING:
 				return ((PdfString)object).toUnicodeString();
-			case PdfObject.Dictionary:
+			case PdfObject.DICTIONARY:
 				type = ((PdfDictionary)object).getAsName(PdfName.Type);
 				if (type == null)
 					return "Dictionary";
