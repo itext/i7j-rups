@@ -127,8 +127,8 @@ public class TreeNodeFactory {
 				return;
 			case PdfObject.ARRAY:
 				PdfArray array = (PdfArray)object;
-				for (Iterator<PdfObject> it = array.listIterator(); it.hasNext(); ) {
-					leaf = PdfObjectTreeNode.getInstance(it.next());
+				for (PdfObject obj : array) {
+					leaf = PdfObjectTreeNode.getInstance(obj);
 					associateIfIndirect(leaf);
 					addNodes(node, leaf);
 					expandNode(leaf);
@@ -143,7 +143,6 @@ public class TreeNodeFactory {
 					addNodes(node, leaf);
 					expandNode(leaf);
 				}
-				return;
 		}
 	}
 
