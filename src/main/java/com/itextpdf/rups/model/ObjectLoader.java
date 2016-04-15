@@ -44,9 +44,12 @@
  */
 package com.itextpdf.rups.model;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Observable;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
+
+import javax.swing.SwingUtilities;
 //import com.itextpdf.kernel.pdf.PdfReader;
 
 /**
@@ -64,16 +67,19 @@ public class ObjectLoader extends BackgroundTask {
 	protected TreeNodeFactory nodes;
 	/** a human readable name for this loaded */
 	private String loaderName;
+
+	private ProgressDialog progress;
 	
 	/**
 	 * Creates a new ObjectLoader.
 	 * @param	observable	the object that will forward the changes.
 	 * @param	document		the PdfDocument from which the objects will be read.
 	 */
-	public ObjectLoader(Observable observable, PdfDocument document, String loaderName) {
+	public ObjectLoader(Observable observable, PdfDocument document, String loaderName, ProgressDialog progress) {
 		this.observable = observable;
 		this.document = document;
 		this.loaderName = loaderName;
+		this.progress = progress;
 		start();
 	}
 	
@@ -115,18 +121,37 @@ public class ObjectLoader extends BackgroundTask {
 	 */
 	@Override
 	public void doTask() {
-		ProgressDialog progress = new ProgressDialog(null, "Reading PDF file");
 		objects = new IndirectObjectFactory(document);
-		int n = objects.getXRefMaximum();
-		progress.setMessage("Reading the Cross-Reference table");
-		progress.setTotal(n);
+		final int n = objects.getXRefMaximum();
+		SwingHelper.invokeSync(new Runnable() {
+			public void run() {
+				progress.setMessage("Reading the Cross-Reference table");
+				progress.setTotal(n);
+			}
+		});
 		while (objects.storeNextObject()) {
-			progress.setValue(objects.getCurrent());
+			SwingHelper.invokeSync(new Runnable() {
+				public void run() {
+					progress.setValue(objects.getCurrent());
+				}
+			});
 		}
-		progress.setTotal(0);
+		SwingHelper.invokeSync(new Runnable() {
+			public void run() {
+				progress.setTotal(0);
+			}
+		});
 		nodes = new TreeNodeFactory(objects);
-		progress.setMessage("Updating GUI");
+		SwingHelper.invokeSync(new Runnable() {
+			public void run() {
+				progress.setMessage("Updating GUI");
+			}
+		});
+	}
+
+	@Override
+	public void finished() {
 		observable.notifyObservers(this);
-		progress.dispose();
+		progress.setVisible(false);
 	}
 }

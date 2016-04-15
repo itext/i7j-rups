@@ -50,6 +50,7 @@ import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
@@ -122,6 +123,8 @@ public class PdfReaderController extends Observable implements Observer {
      * The factory producing tree nodes.
      */
     protected TreeNodeFactory nodes;
+
+    ObjectLoader loader;
 
     private Stack<IconTreeNode> highlights = new Stack<IconTreeNode>();
 
@@ -225,11 +228,11 @@ public class PdfReaderController extends Observable implements Observer {
      *
      * @param file the wrapper object that holds the PdfReader as member variable
      */
-    public void startObjectLoader(PdfFile file) {
+    public void startObjectLoader(PdfFile file, ProgressDialog dialog) {
         setChanged();
         notifyObservers();
         setChanged();
-        new ObjectLoader(this, file.getPdfDocument(), file.getFilename());
+        loader = new ObjectLoader(this, file.getPdfDocument(), file.getFilename(), dialog);
     }
 
     /**

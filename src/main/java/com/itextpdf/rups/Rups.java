@@ -3,14 +3,15 @@ package com.itextpdf.rups;
 import com.itextpdf.kernel.Version;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.model.SwingHelper;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.InputStream;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 public class Rups {
 
@@ -35,12 +36,12 @@ public class Rups {
      */
     public static Rups startNewApplication(final File f, final int onCloseOperation) {
         final Rups rups = new Rups();
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame();
                 // defines the size and location
                 initFrameDim(frame);
-                RupsController controller = new RupsController(frame.getSize());
+                RupsController controller = new RupsController(frame.getSize(), frame, false);
                 initApplication(frame, controller, onCloseOperation);
                 if (null != f && f.canRead()) {
                     controller.loadFile(f, false);
@@ -51,11 +52,11 @@ public class Rups {
         return rups;
     }
 
-    public static Rups startNewPlugin(final JComponent comp, final Dimension size) {
+    public static Rups startNewPlugin(final JComponent comp, final Dimension size, final Frame frame) {
         final Rups rups = new Rups();
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                RupsController controller = new RupsController(comp.getSize());
+                RupsController controller = new RupsController(size, frame, true);
                 comp.add(controller.getMasterComponent());
                 rups.setController(controller);
             }
@@ -64,49 +65,55 @@ public class Rups {
     }
 
     public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
+        getController().waitForLoader();
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                controller.loadFile(f, readOnly);
+                getController().loadFile(f, readOnly);
             }
         });
     }
 
     public void loadDocumentFromStream(final InputStream inputStream, final String name, final File directory, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
+        getController().waitForLoader();
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                controller.loadFileFromStream(inputStream, name, directory, readOnly);
+                getController().loadFileFromStream(inputStream, name, directory, readOnly);
             }
         });
     }
 
     public void loadDocumentFromRawContent(final byte[] bytes, final String name, final File directory, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
+        getController().waitForLoader();
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                controller.loadRawContent(bytes, name, directory, readOnly);
+                getController().loadRawContent(bytes, name, directory, readOnly);
             }
         });
     }
 
     public void closeDocument() {
-        SwingUtilities.invokeLater(new Runnable() {
+        getController().waitForLoader();
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                controller.closeRoutine();
+                getController().closeRoutine();
             }
         });
     }
 
     public void saveDocumentAs(final File f) {
-        SwingUtilities.invokeLater(new Runnable() {
+        getController().waitForLoader();
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                controller.saveFile(f);
+                getController().saveFile(f);
             }
         });
     }
 
     public void compareWith(final PdfDocument document) {
-        SwingUtilities.invokeLater(new Runnable() {
+        getController().waitForLoader();
+        SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                controller.compareWith(document);
+                getController().compareWith(document);
             }
         });
     }

@@ -44,6 +44,8 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.model.SwingHelper;
+
 import java.awt.Color;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -67,47 +69,71 @@ import javax.swing.text.StyleContext;
  */
 public class Console implements Observer {
 
-	/** Single Console instance. */
-	private static Console console = null;
-	
-    /** Custom PrintStream. */
+    /**
+     * Single Console instance.
+     */
+    private static Console console = null;
+
+    /**
+     * Custom PrintStream.
+     */
     PrintStream printStream;
-    /** Custom OutputStream. */
+    /**
+     * Custom OutputStream.
+     */
     PipedOutputStream poCustom;
-    /** Custom InputStream. */
+    /**
+     * Custom InputStream.
+     */
     PipedInputStream piCustom;
-    
-    /** OutputStream for System.out. */
+
+    /**
+     * OutputStream for System.out.
+     */
     PipedOutputStream poOut;
-	/** InputStream for System.out. */
+    /**
+     * InputStream for System.out.
+     */
     PipedInputStream piOut;
 
-    /** OutputStream for System.err. */
+    /**
+     * OutputStream for System.err.
+     */
     PipedOutputStream poErr;
-    /** InputStream for System.err. */
+    /**
+     * InputStream for System.err.
+     */
     PipedInputStream piErr;
-    
-    /** The StyleContext for the Console. */
+
+    /**
+     * The StyleContext for the Console.
+     */
     ConsoleStyleContext styleContext = new ConsoleStyleContext();
-    
-    /** The text area to which everything is written. */
-    JTextPane textArea = new JTextPane(new DefaultStyledDocument(styleContext));
+
+    /**
+     * The text area to which everything is written.
+     */
+    final JTextPane textArea = new JTextPane(new DefaultStyledDocument(styleContext));
+
+    private final static int BUFF_SIZE = 1024;
+    private final static int MAX_TEXT_AREA_SIZE = 8192;
 
     /**
      * Creates a new Console object.
+     *
      * @throws IOException
      */
     private Console() throws IOException {
-    	// Set up Custom
-    	piCustom = new PipedInputStream();
-    	poCustom = new PipedOutputStream(piCustom);
+        // Set up Custom
+        piCustom = new PipedInputStream();
+        poCustom = new PipedOutputStream(piCustom);
         printStream = new PrintStream(poCustom);
-    	
+
         // Set up System.out
         piOut = new PipedInputStream();
         poOut = new PipedOutputStream(piOut);
         System.setOut(new PrintStream(poOut, true));
-        
+
         // Set up System.err
         piErr = new PipedInputStream();
         poErr = new PipedOutputStream(piErr);
@@ -126,69 +152,75 @@ public class Console implements Observer {
      * Console is a Singleton class: you can only get one Console.
      */
     public static synchronized Console getInstance() {
-    	if (console == null) {
-    		try {
-				console = new Console();
-			} catch (IOException e) {
-				console = null;
-			}
-    	}
-    	return console;
+        if (console == null) {
+            try {
+                console = new Console();
+            } catch (IOException e) {
+                console = null;
+            }
+        }
+        return console;
     }
 
-	/**
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 */
-	public void update(Observable observable, Object obj) {
-		if (RupsMenuBar.CLOSE.equals(obj)) {
-			textArea.setText("");
-		}
-		if (RupsMenuBar.OPEN.equals(obj)) {
-			textArea.setText("");
-		}
-	}
-	
+    /**
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
+    public void update(Observable observable, Object obj) {
+        if (RupsMenuBar.CLOSE.equals(obj)) {
+            textArea.setText("");
+        }
+        if (RupsMenuBar.OPEN.equals(obj)) {
+            textArea.setText("");
+        }
+    }
+
     /**
      * Allows you to print something to the custom PrintStream.
-     * @param	s	the message you want to send to the Console
+     *
+     * @param    s    the message you want to send to the Console
      */
-	public static void println(String s) {
-		PrintStream ps = getInstance().getPrintStream();
-		if (ps == null) {
-			System.out.println(s);
-		}
-		else {
-			ps.println(s);
-			ps.flush();
-		}
-	}
+    public static void println(String s) {
+        PrintStream ps = getInstance().getPrintStream();
+        if (ps == null) {
+            System.out.println(s);
+        } else {
+            ps.println(s);
+            ps.flush();
+        }
+    }
 
     /**
      * Get the custom PrintStream of the console.
      */
-	public PrintStream getPrintStream() {
-		return printStream;
-	}
+    public PrintStream getPrintStream() {
+        return printStream;
+    }
 
-	/**
-	 * Get the JTextArea to which everything is written.
-	 */
-	public JTextPane getTextArea() {
-		return textArea;
-	}
-    
-	/**
-	 * The thread that will write everything to the text area.
-	 */
+    /**
+     * Get the JTextArea to which everything is written.
+     */
+    public JTextPane getTextArea() {
+        return textArea;
+    }
+
+    /**
+     * The thread that will write everything to the text area.
+     */
     class ReadWriteThread extends Thread {
-    	/** The InputStream of this Thread */
+        /**
+         * The InputStream of this Thread
+         */
         PipedInputStream pi;
-        /** The type (CUSTOM, SYSTEMOUT, SYSTEMERR) of this Thread */
+        /**
+         * The type (CUSTOM, SYSTEMOUT, SYSTEMERR) of this Thread
+         */
         String type;
 
-        /** Create the ReaderThread. */
+        /**
+         * Create the ReaderThread.
+         */
         ReadWriteThread(PipedInputStream pi, String type) {
-        	super();
+            super();
             this.pi = pi;
             this.type = type;
         }
@@ -197,43 +229,63 @@ public class Console implements Observer {
          * @see java.lang.Thread#run()
          */
         public void run() {
-            final byte[] buf = new byte[1024];
+            final byte[] buf = new byte[BUFF_SIZE];
 
             while (true) {
                 try {
                     final int len = pi.read(buf);
                     if (len == -1) {
                         break;
+                    } else if (len == 0) {
+                        continue;
                     }
-                    Document doc = textArea.getDocument();
-                    AttributeSet attset = styleContext.getStyle(type);
-                    String snippet = new String(buf, 0, len);
-                    doc.insertString(doc.getLength(),
-                                     snippet, attset);
-                    textArea.setCaretPosition(textArea.getDocument().
-                                              getLength());
-                } catch (BadLocationException ex) {
-                } catch (IOException e) {
+                    SwingHelper.invokeSync(new Runnable() {
+                        public void run() {
+                            try {
+                                Document doc = textArea.getDocument();
+                                AttributeSet attset = styleContext.getStyle(type);
+                                String snippet = new String(buf, 0, len);
+                                if (doc.getLength() + snippet.length() > MAX_TEXT_AREA_SIZE) {
+                                    textArea.setText("...\n");
+                                    doc = textArea.getDocument();
+                                }
+                                doc.insertString(doc.getLength(), snippet, attset);
+                                textArea.setCaretPosition(textArea.getDocument().getLength());
+                            } catch (BadLocationException ignored) {
+                            }
+                        }
+                    }, true);
+                } catch (IOException ignored) {
                 }
             }
         }
-    }	
-    
+    }
+
     /**
      * The style context defining the styles of each type of PrintStream.
      */
     class ConsoleStyleContext extends StyleContext {
 
-        /** A Serial Version UID. */
-		private static final long serialVersionUID = 7253870053566811171L;
-		/** The name of the Style used for Custom messages */
-		public static final String CUSTOM = "Custom";
-		/** The name of the Style used for System.out */
+        /**
+         * A Serial Version UID.
+         */
+        private static final long serialVersionUID = 7253870053566811171L;
+        /**
+         * The name of the Style used for Custom messages
+         */
+        public static final String CUSTOM = "Custom";
+        /**
+         * The name of the Style used for System.out
+         */
         public static final String SYSTEMOUT = "SystemOut";
-		/** The name of the Style used for System.err */
-		public static final String SYSTEMERR = "SystemErr";
+        /**
+         * The name of the Style used for System.err
+         */
+        public static final String SYSTEMERR = "SystemErr";
 
-        /** Creates the style context for the Console. */
+        /**
+         * Creates the style context for the Console.
+         */
         public ConsoleStyleContext() {
             super();
             Style root = getStyle(DEFAULT_STYLE);

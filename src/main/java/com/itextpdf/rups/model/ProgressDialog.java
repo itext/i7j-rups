@@ -44,9 +44,8 @@
  */
 package com.itextpdf.rups.model;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -74,10 +73,10 @@ public class ProgressDialog extends JDialog {
 	 * @param	parent the parent frame of this dialog (used to position the dialog)
 	 * @param	msg	the message that will be displayed.
 	 */
-	public ProgressDialog(JFrame parent, String msg) {
-		super();
+	public ProgressDialog(Component parent, String msg, Frame frame, boolean isModal) {
+		super(frame, isModal);
 		this.setTitle("Progress...");
-		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	    setSize(300, 100);
 	    this.setLocationRelativeTo(parent);
 	    
@@ -96,9 +95,15 @@ public class ProgressDialog extends JDialog {
 	    progress = new JProgressBar();
 	    progress.setIndeterminate(true);
 	    getContentPane().add(progress, constraints);
-	    
-	    setVisible(true);
 	}
+
+	@Override
+	public void dispose() {
+		Window frame = getOwner();
+		super.dispose();
+		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+	}
+
 	
 	/**
 	 * Changes the message describing what's in progress

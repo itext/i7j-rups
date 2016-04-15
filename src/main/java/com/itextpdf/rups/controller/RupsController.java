@@ -52,6 +52,7 @@ import com.itextpdf.rups.io.FileChooserAction;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileCompareAction;
 import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
@@ -63,6 +64,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -115,13 +117,19 @@ public class RupsController extends Observable
 
     protected JPanel treePanel;
 
+    protected Frame ownedFrame;
+
+    private boolean pluginMode;
+
     // constructor
 
     /**
      * Constructs the GUI components of the RUPS application.
      */
-    public RupsController(Dimension dimension) {
+    public RupsController(Dimension dimension, Frame frame, boolean pluginMode) {
         // creating components and controllers
+        this.pluginMode = pluginMode;
+        this.ownedFrame = frame;
         menuBar = new RupsMenuBar(this);
         addObserver(menuBar);
         Console console = Console.getInstance();
@@ -200,8 +208,8 @@ public class RupsController extends Observable
     /**
      *
      */
-    public RupsController(Dimension dimension, File f) {
-        this(dimension);
+    public RupsController(Dimension dimension, File f, Frame frame, boolean pluginMode) {
+        this(dimension, frame, pluginMode);
         loadFile(f, false);
     }
 
@@ -282,7 +290,15 @@ public class RupsController extends Observable
 
             setChanged();
             super.notifyObservers(RupsMenuBar.OPEN);
-            readerController.startObjectLoader(pdfFile);
+            final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, !pluginMode);
+            if (!pluginMode) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        dialog.setVisible(true);
+                    }
+                });
+            }
+            readerController.startObjectLoader(pdfFile, dialog);
             readerController.addNonObserverTabs(pdfFile);
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
@@ -415,6 +431,16 @@ public class RupsController extends Observable
         }
     }
 
+    public void waitForLoader() {
+        if (readerController.loader != null) {
+            try {
+                readerController.loader.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     // tree selection
 
     /**
@@ -427,7 +453,6 @@ public class RupsController extends Observable
             return;
         }
         if (selectednode instanceof PdfObjectTreeNode) {
-            //((PdfObjectTreeNode) selectednode).textColor = Color.ORANGE;
             readerController.update(this, selectednode);
         }
     }

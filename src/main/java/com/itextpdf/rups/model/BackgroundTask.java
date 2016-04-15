@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.model;
 
+import java.lang.reflect.InvocationTargetException;
 import javax.swing.SwingUtilities;
 
 /**
@@ -105,6 +106,16 @@ public abstract class BackgroundTask {
         Thread t = thread.get();
         if (t != null) {
             t.start();
+        }
+    }
+
+    /**
+     * Wait for thread to finish what it's doing
+     */
+    public void join() throws InterruptedException {
+        Thread t = thread.get();
+        if (t != null) {
+            t.join();
         }
     }
 
