@@ -56,8 +56,8 @@ import javax.swing.text.DefaultEditorKit;
  */
 public class StreamPanelContextMenu {
 
-    final static String COPY = "Copy";
-    final static String SELECTALL = "Select All";
+    static final String COPY = "Copy";
+    static final String SELECTALL = "Select All";
 
     /**
      * Creates a context menu (right click menu) with two actions:

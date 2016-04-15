@@ -115,8 +115,8 @@ public class Console implements Observer {
      */
     final JTextPane textArea = new JTextPane(new DefaultStyledDocument(styleContext));
 
-    private final static int BUFF_SIZE = 1024;
-    private final static int MAX_TEXT_AREA_SIZE = 8192;
+    private static final int BUFF_SIZE = 1024;
+    private static final int MAX_TEXT_AREA_SIZE = 8192;
 
     /**
      * Creates a new Console object.
