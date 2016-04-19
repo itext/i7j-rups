@@ -410,7 +410,7 @@ public class RupsController extends Observable
         }
     }
 
-    public void compareWith(PdfDocument document) {
+    public void compareWithDocument(PdfDocument document) {
         CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
         CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
         System.out.print(compareResult.getReport());
@@ -420,8 +420,24 @@ public class RupsController extends Observable
     public void compareWithFile(File file) {
         PdfDocument cmpDocument = null;
         try {
-            cmpDocument = new PdfDocument(new PdfReader(new FileInputStream(file)));
-            compareWith(cmpDocument);
+            cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
+            compareWithDocument(cmpDocument);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (cmpDocument != null) {
+                cmpDocument.close();
+            }
+        }
+    }
+
+    public void compareWithStream(InputStream is) {
+        PdfDocument cmpDocument = null;
+        try {
+            PdfReader reader = new PdfReader(is);
+            reader.setCloseStream(false);
+            cmpDocument = new PdfDocument(reader);
+            compareWithDocument(cmpDocument);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

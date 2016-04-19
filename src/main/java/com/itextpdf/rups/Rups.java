@@ -34,7 +34,7 @@ public class Rups {
      *
      * @param f a file that should be opened on launch
      */
-    public static Rups startNewApplication(final File f, final int onCloseOperation) {
+    public static Rups startNewApplication(File f, final int onCloseOperation) {
         final Rups rups = new Rups();
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
@@ -43,12 +43,12 @@ public class Rups {
                 initFrameDim(frame);
                 RupsController controller = new RupsController(frame.getSize(), frame, false);
                 initApplication(frame, controller, onCloseOperation);
-                if (null != f && f.canRead()) {
-                    controller.loadFile(f, false);
-                }
                 rups.setController(controller);
             }
         });
+        if (null != f && f.canRead()) {
+            rups.loadDocumentFromFile(f, false);
+        }
         return rups;
     }
 
@@ -65,34 +65,33 @@ public class Rups {
     }
 
     public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        getController().waitForLoader();
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 getController().loadFile(f, readOnly);
             }
         });
+        getController().waitForLoader();
     }
 
     public void loadDocumentFromStream(final InputStream inputStream, final String name, final File directory, final boolean readOnly) {
-        getController().waitForLoader();
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 getController().loadFileFromStream(inputStream, name, directory, readOnly);
             }
         });
+        getController().waitForLoader();
     }
 
     public void loadDocumentFromRawContent(final byte[] bytes, final String name, final File directory, final boolean readOnly) {
-        getController().waitForLoader();
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 getController().loadRawContent(bytes, name, directory, readOnly);
             }
         });
+        getController().waitForLoader();
     }
 
     public void closeDocument() {
-        getController().waitForLoader();
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 getController().closeRoutine();
@@ -101,7 +100,6 @@ public class Rups {
     }
 
     public void saveDocumentAs(final File f) {
-        getController().waitForLoader();
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 getController().saveFile(f);
@@ -109,12 +107,25 @@ public class Rups {
         });
     }
 
-    public void compareWith(final PdfDocument document) {
-        getController().waitForLoader();
+    public void compareWithDocument(final PdfDocument document) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                getController().compareWith(document);
+                getController().compareWithDocument(document);
             }
+        });
+    }
+
+    public void compareWithFile(final File file) {
+        SwingHelper.invokeSync(new Runnable() {
+            public void run() {
+                getController().compareWithFile(file);           }
+        });
+    }
+
+    public void compareWithStream(final InputStream is) {
+        SwingHelper.invokeSync(new Runnable() {
+            public void run() {
+                getController().compareWithStream(is);           }
         });
     }
 
