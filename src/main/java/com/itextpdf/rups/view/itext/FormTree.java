@@ -55,8 +55,11 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.dom4j.DocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.model.XfaFile;
@@ -140,9 +143,11 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
 					xfaTree.load(xfaFile);
 					xfaTextArea.load(xfaFile);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Logger logger = LoggerFactory.getLogger(FormTree.class);
+					logger.warn(LoggerMessages.xfaLoadingError, e);
 				} catch (DocumentException e) {
-					e.printStackTrace();
+					Logger logger = LoggerFactory.getLogger(FormTree.class);
+					logger.warn(LoggerMessages.xmlDomParsingError, e);
 				}
 			}
 			setModel(new DefaultTreeModel(root));

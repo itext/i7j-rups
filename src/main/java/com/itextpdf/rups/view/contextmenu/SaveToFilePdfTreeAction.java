@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.kernel.pdf.PdfStream;
@@ -57,6 +58,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom action to save raw bytes of a stream to a file from the PdfTree view.
@@ -83,7 +87,7 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
         saveRawBytes = raw;
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent event) {
 
         // get saving location
         JFileChooser fileChooser = new JFileChooser();
@@ -119,10 +123,12 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
                 FileOutputStream fos = new FileOutputStream(path);
                 fos.write(array);
                 fos.close();
-            } catch (IOException ioe) {
-                ioe.printStackTrace(); // TODO : Catch this exception properly
-            } catch (com.itextpdf.io.IOException ioe) {
-                ioe.printStackTrace(); // TODO : Catch this exception properly
+            } catch (IOException e) { // TODO : Catch this exception properly
+                Logger logger = LoggerFactory.getLogger(SaveToFilePdfTreeAction.class);
+                logger.warn(LoggerMessages.writingFileError, e);
+            } catch (com.itextpdf.io.IOException e) { // TODO : Catch this exception properly
+                Logger logger = LoggerFactory.getLogger(SaveToFilePdfTreeAction.class);
+                logger.warn(LoggerMessages.gettingPdfStreamBytesError, e);
             }
         }
     }

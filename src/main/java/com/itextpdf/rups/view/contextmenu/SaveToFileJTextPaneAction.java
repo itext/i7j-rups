@@ -44,12 +44,17 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.model.LoggerMessages;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom action to save raw bytes of a stream to a file from the stream panel.
@@ -70,7 +75,7 @@ public class SaveToFileJTextPaneAction extends AbstractRupsAction {
         super(name, invoker);
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent event) {
 
         // get saving location
         JFileChooser fileChooser = new JFileChooser();
@@ -96,16 +101,16 @@ public class SaveToFileJTextPaneAction extends AbstractRupsAction {
                 writer = new BufferedWriter(new FileWriter(path));
                 writer.write(textPane.getSelectedText());
 
-            } catch (IOException e1) {
-                e1.printStackTrace(); // TODO
-            } catch (com.itextpdf.io.IOException ioe) {
-                ioe.printStackTrace();
+            } catch (IOException e) { //TODO
+                Logger logger = LoggerFactory.getLogger(SaveToFileJTextPaneAction.class);
+                logger.warn(LoggerMessages.writingFileError, e);
             } finally {
                 try {
                     if (writer != null)
                         writer.close();
-                } catch (IOException e2) {
-                    e2.printStackTrace(); // TODO
+                } catch (IOException e) { //TODO
+                    Logger logger = LoggerFactory.getLogger(SaveToFileJTextPaneAction.class);
+                    logger.warn(LoggerMessages.closingStreamError, e);
                 }
             }
 

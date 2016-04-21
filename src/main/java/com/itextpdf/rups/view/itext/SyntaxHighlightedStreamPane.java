@@ -55,6 +55,7 @@ import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
+import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 
@@ -79,6 +80,9 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
@@ -152,19 +156,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                         text.append(operands, attributesOperands);
                         text.append(operator + newline, attributes);
                     }
-                }
-                catch (PdfException e) {
+                } catch (PdfException e) {
                     if ( bb != null ) {
                         text.setText(new String(bb));
                     } else {
                         text.setText(e.getMessage());
                     }
-                }
-                catch (IOException e) {
-                    //throw new ExceptionConverter(e);
-                }
-				catch (com.itextpdf.io.IOException e) {
-					//e.printStackTrace();
+                } catch (IOException ignored) {
+                } catch (com.itextpdf.io.IOException ignored) {
 				}
 
                 text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
@@ -204,21 +203,23 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                                         fileDialog.setVisible(true);
                                         ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
                                     } catch (Exception e) {
-                                        e.printStackTrace();
-
+										Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
+										logger.warn(LoggerMessages.unhandledExceptionDefault, e);
                                     }
                                 }
                             });
                             text.append("\n", null);
                             text.insertComponent(saveImage);
                         } catch (BadLocationException e) {
-                            e.printStackTrace();
+							Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
+							logger.warn(LoggerMessages.unhandledExceptionDefault, e);
                         }
                     } else {
                         text.setText("Image can't be loaded.");
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+					Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
+					logger.warn(LoggerMessages.unhandledExceptionDefault, e);
                 }
 
             } else if ( stream.get(PdfName.Length1) != null ) {

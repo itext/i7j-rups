@@ -51,6 +51,7 @@ import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.io.FileChooserAction;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileCompareAction;
+import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
@@ -80,6 +81,9 @@ import java.util.StringTokenizer;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -327,7 +331,8 @@ public class RupsController extends Observable
                 if (inputStream != null)
                     inputStream.close();
             } catch (IOException e) {
-                e.printStackTrace(); // log to console
+                Logger logger = LoggerFactory.getLogger(RupsController.class);
+                logger.warn(LoggerMessages.closingStreamError, e);
             }
         }
         return res;
@@ -345,7 +350,8 @@ public class RupsController extends Observable
             try {
                 byteArrayOutputStream.close();
             } catch (IOException e) {
-                e.printStackTrace(); // log to console
+                Logger logger = LoggerFactory.getLogger(RupsController.class);
+                logger.warn(LoggerMessages.closingStreamError, e);
             }
         }
         return byteArrayOutputStream.toByteArray();
@@ -393,7 +399,8 @@ public class RupsController extends Observable
                     fos.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Logger logger = LoggerFactory.getLogger(RupsController.class);
+                logger.warn(LoggerMessages.closingStreamError, e);
             }
         }
     }
@@ -413,7 +420,8 @@ public class RupsController extends Observable
     public void compareWithDocument(PdfDocument document) {
         CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
         CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-        System.out.print(compareResult.getReport());
+        Logger logger = LoggerFactory.getLogger(RupsController.class);
+        logger.info(compareResult.getReport());
         readerController.notifyObservers(compareResult);
     }
 
@@ -423,7 +431,8 @@ public class RupsController extends Observable
             cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
             compareWithDocument(cmpDocument);
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger logger = LoggerFactory.getLogger(RupsController.class);
+            logger.warn(LoggerMessages.createCompareDocError, e);
         } finally {
             if (cmpDocument != null) {
                 cmpDocument.close();
@@ -439,7 +448,8 @@ public class RupsController extends Observable
             cmpDocument = new PdfDocument(reader);
             compareWithDocument(cmpDocument);
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger logger = LoggerFactory.getLogger(RupsController.class);
+            logger.warn(LoggerMessages.createCompareDocError, e);
         } finally {
             if (cmpDocument != null) {
                 cmpDocument.close();
@@ -452,7 +462,8 @@ public class RupsController extends Observable
             try {
                 readerController.loader.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger logger = LoggerFactory.getLogger(RupsController.class);
+                logger.warn(LoggerMessages.waitingForLoaderError, e);
             }
         }
     }

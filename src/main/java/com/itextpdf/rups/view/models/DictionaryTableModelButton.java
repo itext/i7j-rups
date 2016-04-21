@@ -62,7 +62,7 @@ public class DictionaryTableModelButton extends JButton implements TableCellRend
         setEnabled(true);
         addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("hello!");
+                //Do nothing
             }
         });
     }

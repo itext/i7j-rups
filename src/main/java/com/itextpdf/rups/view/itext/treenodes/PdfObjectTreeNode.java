@@ -45,10 +45,12 @@
 package com.itextpdf.rups.view.itext.treenodes;
 
 import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-//import com.itextpdf.text.pdf.PdfReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Every node in our tree corresponds with a PDF object.
@@ -306,8 +308,9 @@ public class PdfObjectTreeNode extends IconTreeNode {
 					}
 				}
 			}
-		}catch (NullPointerException ex){
-			System.out.println(this.toString() + " Parentnode is null.");
+		}catch (NullPointerException e) {
+			Logger logger = LoggerFactory.getLogger(PdfObjectTreeNode.class);
+			logger.warn(LoggerMessages.parentNodeNullError, e);
 		}
 		return null;
 	}

@@ -44,10 +44,15 @@
  */
 package com.itextpdf.rups.view.icons;
 
+import com.itextpdf.rups.model.LoggerMessages;
+
 import java.util.HashMap;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that fetches the icons in com.itextpdf.rups.view.icons.
@@ -73,7 +78,8 @@ public class IconFetcher {
 				cache.put(filename, icon);
 			}
 			catch(Exception e) {
-				System.err.println("Can't find file: " + filename);
+				Logger logger = LoggerFactory.getLogger(IconFetcher.class);
+				logger.error(LoggerMessages.findingIconError + filename, e);
 				return null;
 			}
 		}

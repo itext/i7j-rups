@@ -3,7 +3,11 @@ package com.itextpdf.rups.model;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SwingHelper {
+
     public static void invokeSync(Runnable runnable) {
         invokeSync(runnable, false);
     }
@@ -16,11 +20,13 @@ public class SwingHelper {
                 SwingUtilities.invokeAndWait(runnable);
             } catch (InterruptedException e) {
                 if (!isSilent) {
-                    e.printStackTrace();
+                    Logger logger = LoggerFactory.getLogger(SwingHelper.class);
+                    logger.warn(LoggerMessages.invokingRunnableError, e);
                 }
             } catch (InvocationTargetException e) {
                 if (!isSilent) {
-                    e.printStackTrace();
+                    Logger logger = LoggerFactory.getLogger(SwingHelper.class);
+                    logger.warn(LoggerMessages.invokingRunnableError, e);
                 }
             }
         }
