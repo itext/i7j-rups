@@ -370,10 +370,18 @@ public class PdfReaderController extends Observable implements Observer {
     protected void highlightChanges(CompareTool.CompareResult compareResult) {
         clearHighlights();
         for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
-            PdfObjectTreeNode currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
-            while (!path.getPath().empty() && currentNode != null) {
+            PdfObjectTreeNode currentNode = null;
+            while (!path.getIndirectPath().empty()) {
+                CompareTool.ObjectPath.IndirectPathItem indirectPathItem = path.getIndirectPath().pop();
+                currentNode = nodes.getNode(indirectPathItem.getOutObject().getObjNumber());
+                if (currentNode != null) {
+                    nodes.expandNode(currentNode);
+                }
+            }
+            currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
+            while (!path.getLocalPath().empty() && currentNode != null) {
                 nodes.expandNode(currentNode);
-                CompareTool.ObjectPath.PathItem item = path.getPath().pop();
+                CompareTool.ObjectPath.LocalPathItem item = path.getLocalPath().pop();
                 if (item instanceof CompareTool.ObjectPath.DictPathItem) {
                     currentNode = nodes.getChildNode(currentNode, ((CompareTool.ObjectPath.DictPathItem) item).getKey());
                 } else if (item instanceof CompareTool.ObjectPath.ArrayPathItem) {
