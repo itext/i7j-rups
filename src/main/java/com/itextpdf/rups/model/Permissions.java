@@ -44,7 +44,7 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.EncryptionConstants;
 
 /**
  * This class can tell you more about the permissions that are allowed
@@ -141,7 +141,7 @@ public class Permissions {
 	public boolean isAllowPrinting() {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_PRINTING & permissions) == PdfWriter.ALLOW_PRINTING;
+			|| (EncryptionConstants.ALLOW_PRINTING & permissions) == EncryptionConstants.ALLOW_PRINTING;
 	}
 	/**
 	 * Tells you if modifying the contents is allowed.
@@ -150,7 +150,7 @@ public class Permissions {
 	public boolean isAllowModifyContents(boolean decrypted) {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_MODIFY_CONTENTS & permissions) == PdfWriter.ALLOW_MODIFY_CONTENTS;
+			|| (EncryptionConstants.ALLOW_MODIFY_CONTENTS & permissions) == EncryptionConstants.ALLOW_MODIFY_CONTENTS;
 	}
 	/**
 	 * Tells you if copying is allowed.
@@ -159,7 +159,7 @@ public class Permissions {
 	public boolean isAllowCopy(boolean decrypted) {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_COPY & permissions) == PdfWriter.ALLOW_COPY;
+			|| (EncryptionConstants.ALLOW_COPY & permissions) == EncryptionConstants.ALLOW_COPY;
 	}
 	/**
 	 * Tells you if modifying annotations is allowed
@@ -168,7 +168,7 @@ public class Permissions {
 	public boolean isAllowModifyAnnotations() {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_MODIFY_ANNOTATIONS & permissions) == PdfWriter.ALLOW_MODIFY_ANNOTATIONS;
+			|| (EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS & permissions) == EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS;
 	}
 	/**
 	 * Tells you if filling in forms is allowed.
@@ -177,7 +177,7 @@ public class Permissions {
 	public boolean isAllowFillIn() {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_FILL_IN & permissions) == PdfWriter.ALLOW_FILL_IN;
+			|| (EncryptionConstants.ALLOW_FILL_IN & permissions) == EncryptionConstants.ALLOW_FILL_IN;
 	}
 	/**
 	 * Tells you if modifying the layout for screenreaders is allowed.
@@ -186,7 +186,7 @@ public class Permissions {
 	public boolean isAllowScreenReaders() {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_SCREENREADERS & permissions) == PdfWriter.ALLOW_SCREENREADERS;
+			|| (EncryptionConstants.ALLOW_SCREENREADERS & permissions) == EncryptionConstants.ALLOW_SCREENREADERS;
 	}
 	/**
 	 * Tells you if document assembly is allowed.
@@ -195,7 +195,7 @@ public class Permissions {
 	public boolean isAllowAssembly() {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_ASSEMBLY & permissions) == PdfWriter.ALLOW_ASSEMBLY;
+			|| (EncryptionConstants.ALLOW_ASSEMBLY & permissions) == EncryptionConstants.ALLOW_ASSEMBLY;
 	}
 	/**
 	 * Tells you if degraded printing is allowed.
@@ -204,6 +204,6 @@ public class Permissions {
 	public boolean isAllowDegradedPrinting() {
 		return
 			!encrypted
-			|| (PdfWriter.ALLOW_DEGRADED_PRINTING & permissions) == PdfWriter.ALLOW_DEGRADED_PRINTING;
+			|| (EncryptionConstants.ALLOW_DEGRADED_PRINTING & permissions) == EncryptionConstants.ALLOW_DEGRADED_PRINTING;
 	}
 }

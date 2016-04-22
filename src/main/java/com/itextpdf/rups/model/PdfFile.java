@@ -47,10 +47,10 @@ package com.itextpdf.rups.model;
 
 import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.crypto.BadPasswordException;
-import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.ReaderProperties;
 
 import javax.swing.*;
 import java.io.*;
@@ -148,7 +148,7 @@ public class PdfFile {
             pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
 
 		    byte[] password = new String(passwordField.getPassword()).getBytes();
-		    reader = new PdfReader(fis, password);
+		    reader = new PdfReader(fis, new ReaderProperties().setPassword(password));
 		    permissions.setEncrypted(true);
 		    permissions.setCryptoMode(reader.getCryptoMode());
 		    permissions.setPermissions((int)reader.getPermissions());
