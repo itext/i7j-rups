@@ -256,6 +256,7 @@ public class PdfReaderController extends Observable implements Observer {
         }
         if (obj instanceof CompareTool.CompareResult) {
             highlightChanges((CompareTool.CompareResult) obj);
+            pdfTree.repaint();
             return;
         }
         super.notifyObservers(obj);

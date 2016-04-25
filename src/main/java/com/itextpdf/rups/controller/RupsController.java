@@ -421,7 +421,7 @@ public class RupsController extends Observable
         }
     }
 
-    public void compareWithDocument(PdfDocument document) {
+    public boolean compareWithDocument(PdfDocument document) {
         CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
         try {
             CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
@@ -432,20 +432,23 @@ public class RupsController extends Observable
                 logger.info(compareResult.getReport());
             }
             readerController.notifyObservers(compareResult);
+            return compareResult.isOk();
         } catch (Exception e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
             logger.warn(LoggerMessages.comparingError, e);
+            return false;
         }
     }
 
-    public void compareWithFile(File file) {
+    public boolean compareWithFile(File file) {
         PdfDocument cmpDocument = null;
         try {
             cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
-            compareWithDocument(cmpDocument);
+            return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
             logger.warn(LoggerMessages.createCompareDocError, e);
+            return false;
         } finally {
             if (cmpDocument != null) {
                 cmpDocument.close();
@@ -453,16 +456,17 @@ public class RupsController extends Observable
         }
     }
 
-    public void compareWithStream(InputStream is) {
+    public boolean compareWithStream(InputStream is) {
         PdfDocument cmpDocument = null;
         try {
             PdfReader reader = new PdfReader(is);
             reader.setCloseStream(false);
             cmpDocument = new PdfDocument(reader);
-            compareWithDocument(cmpDocument);
+            return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
             logger.warn(LoggerMessages.createCompareDocError, e);
+            return false;
         } finally {
             if (cmpDocument != null) {
                 cmpDocument.close();

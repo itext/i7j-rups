@@ -17,6 +17,8 @@ public class Rups {
 
     private RupsController controller;
 
+    private volatile boolean lastCompareResult = false;
+
     protected Rups() {
         this.controller = null;
     }
@@ -107,26 +109,28 @@ public class Rups {
         });
     }
 
-    public void compareWithDocument(final PdfDocument document) {
+    public boolean compareWithDocument(final PdfDocument document) {
         SwingHelper.invokeSync(new Runnable() {
-            public void run() {
-                getController().compareWithDocument(document);
+            public void run() {lastCompareResult = getController().compareWithDocument(document);
             }
         });
+        return lastCompareResult;
     }
 
-    public void compareWithFile(final File file) {
+    public boolean compareWithFile(final File file) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                getController().compareWithFile(file);           }
+                lastCompareResult = getController().compareWithFile(file);           }
         });
+        return lastCompareResult;
     }
 
-    public void compareWithStream(final InputStream is) {
+    public boolean compareWithStream(final InputStream is) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                getController().compareWithStream(is);           }
+                lastCompareResult = getController().compareWithStream(is);           }
         });
+        return lastCompareResult;
     }
 
     protected static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
