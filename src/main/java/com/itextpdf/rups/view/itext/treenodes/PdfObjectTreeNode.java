@@ -310,7 +310,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
 			}
 		}catch (NullPointerException e) {
 			Logger logger = LoggerFactory.getLogger(PdfObjectTreeNode.class);
-			logger.warn(LoggerMessages.parentNodeNullError, e);
+			logger.warn(LoggerMessages.PARENT_NODE_NULL_ERROR, e);
 		}
 		return null;
 	}

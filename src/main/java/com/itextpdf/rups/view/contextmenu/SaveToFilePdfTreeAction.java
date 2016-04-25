@@ -125,10 +125,10 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
                 fos.close();
             } catch (IOException e) { // TODO : Catch this exception properly
                 Logger logger = LoggerFactory.getLogger(SaveToFilePdfTreeAction.class);
-                logger.warn(LoggerMessages.writingFileError, e);
+                logger.warn(LoggerMessages.WRITING_FILE_ERROR, e);
             } catch (com.itextpdf.io.IOException e) { // TODO : Catch this exception properly
                 Logger logger = LoggerFactory.getLogger(SaveToFilePdfTreeAction.class);
-                logger.warn(LoggerMessages.gettingPdfStreamBytesError, e);
+                logger.warn(LoggerMessages.GETTING_PDF_STREAM_BYTES_ERROR, e);
             }
         }
     }

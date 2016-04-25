@@ -336,7 +336,7 @@ public class RupsController extends Observable
                     inputStream.close();
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.closingStreamError, e);
+                logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
             }
         }
         return res;
@@ -355,7 +355,7 @@ public class RupsController extends Observable
                 byteArrayOutputStream.close();
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.closingStreamError, e);
+                logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
             }
         }
         return byteArrayOutputStream.toByteArray();
@@ -404,7 +404,7 @@ public class RupsController extends Observable
                 }
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.closingStreamError, e);
+                logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
             }
         }
     }
@@ -435,7 +435,7 @@ public class RupsController extends Observable
             return compareResult;
         } catch (Exception e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.comparingError, e);
+            logger.warn(LoggerMessages.COMPARING_ERROR, e);
             return null;
         }
     }
@@ -447,7 +447,7 @@ public class RupsController extends Observable
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.createCompareDocError, e);
+            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
             return null;
         } finally {
             if (cmpDocument != null) {
@@ -465,7 +465,7 @@ public class RupsController extends Observable
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.createCompareDocError, e);
+            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
             return null;
         } finally {
             if (cmpDocument != null) {
@@ -480,7 +480,7 @@ public class RupsController extends Observable
                 readerController.loader.join();
             } catch (InterruptedException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.waitingForLoaderError, e);
+                logger.warn(LoggerMessages.WAITING_FOR_LOADER_ERROR, e);
             }
         }
     }

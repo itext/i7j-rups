@@ -79,7 +79,7 @@ public class IconFetcher {
 			}
 			catch(Exception e) {
 				Logger logger = LoggerFactory.getLogger(IconFetcher.class);
-				logger.error(LoggerMessages.findingIconError + filename, e);
+				logger.error(LoggerMessages.FINDING_ICON_ERROR + filename, e);
 				return null;
 			}
 		}

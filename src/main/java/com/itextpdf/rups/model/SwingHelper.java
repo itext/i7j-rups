@@ -21,12 +21,12 @@ public class SwingHelper {
             } catch (InterruptedException e) {
                 if (!isSilent) {
                     Logger logger = LoggerFactory.getLogger(SwingHelper.class);
-                    logger.warn(LoggerMessages.invokingRunnableError, e);
+                    logger.warn(LoggerMessages.INVOKING_RUNNABLE_ERROR, e);
                 }
             } catch (InvocationTargetException e) {
                 if (!isSilent) {
                     Logger logger = LoggerFactory.getLogger(SwingHelper.class);
-                    logger.warn(LoggerMessages.invokingRunnableError, e);
+                    logger.warn(LoggerMessages.INVOKING_RUNNABLE_ERROR, e);
                 }
             }
         }

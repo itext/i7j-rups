@@ -204,7 +204,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                                         ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
                                     } catch (Exception e) {
 										Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-										logger.warn(LoggerMessages.unhandledExceptionDefault, e);
+										logger.warn(LoggerMessages.UNHANDLED_EXCEPTION_DEFAULT, e);
                                     }
                                 }
                             });
@@ -212,14 +212,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                             text.insertComponent(saveImage);
                         } catch (BadLocationException e) {
 							Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-							logger.warn(LoggerMessages.unhandledExceptionDefault, e);
+							logger.warn(LoggerMessages.UNHANDLED_EXCEPTION_DEFAULT, e);
                         }
                     } else {
                         text.setText("Image can't be loaded.");
                     }
                 } catch (IOException e) {
 					Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-					logger.warn(LoggerMessages.unhandledExceptionDefault, e);
+					logger.warn(LoggerMessages.UNHANDLED_EXCEPTION_DEFAULT, e);
                 }
 
             } else if ( stream.get(PdfName.Length1) != null ) {
