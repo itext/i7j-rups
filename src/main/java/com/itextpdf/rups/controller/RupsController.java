@@ -419,10 +419,19 @@ public class RupsController extends Observable
 
     public void compareWithDocument(PdfDocument document) {
         CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
-        CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-        Logger logger = LoggerFactory.getLogger(RupsController.class);
-        logger.info(compareResult.getReport());
-        readerController.notifyObservers(compareResult);
+        try {
+            CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
+            Logger logger = LoggerFactory.getLogger(RupsController.class);
+            if (compareResult.isOk()) {
+                logger.info("Documents are equal");
+            } else {
+                logger.info(compareResult.getReport());
+            }
+            readerController.notifyObservers(compareResult);
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(RupsController.class);
+            logger.warn(LoggerMessages.comparingError, e);
+        }
     }
 
     public void compareWithFile(File file) {

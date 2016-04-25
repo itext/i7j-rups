@@ -13,4 +13,5 @@ public class LoggerMessages {
     public static final String xfaLoadingError = "Can't load XFA";
     public static final String xmlDomParsingError = "Can't parse xml";
     public static final String unhandledExceptionDefault = "Unhandled exception";
+    public static final String comparingError = "Unhandled exception while comparing documents";
 }
