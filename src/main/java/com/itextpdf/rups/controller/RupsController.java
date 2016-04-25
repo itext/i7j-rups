@@ -421,7 +421,7 @@ public class RupsController extends Observable
         }
     }
 
-    public boolean compareWithDocument(PdfDocument document) {
+    public CompareTool.CompareResult compareWithDocument(PdfDocument document) {
         CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
         try {
             CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
@@ -431,16 +431,16 @@ public class RupsController extends Observable
             } else {
                 logger.info(compareResult.getReport());
             }
-            readerController.notifyObservers(compareResult);
-            return compareResult.isOk();
+            highlightChanges(compareResult);
+            return compareResult;
         } catch (Exception e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
             logger.warn(LoggerMessages.comparingError, e);
-            return false;
+            return null;
         }
     }
 
-    public boolean compareWithFile(File file) {
+    public CompareTool.CompareResult compareWithFile(File file) {
         PdfDocument cmpDocument = null;
         try {
             cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
@@ -448,7 +448,7 @@ public class RupsController extends Observable
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
             logger.warn(LoggerMessages.createCompareDocError, e);
-            return false;
+            return null;
         } finally {
             if (cmpDocument != null) {
                 cmpDocument.close();
@@ -456,7 +456,7 @@ public class RupsController extends Observable
         }
     }
 
-    public boolean compareWithStream(InputStream is) {
+    public CompareTool.CompareResult compareWithStream(InputStream is) {
         PdfDocument cmpDocument = null;
         try {
             PdfReader reader = new PdfReader(is);
@@ -466,7 +466,7 @@ public class RupsController extends Observable
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
             logger.warn(LoggerMessages.createCompareDocError, e);
-            return false;
+            return null;
         } finally {
             if (cmpDocument != null) {
                 cmpDocument.close();
@@ -483,6 +483,10 @@ public class RupsController extends Observable
                 logger.warn(LoggerMessages.waitingForLoaderError, e);
             }
         }
+    }
+
+    public void highlightChanges(CompareTool.CompareResult compareResult) {
+        readerController.notifyObservers(compareResult);
     }
 
     // tree selection

@@ -372,17 +372,19 @@ public class PdfReaderController extends Observable implements Observer {
         clearHighlights();
         for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
             PdfObjectTreeNode currentNode = null;
-            while (!path.getIndirectPath().empty()) {
-                CompareTool.ObjectPath.IndirectPathItem indirectPathItem = path.getIndirectPath().pop();
+            Stack<CompareTool.ObjectPath.IndirectPathItem> indirectPath = (Stack<CompareTool.ObjectPath.IndirectPathItem>)path.getIndirectPath().clone();
+            while (!indirectPath.empty()) {
+                CompareTool.ObjectPath.IndirectPathItem indirectPathItem = indirectPath.pop();
                 currentNode = nodes.getNode(indirectPathItem.getOutObject().getObjNumber());
                 if (currentNode != null) {
                     nodes.expandNode(currentNode);
                 }
             }
+            Stack<CompareTool.ObjectPath.LocalPathItem> localPath = (Stack<CompareTool.ObjectPath.LocalPathItem>)path.getLocalPath().clone();
             currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
-            while (!path.getLocalPath().empty() && currentNode != null) {
+            while (!localPath.empty() && currentNode != null) {
                 nodes.expandNode(currentNode);
-                CompareTool.ObjectPath.LocalPathItem item = path.getLocalPath().pop();
+                CompareTool.ObjectPath.LocalPathItem item = localPath.pop();
                 if (item instanceof CompareTool.ObjectPath.DictPathItem) {
                     currentNode = nodes.getChildNode(currentNode, ((CompareTool.ObjectPath.DictPathItem) item).getKey());
                 } else if (item instanceof CompareTool.ObjectPath.ArrayPathItem) {

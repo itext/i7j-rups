@@ -2,6 +2,7 @@ package com.itextpdf.rups;
 
 import com.itextpdf.kernel.Version;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.SwingHelper;
 
@@ -17,7 +18,7 @@ public class Rups {
 
     private RupsController controller;
 
-    private volatile boolean lastCompareResult = false;
+    private volatile CompareTool.CompareResult lastCompareResult = null;
 
     protected Rups() {
         this.controller = null;
@@ -114,7 +115,7 @@ public class Rups {
             public void run() {lastCompareResult = getController().compareWithDocument(document);
             }
         });
-        return lastCompareResult;
+        return isEqual();
     }
 
     public boolean compareWithFile(final File file) {
@@ -122,7 +123,7 @@ public class Rups {
             public void run() {
                 lastCompareResult = getController().compareWithFile(file);           }
         });
-        return lastCompareResult;
+        return isEqual();
     }
 
     public boolean compareWithStream(final InputStream is) {
@@ -130,7 +131,17 @@ public class Rups {
             public void run() {
                 lastCompareResult = getController().compareWithStream(is);           }
         });
-        return lastCompareResult;
+        return isEqual();
+    }
+
+    public void highlightLastSavedChanges() {
+        SwingHelper.invokeSync(new Runnable() {
+            public void run() {
+                if (lastCompareResult != null) {
+                    getController().highlightChanges(lastCompareResult);
+                }
+            }
+        });
     }
 
     protected static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
@@ -148,5 +159,13 @@ public class Rups {
         frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
         frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
         frame.setResizable(true);
+    }
+
+    private boolean isEqual() {
+        if (lastCompareResult == null) {
+            return false;
+        } else {
+            return lastCompareResult.isOk();
+        }
     }
 }
