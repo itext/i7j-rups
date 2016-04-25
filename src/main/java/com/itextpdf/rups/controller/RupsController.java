@@ -147,41 +147,6 @@ public class RupsController extends Observable
         masterComponent.setOrientation(JSplitPane.VERTICAL_SPLIT);
         masterComponent.setDividerLocation((int) (dimension.getHeight() * .70));
         masterComponent.setDividerSize(2);
-        masterComponent.setDropTarget(new DropTarget() {
-            // drag and drop for opening files
-            public synchronized void drop(DropTargetDropEvent dtde) {
-                dtde.acceptDrop(DnDConstants.ACTION_COPY);
-                Transferable t = dtde.getTransferable();
-                java.util.List<File> files = null;
-
-                try {
-                    if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                        files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-                    }
-                    if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
-
-                        String urls = (String) t.getTransferData(DataFlavor.stringFlavor);
-                        files = new LinkedList();
-                        StringTokenizer tokens = new StringTokenizer(urls);
-                        while (tokens.hasMoreTokens()) {
-                            String urlString = tokens.nextToken();
-                            URL url = new URL(urlString);
-                            files.add(new File(URLDecoder.decode(url.getFile(), "UTF-8")));
-                        }
-                    }
-
-                    if (files == null || files.size() != 1) {
-                        JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        loadFile(files.get(0), false);
-                    }
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-
-                dtde.dropComplete(true);
-            }
-        });
 
         JSplitPane content = new JSplitPane();
         masterComponent.add(content, JSplitPane.TOP);
@@ -205,6 +170,45 @@ public class RupsController extends Observable
         editorPane.addTab("Console", null, cons, "Console window (System.out/System.err)");
         editorPane.setSelectedComponent(cons);
         info.add(editorPane, JSplitPane.RIGHT);
+
+        //application specific features
+        if (!pluginMode) {
+            masterComponent.setDropTarget(new DropTarget() {
+                // drag and drop for opening files
+                public synchronized void drop(DropTargetDropEvent dtde) {
+                    dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                    Transferable t = dtde.getTransferable();
+                    java.util.List<File> files = null;
+
+                    try {
+                        if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                            files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                        }
+                        if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
+
+                            String urls = (String) t.getTransferData(DataFlavor.stringFlavor);
+                            files = new LinkedList();
+                            StringTokenizer tokens = new StringTokenizer(urls);
+                            while (tokens.hasMoreTokens()) {
+                                String urlString = tokens.nextToken();
+                                URL url = new URL(urlString);
+                                files.add(new File(URLDecoder.decode(url.getFile(), "UTF-8")));
+                            }
+                        }
+
+                        if (files == null || files.size() != 1) {
+                            JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            loadFile(files.get(0), false);
+                        }
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    dtde.dropComplete(true);
+                }
+            });
+        }
 
         masterPanel.add(masterComponent, BorderLayout.CENTER);
     }
@@ -485,7 +489,10 @@ public class RupsController extends Observable
     public void valueChanged(TreeSelectionEvent evt) {
         Object selectednode = readerController.getPdfTree().getLastSelectedPathComponent();
         if (selectednode instanceof PdfTrailerTreeNode) {
-            menuBar.update(this, RupsMenuBar.FILE_MENU);
+            if (!pluginMode) {
+                menuBar.update(this, RupsMenuBar.FILE_MENU);
+            }
+            readerController.getPdfTree().clearSelection();
             return;
         }
         if (selectednode instanceof PdfObjectTreeNode) {
