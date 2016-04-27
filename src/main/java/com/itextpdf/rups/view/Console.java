@@ -92,18 +92,21 @@ public class Console implements Observer {
 
     /**
      * Creates a new Console object.
-     *
-     * @throws IOException
      */
-    private Console() throws IOException {
+    private Console(boolean pluginMode) {
         // Set up Custom
         printStream = new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.CUSTOM)));
 
-        // Set up System.out
-        System.setOut(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.SYSTEMOUT)), true));
+        if (!pluginMode) {
+            // Set up System.out
+            System.setOut(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.SYSTEMOUT)), true));
 
-        // Set up System.err
-        System.setErr(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.SYSTEMERR)), true));
+            // Set up System.err
+            System.setErr(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.SYSTEMERR)), true));
+        } else {
+            // Set up System.err
+            System.setErr(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.CUSTOM)), true));
+        }
 
         // Add a scrolling text area
         textArea.setEditable(false);
@@ -114,13 +117,15 @@ public class Console implements Observer {
      */
     public static synchronized Console getInstance() {
         if (console == null) {
-            try {
-                console = new Console();
-            } catch (IOException e) {
-                console = null;
-            }
+            console = new Console(false);
         }
         return console;
+    }
+
+    public static synchronized void initConsoleInPluginMode() {
+        if (console == null) {
+            console = new Console(true);
+        }
     }
 
     /**

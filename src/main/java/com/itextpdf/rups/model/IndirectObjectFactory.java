@@ -51,6 +51,8 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfObject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -72,6 +74,21 @@ public class IndirectObjectFactory {
 	protected IntHashtable refToIdx = new IntHashtable();
 	/** Array to indicate if object is already loaded */
 	protected ArrayList<Boolean> isLoaded = new ArrayList<Boolean>();
+
+	private static final String METHOD_NAME = "checkState";
+	private static final String FIELD_NAME = "FORBID_RELEASE";
+	private static Method checkStateMethod;
+	private static Field forbidReleaseField;
+
+	static {
+		try {
+			checkStateMethod = PdfObject.class.getDeclaredMethod(METHOD_NAME, short.class);
+			checkStateMethod.setAccessible(true);
+			forbidReleaseField = PdfObject.class.getDeclaredField(FIELD_NAME);
+			forbidReleaseField.setAccessible(true);
+		} catch (Exception ignored) {
+		}
+	}
 	
 	/**
 	 * Creates a list that will contain all the indirect objects
@@ -145,8 +162,12 @@ public class IndirectObjectFactory {
 		} else {
 			isLoaded.add(false);
 		}
-		object.release();
-		objects.add(PdfNull.PDF_NULL);
+		if (canRelease(object)) {
+			object.release();
+			objects.add(PdfNull.PDF_NULL);
+		} else {
+			objects.add(object);
+		}
 	}
 	
 	/**
@@ -219,5 +240,13 @@ public class IndirectObjectFactory {
 			isLoaded.set(idx, true);
 		}
 		return object;
+	}
+
+	private boolean canRelease(PdfObject obj) {
+		try {
+			return !(Boolean)checkStateMethod.invoke(obj, forbidReleaseField.get(obj));
+		} catch (Exception any) {
+			return true;
+		}
 	}
 }
