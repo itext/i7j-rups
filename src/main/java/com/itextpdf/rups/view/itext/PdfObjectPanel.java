@@ -62,6 +62,8 @@ import java.util.Observer;
 
 public class PdfObjectPanel extends JPanel implements Observer {
 
+	private boolean pluginMode;
+
 	/** Name of a panel in the CardLayout. */
 	private static final String TEXT = "text";
 	/** Name of a panel in the CardLayout. */
@@ -78,7 +80,10 @@ public class PdfObjectPanel extends JPanel implements Observer {
     private JTableButtonMouseListener mouseListener;
 	
 	/** Creates a PDF object panel. */
-	public PdfObjectPanel() {
+	public PdfObjectPanel(boolean pluginMode) {
+
+		this.pluginMode = pluginMode;
+
 		// layout
 		setLayout(layout);
 
@@ -126,9 +131,11 @@ public class PdfObjectPanel extends JPanel implements Observer {
 		switch(object.getType()) {
 		case PdfObject.DICTIONARY:
 		case PdfObject.STREAM:
-			table.setModel(new DictionaryTableModel((PdfDictionary)object));
-            table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
-			layout.show(this, TABLE);
+			table.setModel(new DictionaryTableModel((PdfDictionary)object, pluginMode));
+			if (!pluginMode) {
+				table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
+			}
+            layout.show(this, TABLE);
 			this.repaint();
 			break;
 		case PdfObject.ARRAY:

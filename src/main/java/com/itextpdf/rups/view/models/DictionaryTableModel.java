@@ -58,6 +58,8 @@ import java.util.ArrayList;
  */
 public class DictionaryTableModel extends AbstractTableModel {
 
+
+    private boolean pluginMode;
     /**
      * A serial version UID.
      */
@@ -76,7 +78,8 @@ public class DictionaryTableModel extends AbstractTableModel {
      *
      * @param dictionary the dictionary we want to show
      */
-    public DictionaryTableModel(PdfDictionary dictionary) {
+    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode) {
+        this.pluginMode = pluginMode;
         this.dictionary = dictionary;
         for (PdfName n : dictionary.keySet())
             this.keys.add(n);
@@ -86,20 +89,20 @@ public class DictionaryTableModel extends AbstractTableModel {
      * @see javax.swing.table.TableModel#getColumnCount()
      */
     public int getColumnCount() {
-        return 3;
+        return pluginMode ? 2 : 3;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-        return dictionary.size() + 1;
+        return pluginMode ? dictionary.size() : dictionary.size() + 1;
     }
 
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex < 2;
+        return pluginMode ? false : columnIndex < 2;
     }
 
     /**

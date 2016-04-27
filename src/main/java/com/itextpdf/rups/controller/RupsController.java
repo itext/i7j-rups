@@ -138,7 +138,7 @@ public class RupsController extends Observable
         addObserver(menuBar);
         Console console = Console.getInstance();
         addObserver(console);
-        readerController = new PdfReaderController(this, this);
+        readerController = new PdfReaderController(this, this, pluginMode);
         addObserver(readerController);
         masterPanel = new JPanel(new BorderLayout());
 
@@ -425,12 +425,6 @@ public class RupsController extends Observable
         CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
         try {
             CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-            Logger logger = LoggerFactory.getLogger(RupsController.class);
-            if (compareResult.isOk()) {
-                logger.info("Documents are equal");
-            } else {
-                logger.info(compareResult.getReport());
-            }
             highlightChanges(compareResult);
             return compareResult;
         } catch (Exception e) {
@@ -486,6 +480,12 @@ public class RupsController extends Observable
     }
 
     public void highlightChanges(CompareTool.CompareResult compareResult) {
+        Logger logger = LoggerFactory.getLogger(RupsController.class);
+        if (compareResult.isOk()) {
+            logger.info("Documents are equal");
+        } else {
+            logger.info(compareResult.getReport());
+        }
         readerController.notifyObservers(compareResult);
     }
 

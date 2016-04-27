@@ -137,7 +137,7 @@ public class PdfReaderController extends Observable implements Observer {
      * @param pageSelectionListener when somebody changes a page, this listener changes accordingly
      */
     public PdfReaderController(TreeSelectionListener treeSelectionListener,
-                               PageSelectionListener pageSelectionListener) {
+                               PageSelectionListener pageSelectionListener, boolean pluginMode) {
         pdfTree = new PdfTree();
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
@@ -165,7 +165,7 @@ public class PdfReaderController extends Observable implements Observer {
         navigationTabs.addTab("XFA", null, new JScrollPane(form.getXfaTree()), "Tree view of the XFA form");
         navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
 
-        objectPanel = new PdfObjectPanel();
+        objectPanel = new PdfObjectPanel(pluginMode);
         addObserver(objectPanel);
         streamPane = new SyntaxHighlightedStreamPane();
         addObserver(streamPane);
