@@ -70,6 +70,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
@@ -124,6 +126,8 @@ public class PdfReaderController extends Observable implements Observer {
      */
     protected TreeNodeFactory nodes;
 
+    protected PlainText text;
+
     ObjectLoader loader;
 
     private Stack<IconTreeNode> highlights = new Stack<IconTreeNode>();
@@ -156,6 +160,8 @@ public class PdfReaderController extends Observable implements Observer {
         addObserver(form);
         xref = new XRefTable(this);
         addObserver(xref);
+        text = new PlainText();
+        addObserver(text);
 
         navigationTabs = new JTabbedPane();
         navigationTabs.addTab("Pages", null, new JScrollPane(pages), "Pages");
@@ -164,6 +170,19 @@ public class PdfReaderController extends Observable implements Observer {
         navigationTabs.addTab("Form", null, new JScrollPane(form), "Interactive Form");
         navigationTabs.addTab("XFA", null, new JScrollPane(form.getXfaTree()), "Tree view of the XFA form");
         navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
+        navigationTabs.addTab("PlainText", null, new JScrollPane(text), "Plain text representation of the PDF");
+        navigationTabs.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if (navigationTabs.getSelectedIndex() != -1) {
+                    String title = navigationTabs.getTitleAt(navigationTabs.getSelectedIndex());
+                    if ("Structure".equals(title)) {
+                        structure.update(null, e);
+                    } else if ("PlainText".equals(title)) {
+                        text.update(null, e);
+                    }
+                }
+            }
+        });
 
         objectPanel = new PdfObjectPanel(pluginMode);
         addObserver(objectPanel);
@@ -232,7 +251,7 @@ public class PdfReaderController extends Observable implements Observer {
         setChanged();
         notifyObservers();
         setChanged();
-        loader = new ObjectLoader(this, file.getPdfDocument(), file.getFilename(), dialog);
+        loader = new ObjectLoader(this, file, file.getFilename(), dialog);
     }
 
     /**
@@ -250,9 +269,10 @@ public class PdfReaderController extends Observable implements Observer {
             ObjectLoader loader = (ObjectLoader) obj;
             nodes = loader.getNodes();
             PdfTrailerTreeNode root = pdfTree.getRoot();
-            root.setTrailer(loader.getDocument().getTrailer());
+            root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
             root.setUserObject("PDF Object Tree (" + loader.getLoaderName() + ")");
             nodes.expandNode(root);
+            navigationTabs.setSelectedIndex(0);
         }
         if (obj instanceof CompareTool.CompareResult) {
             highlightChanges((CompareTool.CompareResult) obj);
@@ -320,12 +340,7 @@ public class PdfReaderController extends Observable implements Observer {
         if (RupsMenuBar.CLOSE.equals(obj)) {
             setChanged();
             notifyObservers(null);
-
-
-            if (navigationTabs.indexOfTab("PlainText") != -1) {
-                navigationTabs.removeTabAt(navigationTabs.indexOfTab("PlainText"));
-            }
-
+            loader = null;
             nodes = null;
         }
         if (obj instanceof PdfObjectTreeNode) {
@@ -355,17 +370,6 @@ public class PdfReaderController extends Observable implements Observer {
             setChanged();
             notifyObservers(obj);
         }
-    }
-
-    /**
-     * Adds tabs that don't need to be an observer. Also removes them when they are present to avoid duplication.
-     *
-     * @param file
-     */
-    public void addNonObserverTabs(PdfFile file) {
-        if (navigationTabs.indexOfTab("PlainText") != -1)
-            navigationTabs.remove(navigationTabs.indexOfTab("PlainText"));
-        navigationTabs.addTab("PlainText", null, new JScrollPane(new JTextArea(file.getRawContent())), "Plain text representation of the PDF");
     }
 
     protected void highlightChanges(CompareTool.CompareResult compareResult) {

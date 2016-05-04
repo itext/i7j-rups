@@ -79,8 +79,8 @@ public class PdfFile {
 	/** The file permissions */
 	protected Permissions permissions = null;
 
-    /** Raw content string */
-    protected String rawContent = null;
+    /** Raw content */
+    protected byte[] rawContent = null;
 
 	protected ByteArrayOutputStream baos = null;
 
@@ -113,7 +113,7 @@ public class PdfFile {
 	 * @throws PdfException
 	 */
 	public PdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
-        rawContent = new String(file, "Cp1252");
+        rawContent = file;
 
 		try {
 			readFile(new ByteArrayInputStream(file), false, readOnly);
@@ -195,8 +195,12 @@ public class PdfFile {
     }
 
     public String getRawContent() {
-        return rawContent;
-    }
+		try {
+			return new String(rawContent, "Cp1252");
+		} catch (UnsupportedEncodingException e) {
+			return "Wrong Encoding";
+		}
+	}
 
     public void setDirectory(File directory) {
         this.directory = directory;

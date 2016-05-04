@@ -93,11 +93,9 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
 		if (obj == null) {
 			list = new ArrayList<PdfPageTreeNode>();
 			repaint();
-			return;
-		}
-		if (obj instanceof ObjectLoader) {
+		} else if (obj instanceof ObjectLoader) {
 			ObjectLoader loader = (ObjectLoader)obj;
-			String[] pageLabels = loader.getDocument().getPageLabels();
+			String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
 			int i = 0;
 			TreeNodeFactory factory = loader.getNodes();
 			PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();

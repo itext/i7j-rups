@@ -47,11 +47,16 @@ package com.itextpdf.rups.view.itext;
 import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JTree;
+import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
 
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -63,6 +68,9 @@ import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A JTree visualizing information about the structure tree of
  * the PDF file (if any).
@@ -71,6 +79,12 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
 	
 	/** Nodes in the FormTree correspond with nodes in the main PdfTree. */
 	protected PdfReaderController controller;
+
+	protected ObjectLoader loader;
+
+	protected boolean loaded = false;
+
+	protected SwingWorker<TreeModel, Integer> worker;
 
 	public StructureTree(PdfReaderController controller) {
 		super();
@@ -82,23 +96,54 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
 	
 	public void update(Observable observable, Object obj) {
 		if (obj == null) {
+			loader = null;
+			if (worker != null) {
+				worker.cancel(true);
+				worker = null;
+			}
 			setModel(new DefaultTreeModel(new StructureTreeNode()));
 			repaint();
-			return;
-		}
-		if (obj instanceof ObjectLoader) {
-			ObjectLoader loader = (ObjectLoader)obj;
-			TreeNodeFactory factory = loader.getNodes();
-			PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-			PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-			PdfObjectTreeNode structuretree = factory.getChildNode(catalog, PdfName.StructTreeRoot);
-			if (structuretree == null) {
-				return;
+			loaded = false;
+		} else if (obj instanceof ObjectLoader) {
+			loader = (ObjectLoader)obj;
+			if (worker != null) {
+				worker.cancel(true);
+				worker = null;
 			}
-			StructureTreeNode root = new StructureTreeNode();
-			PdfObjectTreeNode kids = factory.getChildNode(structuretree, PdfName.K);
-			loadKids(factory, root, kids);
-			setModel(new DefaultTreeModel(root));
+			loaded = false;
+		} else if (obj instanceof ChangeEvent && loader != null && !loaded) {
+			loaded = true;
+			setModel(new DefaultTreeModel(new DefaultMutableTreeNode("Loading...")));
+			worker = new SwingWorker<TreeModel, Integer>() {
+				@Override
+				protected TreeModel doInBackground() throws Exception {
+					TreeNodeFactory factory = loader.getNodes();
+					PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+					PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+					PdfObjectTreeNode structuretree = factory.getChildNode(catalog, PdfName.StructTreeRoot);
+					if (structuretree == null) {
+						return new DefaultTreeModel(new StructureTreeNode());
+					}
+					StructureTreeNode root = new StructureTreeNode();
+					PdfObjectTreeNode kids = factory.getChildNode(structuretree, PdfName.K);
+					loadKids(factory, root, kids);
+					return new DefaultTreeModel(root);
+				}
+
+				@Override
+				protected void done() {
+					try {
+						if (!isCancelled()) {
+							TreeModel model = this.get();
+							StructureTree.this.setModel(model);
+						}
+					} catch (Exception any) {
+						StructureTree.this.setModel(new DefaultTreeModel(new StructureTreeNode()));
+					}
+					super.done();
+				}
+			};
+			worker.execute();
 		}
 	}
 

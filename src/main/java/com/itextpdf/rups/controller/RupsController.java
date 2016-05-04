@@ -301,7 +301,7 @@ public class RupsController extends Observable
 
             setChanged();
             super.notifyObservers(RupsMenuBar.OPEN);
-            final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, !pluginMode);
+            final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, pluginMode);
             if (!pluginMode) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
@@ -310,7 +310,6 @@ public class RupsController extends Observable
                 });
             }
             readerController.startObjectLoader(pdfFile, dialog);
-            readerController.addNonObserverTabs(pdfFile);
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (PdfException de) {

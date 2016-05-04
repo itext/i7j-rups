@@ -66,6 +66,8 @@ public class ProgressDialog extends JDialog {
 	protected JProgressBar progress;
 	/** the icon used for this dialog box. */
 	public static final JLabel INFO = new JLabel(UIManager.getIcon("OptionPane.informationIcon"));
+
+	private boolean pluginMode;
 	
 	/**
 	 * Creates a Progress frame displaying a certain message
@@ -73,8 +75,9 @@ public class ProgressDialog extends JDialog {
 	 * @param	parent the parent frame of this dialog (used to position the dialog)
 	 * @param	msg	the message that will be displayed.
 	 */
-	public ProgressDialog(Component parent, String msg, Frame frame, boolean isModal) {
-		super(frame, isModal);
+	public ProgressDialog(Component parent, String msg, Frame frame, boolean pluginMode) {
+		super(frame, !pluginMode);
+		this.pluginMode = pluginMode;
 		this.setTitle("Progress...");
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	    setSize(300, 100);
@@ -101,7 +104,9 @@ public class ProgressDialog extends JDialog {
 	public void dispose() {
 		Window frame = getOwner();
 		super.dispose();
-		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		if (!pluginMode) {
+			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		}
 	}
 
 	

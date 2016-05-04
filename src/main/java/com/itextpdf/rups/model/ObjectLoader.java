@@ -58,9 +58,8 @@ import javax.swing.SwingUtilities;
 public class ObjectLoader extends BackgroundTask {
 	/** This is the object that will forward the updates to the observers. */
 	protected Observable observable;
-	/** iText's PdfReader object. */
-	//Changed to PDF Doccument
-	protected PdfDocument document;
+	/** RUPS's PdfFile object. */
+	protected PdfFile file;
 	/** The factory that can provide PDF objects. */
 	protected IndirectObjectFactory objects;
 	/** The factory that can provide tree nodes. */
@@ -73,11 +72,11 @@ public class ObjectLoader extends BackgroundTask {
 	/**
 	 * Creates a new ObjectLoader.
 	 * @param	observable	the object that will forward the changes.
-	 * @param	document		the PdfDocument from which the objects will be read.
+	 * @param	file		the PdfFile from which the objects will be read.
 	 */
-	public ObjectLoader(Observable observable, PdfDocument document, String loaderName, ProgressDialog progress) {
+	public ObjectLoader(Observable observable, PdfFile file, String loaderName, ProgressDialog progress) {
 		this.observable = observable;
-		this.document = document;
+		this.file = file;
 		this.loaderName = loaderName;
 		this.progress = progress;
 		start();
@@ -87,8 +86,8 @@ public class ObjectLoader extends BackgroundTask {
 	 * Getter for the PdfReader object.
 	 * @return	a reader object
 	 */
-	public PdfDocument getDocument() {
-		return document;
+	public PdfFile getFile() {
+		return file;
 	}
 
 	/**
@@ -121,7 +120,7 @@ public class ObjectLoader extends BackgroundTask {
 	 */
 	@Override
 	public void doTask() {
-		objects = new IndirectObjectFactory(document);
+		objects = new IndirectObjectFactory(file.getPdfDocument());
 		final int n = objects.getXRefMaximum();
 		SwingHelper.invokeSync(new Runnable() {
 			public void run() {
