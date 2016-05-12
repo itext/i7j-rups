@@ -50,6 +50,8 @@ import java.util.Observer;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.TextAreaOutputStream;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfObject;
@@ -73,7 +75,14 @@ public class StreamTextArea extends JScrollPane implements Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		text.setText(null);
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				default:
+					text.setText("");
+					break;
+			}
+		}
 	}
 	
 	/**

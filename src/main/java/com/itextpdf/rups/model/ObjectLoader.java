@@ -44,20 +44,17 @@
  */
 package com.itextpdf.rups.model;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Observable;
+import java.util.Observer;
 
-import com.itextpdf.kernel.pdf.PdfDocument;
-
-import javax.swing.SwingUtilities;
+import com.itextpdf.rups.event.PostOpenDocumentEvent;
 //import com.itextpdf.kernel.pdf.PdfReader;
 
 /**
  * Loads the necessary iText PDF objects in Background.
  */
 public class ObjectLoader extends BackgroundTask {
-	/** This is the object that will forward the updates to the observers. */
-	protected Observable observable;
+	/** This is the object that wait for task to complete. */
+	protected Observer observer;
 	/** RUPS's PdfFile object. */
 	protected PdfFile file;
 	/** The factory that can provide PDF objects. */
@@ -71,11 +68,11 @@ public class ObjectLoader extends BackgroundTask {
 	
 	/**
 	 * Creates a new ObjectLoader.
-	 * @param	observable	the object that will forward the changes.
+	 * @param	observer	the object that will forward the changes.
 	 * @param	file		the PdfFile from which the objects will be read.
 	 */
-	public ObjectLoader(Observable observable, PdfFile file, String loaderName, ProgressDialog progress) {
-		this.observable = observable;
+	public ObjectLoader(Observer observer, PdfFile file, String loaderName, ProgressDialog progress) {
+		this.observer = observer;
 		this.file = file;
 		this.loaderName = loaderName;
 		this.progress = progress;
@@ -150,7 +147,7 @@ public class ObjectLoader extends BackgroundTask {
 
 	@Override
 	public void finished() {
-		observable.notifyObservers(this);
+		observer.update(null, new PostOpenDocumentEvent(this));
 		progress.setVisible(false);
 	}
 }

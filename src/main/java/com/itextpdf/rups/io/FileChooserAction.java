@@ -45,9 +45,11 @@
 package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.event.RupsEvent;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Observable;
@@ -57,31 +59,33 @@ import java.util.Observer;
  * Allows you to browse the file system and forwards the file
  * to the object that is waiting for you to choose a file.
  */
-public class FileChooserAction extends AbstractAction {
+public abstract class FileChooserAction extends AbstractAction {
 	
 	/** An object that is expecting the result of the file chooser action. */
-	protected Observable observable;
+	protected Observer observer;
 	/** A file filter to apply when browsing for a file. */
 	protected FileFilter filter;
-	/** Indicates if you're browsing to create a new or an existing file. */
-	protected boolean newFile;
 	/** The file that was chosen. */
 	protected File file;
+	/** A parent Component for chooser dialog */
+	protected Component parent;
+
+	protected JFileChooser fileChooser;
 	
 	private static File lastSelectedFolder;
 	
 	/**
 	 * Creates a new file chooser action.
-	 * @param observable	the object waiting for you to select file
+	 * @param observer	the object waiting for you to select file
 	 * @param caption	a description for the action
 	 * @param filter	a filter to apply when browsing
-	 * @param newFile	indicates if you should browse for a new or existing file
+	 * @param parent    a parent Component for chooser dialog
 	 */
-	public FileChooserAction(Observable observable, String caption, FileFilter filter, boolean newFile) {
+	public FileChooserAction(Observer observer, String caption, FileFilter filter, Component parent) {
 		super(caption);
-		this.observable = observable;
+		this.observer = observer;
 		this.filter = filter;
-		this.newFile = newFile;
+		this.parent = parent;
 	}
 	
 	/**
@@ -95,34 +99,24 @@ public class FileChooserAction extends AbstractAction {
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent evt) {
-		JFileChooser fc = new JFileChooser();
-		fc.setCurrentDirectory(lastSelectedFolder);
-		fc.setSelectedFile(file);
+		fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(lastSelectedFolder);
+		fileChooser.setSelectedFile(file);
 		
 		if (filter != null) {
-			fc.setFileFilter(filter);
+			fileChooser.setFileFilter(filter);
 		}
-		int okCancel;
-		if (newFile) {
-			okCancel = fc.showSaveDialog(((RupsController) observable).getMasterComponent());
-		}
-		else {
-			okCancel = fc.showOpenDialog(((RupsController) observable).getMasterComponent());
-		}
+		int okCancel = showDialog();
 		if (okCancel == JFileChooser.APPROVE_OPTION) {
-			file = fc.getSelectedFile();
-			lastSelectedFolder = fc.getCurrentDirectory();
-			observable.notifyObservers(this);
+			file = fileChooser.getSelectedFile();
+			lastSelectedFolder = fileChooser.getCurrentDirectory();
+			observer.update(null, getEvent());
         }
 	}
 
-    /**
-     * Is this FileChooserAction opened to save the file or to open one
-     * @return boolean
-     */
-    public boolean isNewFile() {
-        return newFile;
-    }
+	protected abstract int showDialog();
+
+	protected abstract RupsEvent getEvent();
 
 	/** A serial version UID. */
 	private static final long serialVersionUID = 2225830878098387118L;

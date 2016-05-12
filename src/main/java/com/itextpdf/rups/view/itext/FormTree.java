@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -107,50 +108,54 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
 	 * @param	obj			the object
 	 */
 	public void update(Observable observable, Object obj) {
-		if (obj == null) {
-			setModel(new DefaultTreeModel(new FormTreeNode()));
-			xfaFile = null;
-			xfaTree.clear();
-			xfaTextArea.clear();
-			repaint();
-			return;
-		}
-		if (obj instanceof ObjectLoader) {
-			ObjectLoader loader = (ObjectLoader)obj;
-			TreeNodeFactory factory = loader.getNodes();
-			PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-			PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-			PdfObjectTreeNode form = factory.getChildNode(catalog, PdfName.AcroForm);
-			if (form == null) {
-				return;
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent)obj;
+			switch (event.getType()) {
+				case RupsEvent.CLOSE_DOCUMENT_EVENT:
+					setModel(new DefaultTreeModel(new FormTreeNode()));
+					xfaFile = null;
+					xfaTree.clear();
+					xfaTextArea.clear();
+					repaint();
+					return;
+				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+					ObjectLoader loader = (ObjectLoader) event.getContent();
+					TreeNodeFactory factory = loader.getNodes();
+					PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+					PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+					PdfObjectTreeNode form = factory.getChildNode(catalog, PdfName.AcroForm);
+					if (form == null) {
+						return;
+					}
+					PdfObjectTreeNode fields = factory.getChildNode(form, PdfName.Fields);
+					FormTreeNode root = new FormTreeNode();
+					if (fields != null) {
+						FormTreeNode node = new FormTreeNode(fields);
+						node.setUserObject("Fields");
+						loadFields(factory, node, fields);
+						root.add(node);
+					}
+					PdfObjectTreeNode xfa = factory.getChildNode(form, PdfName.XFA);
+					if (xfa != null) {
+						XfaTreeNode node = new XfaTreeNode(xfa);
+						node.setUserObject("XFA");
+						loadXfa(factory, node, xfa);
+						root.add(node);
+						try {
+							xfaFile = new XfaFile(node);
+							xfaTree.load(xfaFile);
+							xfaTextArea.load(xfaFile);
+						} catch (IOException e) {
+							Logger logger = LoggerFactory.getLogger(FormTree.class);
+							logger.warn(LoggerMessages.XFA_LOADING_ERROR, e);
+						} catch (DocumentException e) {
+							Logger logger = LoggerFactory.getLogger(FormTree.class);
+							logger.warn(LoggerMessages.XML_DOM_PARSING_ERROR, e);
+						}
+					}
+					setModel(new DefaultTreeModel(root));
+					return;
 			}
-			PdfObjectTreeNode fields = factory.getChildNode(form, PdfName.Fields);
-			FormTreeNode root = new FormTreeNode();
-			if (fields != null) {
-				FormTreeNode node = new FormTreeNode(fields);
-				node.setUserObject("Fields");
-				loadFields(factory, node, fields);
-				root.add(node);
-			}
-			PdfObjectTreeNode xfa = factory.getChildNode(form, PdfName.XFA);
-			if (xfa != null) {
-				XfaTreeNode node = new XfaTreeNode(xfa);
-				node.setUserObject("XFA");
-				loadXfa(factory, node, xfa);
-				root.add(node);
-				try {
-					xfaFile = new XfaFile(node);
-					xfaTree.load(xfaFile);
-					xfaTextArea.load(xfaFile);
-				} catch (IOException e) {
-					Logger logger = LoggerFactory.getLogger(FormTree.class);
-					logger.warn(LoggerMessages.XFA_LOADING_ERROR, e);
-				} catch (DocumentException e) {
-					Logger logger = LoggerFactory.getLogger(FormTree.class);
-					logger.warn(LoggerMessages.XML_DOM_PARSING_ERROR, e);
-				}
-			}
-			setModel(new DefaultTreeModel(root));
 		}
 	}
 

@@ -44,32 +44,35 @@
  */
 package com.itextpdf.rups.io;
 
+import com.itextpdf.rups.event.CloseDocumentEvent;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
+import java.util.Observer;
 
 /**
- * Action that tells an observable to close a file and/or releases
+ * Action that tells an observer to close a file and/or releases
  * resources relevant for the file that is being closed.
  */
 public class FileCloseAction implements ActionListener {
 	
 	/** An object that allows you to close a file. */
-	protected Observable observable;
+	protected Observer observer;
 	
 	/**
 	 * Creates the close action.
-	 * @param	observable	the object that expects you to close a file.
+	 * @param	observer	the object that expects you to close a file.
 	 */
-	public FileCloseAction(Observable observable) {
-		this.observable = observable;
+	public FileCloseAction(Observer observer) {
+		this.observer = observer;
 	}
 	
 	/**
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent evt) {
-		observable.notifyObservers(this);
+		observer.update(null, new CloseDocumentEvent());
 	}
 
 }

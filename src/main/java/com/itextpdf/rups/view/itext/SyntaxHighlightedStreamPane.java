@@ -55,6 +55,8 @@ import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
@@ -116,7 +118,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		text.setText(null);
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				default:
+					text.setText("");
+					break;
+			}
+		}
 	}
 	/**
 	 * Renders the content stream of a PdfObject or empties the text area.

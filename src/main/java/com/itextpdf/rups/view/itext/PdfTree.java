@@ -44,10 +44,10 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeExpansionListener;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
-import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
@@ -57,7 +57,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Stack;
 
 /**
  * A JTree that shows the object hierarchy of a PDF document.
@@ -78,7 +77,8 @@ public class PdfTree extends JTree implements Observer {
         addMouseListener(listener);
 		setCellRenderer(new IconTreeCellRenderer());
         addTreeExpansionListener(new PdfTreeExpansionListener());
-		update(null, null);
+		setModel(new DefaultTreeModel(root));
+		repaint();
 	}
 	
 	/**
@@ -97,9 +97,13 @@ public class PdfTree extends JTree implements Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		if (obj == null) {
-			root = new PdfTrailerTreeNode();
-
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				case RupsEvent.CLOSE_DOCUMENT_EVENT:
+					root = new PdfTrailerTreeNode();
+					break;
+			}
 		}
 		setModel(new DefaultTreeModel(root));
 		repaint();

@@ -53,6 +53,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
@@ -83,25 +84,30 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		if (obj == null) {
-			setModel(new DefaultTreeModel(new OutlineTreeNode()));
-			repaint();
-			return;
-		}
-		if (obj instanceof ObjectLoader) {
-			ObjectLoader loader = (ObjectLoader)obj;
-			TreeNodeFactory factory = loader.getNodes();
-			PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-			PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-			PdfObjectTreeNode outline = factory.getChildNode(catalog, PdfName.Outlines);
-			if (outline == null) {
-				return;
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent)obj;
+			switch (event.getType()) {
+				case RupsEvent.CLOSE_DOCUMENT_EVENT:
+					setModel(null);
+					setModel(new DefaultTreeModel(new OutlineTreeNode()));
+					repaint();
+					return;
+				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+					ObjectLoader loader = (ObjectLoader)event.getContent();
+					TreeNodeFactory factory = loader.getNodes();
+					PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+					PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+					PdfObjectTreeNode outline = factory.getChildNode(catalog, PdfName.Outlines);
+					if (outline == null) {
+						return;
+					}
+					OutlineTreeNode root = new OutlineTreeNode();
+					PdfObjectTreeNode first = factory.getChildNode(outline, PdfName.First);
+					if (first != null)
+						loadOutline(factory, root, first);
+					setModel(new DefaultTreeModel(root));
+					return;
 			}
-			OutlineTreeNode root = new OutlineTreeNode();
-			PdfObjectTreeNode first = factory.getChildNode(outline, PdfName.First);
-			if (first != null)
-			    loadOutline(factory, root, first);
-			setModel(new DefaultTreeModel(root));
 		}
 	}
 	

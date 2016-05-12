@@ -50,9 +50,9 @@ import java.util.Observer;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IndirectObjectFactory;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -75,25 +75,28 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
 	public XRefTable(PdfReaderController controller) {
 		super();
 		this.controller = controller;
+		setModel(new JTableAutoModel(this));
 	}
 	
 	/**
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		if (obj == null) {
-			objects = null;
-			setModel(new JTableAutoModel(this));
-			repaint();
-			return;
-		}
-		if (observable instanceof PdfReaderController
-				&& obj instanceof ObjectLoader) {
-			ObjectLoader loader = (ObjectLoader)obj;
-			objects = loader.getObjects();
-			setModel(new JTableAutoModel(this));
-			TableColumn col= getColumnModel().getColumn(0);
-			col.setPreferredWidth(5);
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				case RupsEvent.CLOSE_DOCUMENT_EVENT:
+					objects = null;
+					setModel(new JTableAutoModel(this));
+					repaint();
+					return;
+				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+					ObjectLoader loader = (ObjectLoader)event.getContent();
+					objects = loader.getObjects();
+					setModel(new JTableAutoModel(this));
+					TableColumn col= getColumnModel().getColumn(0);
+					col.setPreferredWidth(5);
+			}
 		}
 	}
 	

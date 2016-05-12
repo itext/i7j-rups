@@ -47,13 +47,13 @@ package com.itextpdf.rups.controller;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.event.OpenPlainTextEvent;
+import com.itextpdf.rups.event.OpenStructureEvent;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
-import com.itextpdf.rups.model.PdfFile;
-import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.PageSelectionListener;
-import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
@@ -69,7 +69,6 @@ import java.util.Stack;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
@@ -128,8 +127,6 @@ public class PdfReaderController extends Observable implements Observer {
 
     protected PlainText text;
 
-    ObjectLoader loader;
-
     private Stack<IconTreeNode> highlights = new Stack<IconTreeNode>();
 
     /**
@@ -176,9 +173,9 @@ public class PdfReaderController extends Observable implements Observer {
                 if (navigationTabs.getSelectedIndex() != -1) {
                     String title = navigationTabs.getTitleAt(navigationTabs.getSelectedIndex());
                     if ("Structure".equals(title)) {
-                        structure.update(null, e);
+                        structure.update(PdfReaderController.this, new OpenStructureEvent());
                     } else if ("PlainText".equals(title)) {
-                        text.update(null, e);
+                        text.update(PdfReaderController.this, new OpenPlainTextEvent());
                     }
                 }
             }
@@ -243,43 +240,61 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     /**
-     * Starts loading the PDF Objects in background.
+     * Forwards updates from the RupsController to the Observers of this class.
      *
-     * @param file the wrapper object that holds the PdfReader as member variable
+     * @param    observable    this should be the RupsController
+     * @param    obj    the object that has to be forwarded to the observers of PdfReaderController
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
-    public void startObjectLoader(PdfFile file, ProgressDialog dialog) {
-        setChanged();
-        notifyObservers();
-        setChanged();
-        loader = new ObjectLoader(this, file, file.getFilename(), dialog);
-    }
+    public void update(Observable observable, Object obj) {
+        if (observable instanceof RupsController && obj instanceof RupsEvent) {
+            RupsEvent event = (RupsEvent) obj;
+            switch (event.getType()) {
+                case RupsEvent.CLOSE_DOCUMENT_EVENT:
+                    nodes = null;
+                    setChanged();
+                    super.notifyObservers(event);
+                    break;
+                case RupsEvent.COMPARE_POST_EVENT:
+                    highlightChanges((CompareTool.CompareResult) event.getContent());
+                    pdfTree.repaint();
+                    break;
+                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+                    ObjectLoader loader = (ObjectLoader) event.getContent();
+                    nodes = loader.getNodes();
+                    PdfTrailerTreeNode root = pdfTree.getRoot();
+                    root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
+                    root.setUserObject("PDF Object Tree (" + loader.getLoaderName() + ")");
+                    nodes.expandNode(root);
+                    navigationTabs.setSelectedIndex(0);
+                    setChanged();
+                    super.notifyObservers(event);
+                    break;
+                case RupsEvent.TREE_NODE_CLICKED_EVENT:
+                    PdfObjectTreeNode node = (PdfObjectTreeNode) event.getContent();
+                    nodes.expandNode(node);
 
-    /**
-     * The GUI components that show the internals of a PDF file,
-     * can only be shown if all objects are loaded into the
-     * IndirectObjectFactory using the ObjectLoader.
-     * As soon as this is done, the GUI components are notified.
-     *
-     * @param    obj    in this case the Object should be an ObjectLoader
-     * @see java.util.Observable#notifyObservers(java.lang.Object)
-     */
-    @Override
-    public void notifyObservers(Object obj) {
-        if (obj instanceof ObjectLoader) {
-            ObjectLoader loader = (ObjectLoader) obj;
-            nodes = loader.getNodes();
-            PdfTrailerTreeNode root = pdfTree.getRoot();
-            root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
-            root.setUserObject("PDF Object Tree (" + loader.getLoaderName() + ")");
-            nodes.expandNode(root);
-            navigationTabs.setSelectedIndex(0);
+                    if (node.isRecursive()) {
+                        boolean keyboardNav = false;
+
+                        KeyListener[] listeners = pdfTree.getKeyListeners();
+
+                        for (int i = 0; i < listeners.length; i++) {
+                            KeyListener listener = listeners[i];
+                            if (listener instanceof PdfTreeNavigationListener) {
+                                keyboardNav = ((PdfTreeNavigationListener) listener).isLastActionKeyboardNavigation();
+                            }
+                        }
+
+                        if (!keyboardNav) {
+                            pdfTree.selectNode(node.getAncestor());
+                            return;
+                        }
+                    }
+                    render(node.getPdfObject());
+                    break;
+            }
         }
-        if (obj instanceof CompareTool.CompareResult) {
-            highlightChanges((CompareTool.CompareResult) obj);
-            pdfTree.repaint();
-            return;
-        }
-        super.notifyObservers(obj);
     }
 
     /**
@@ -327,49 +342,6 @@ public class PdfReaderController extends Observable implements Observer {
             return;
         if (pageNumber < pages.getRowCount())
             pages.setRowSelectionInterval(pageNumber, pageNumber);
-    }
-
-    /**
-     * Forwards updates from the RupsController to the Observers of this class.
-     *
-     * @param    observable    this should be the RupsController
-     * @param    obj    the object that has to be forwarded to the observers of PdfReaderController
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (RupsMenuBar.CLOSE.equals(obj)) {
-            setChanged();
-            notifyObservers(null);
-            loader = null;
-            nodes = null;
-        }
-        if (obj instanceof PdfObjectTreeNode) {
-            PdfObjectTreeNode node = (PdfObjectTreeNode) obj;
-            nodes.expandNode(node);
-
-            if (node.isRecursive()) {
-                boolean keyboardNav = false;
-
-                KeyListener[] listeners = pdfTree.getKeyListeners();
-
-                for (int i = 0; i < listeners.length; i++) {
-                    KeyListener listener = listeners[i];
-                    if (listener instanceof PdfTreeNavigationListener) {
-                        keyboardNav = ((PdfTreeNavigationListener) listener).isLastActionKeyboardNavigation();
-                    }
-                }
-
-                if (!keyboardNav) {
-                    pdfTree.selectNode(node.getAncestor());
-                    return;
-                }
-            }
-            render(node.getPdfObject());
-        }
-        if (obj instanceof CompareTool.CompareResult) {
-            setChanged();
-            notifyObservers(obj);
-        }
     }
 
     protected void highlightChanges(CompareTool.CompareResult compareResult) {

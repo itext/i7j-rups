@@ -45,6 +45,8 @@
 package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.models.DictionaryTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModelButton;
@@ -113,7 +115,14 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		clear();
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				default:
+					clear();
+					break;
+			}
+		}
 	}
 	
 	/**
@@ -188,25 +197,25 @@ public class PdfObjectPanel extends JPanel implements Observer {
 				}
 
 				//Todo: add type chooser dialog when stream and array modification will be implemented
-                /*Map<String, Byte> choiceMap = new HashMap<String, Byte>(9);
-                choiceMap.put("Boolean", PdfObject.Boolean);
-                choiceMap.put("Number", PdfObject.Number);
-                choiceMap.put("String", PdfObject.String);
-                choiceMap.put("Name", PdfObject.Name);
-                choiceMap.put("Array", PdfObject.Array);
-                choiceMap.put("Dictionary", PdfObject.Dictionary);
-                choiceMap.put("Stream", PdfObject.Stream);
-
-                String[] choices = new String[choiceMap.size()];
-                choiceMap.keySet().toArray(choices);
-
-                int defaultChoice = 0; // perhaps add some processing of the input to add to the UX
-
-                String input = (String) JOptionPane.showInputDialog(table, "What is the type of the new value?", "Value Type", JOptionPane.QUESTION_MESSAGE, null, choices, choices[defaultChoice]);
-
-                if ( input == null ) { // user cancelled input
-                    return;
-                }*/
+//                Map<String, Byte> choiceMap = new HashMap<String, Byte>(9);
+//                choiceMap.put("Boolean", PdfObject.Boolean);
+//                choiceMap.put("Number", PdfObject.Number);
+//                choiceMap.put("String", PdfObject.String);
+//                choiceMap.put("Name", PdfObject.Name);
+//                choiceMap.put("Array", PdfObject.Array);
+//                choiceMap.put("Dictionary", PdfObject.Dictionary);
+//                choiceMap.put("Stream", PdfObject.Stream);
+//
+//                String[] choices = new String[choiceMap.size()];
+//                choiceMap.keySet().toArray(choices);
+//
+//                int defaultChoice = 0; // perhaps add some processing of the input to add to the UX
+//
+//                String input = (String) JOptionPane.showInputDialog(table, "What is the type of the new value?", "Value Type", JOptionPane.QUESTION_MESSAGE, null, choices, choices[defaultChoice]);
+//
+//                if ( input == null ) { // user cancelled input
+//                    return;
+//                }
 
                 // call addRow
                 ((DictionaryTableModel) table.getModel()).addRow(keyField, valueField);

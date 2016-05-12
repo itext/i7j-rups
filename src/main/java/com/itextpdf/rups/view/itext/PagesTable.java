@@ -45,6 +45,7 @@
 package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.PageSelectionListener;
@@ -84,39 +85,46 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
 	public PagesTable(PdfReaderController controller, PageSelectionListener listener) {
 		this.controller = controller;
 		this.listener = listener;
+		setModel(new JTableAutoModel(this));
 	}
 
 	/**
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
     public void update(Observable observable, Object obj) {
-		if (obj == null) {
-			list = new ArrayList<PdfPageTreeNode>();
-			repaint();
-		} else if (obj instanceof ObjectLoader) {
-			ObjectLoader loader = (ObjectLoader)obj;
-			String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
-			int i = 0;
-			TreeNodeFactory factory = loader.getNodes();
-			PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-			PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-			Enumeration<PdfPageTreeNode> p = new PageEnumerator((PdfDictionary)catalog.getPdfObject(), factory);
-			PdfPageTreeNode  child;
-			StringBuffer buf;
-			while (p.hasMoreElements()) {
-				child = p.nextElement();
-				buf = new StringBuffer("Page ");
-				buf.append(++i);
-				if (pageLabels != null) {
-					buf.append(" ( ");
-					buf.append(pageLabels[i - 1]);
-					buf.append(" )");
-				}
-				child.setUserObject(buf.toString());
-				list.add((PdfPageTreeNode)child);
+		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				case RupsEvent.CLOSE_DOCUMENT_EVENT:
+					list = new ArrayList<PdfPageTreeNode>();
+					break;
+				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+					ObjectLoader loader = (ObjectLoader)event.getContent();
+					String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
+					int i = 0;
+					TreeNodeFactory factory = loader.getNodes();
+					PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+					PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+					Enumeration<PdfPageTreeNode> p = new PageEnumerator((PdfDictionary)catalog.getPdfObject(), factory);
+					PdfPageTreeNode  child;
+					StringBuffer buf;
+					while (p.hasMoreElements()) {
+						child = p.nextElement();
+						buf = new StringBuffer("Page ");
+						buf.append(++i);
+						if (pageLabels != null) {
+							buf.append(" ( ");
+							buf.append(pageLabels[i - 1]);
+							buf.append(" )");
+						}
+						child.setUserObject(buf.toString());
+						list.add(child);
+					}
+					break;
 			}
+			setModel(new JTableAutoModel(this));
+			repaint();
 		}
-		setModel(new JTableAutoModel(this));
 	}
 
 	/**

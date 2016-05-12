@@ -45,9 +45,8 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.rups.io.FileChooserAction;
-import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.FileCompareAction;
+import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.io.*;
 import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.PdfFile;
 
@@ -86,30 +85,30 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	 */
 	public static final String VERSION = "Version";
 	
-	/** The Observable object. */
-	protected Observable observable;
+	/** The RupsController object. */
+	protected RupsController controller;
 	/** The action needed to open a file. */
-	protected FileChooserAction fileChooserAction;
+	protected FileOpenAction fileOpenAction;
 	/** The action needed to save a file. */
-	protected FileChooserAction fileSaverAction;
+	protected FileSaveAction fileSaverAction;
 	/** The HashMap with all the actions. */
 	protected HashMap<String, JMenuItem> items;
 
 	protected FileCompareAction fileCompareAction;
 	/**
 	 * Creates a JMenuBar.
-	 * @param observable	the controller to which this menu bar is added
+	 * @param controller the controller to which this menu bar is added
 	 */
-	public RupsMenuBar(final Observable observable) {
-		this.observable = observable;
+	public RupsMenuBar(RupsController controller) {
+		this.controller = controller;
 		items = new HashMap<String, JMenuItem>();
-		fileChooserAction = new FileChooserAction(observable, "Open", PdfFilter.INSTANCE, false);
-		fileSaverAction = new FileChooserAction(observable, "Save As...", PdfFilter.INSTANCE, true);
-		fileCompareAction = new FileCompareAction(observable, COMPARE_WITH, PdfFilter.INSTANCE, false);
+		fileOpenAction = new FileOpenAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+		fileSaverAction = new FileSaveAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+		fileCompareAction = new FileCompareAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
 		MessageAction message = new MessageAction();
 		JMenu file = new JMenu(FILE_MENU);
-		addItem(file, OPEN, fileChooserAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
-		addItem(file, CLOSE, new FileCloseAction(observable), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
+		addItem(file, OPEN, fileOpenAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
+		addItem(file, CLOSE, new FileCloseAction(this.controller), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, COMPARE_WITH, fileCompareAction, KeyStroke.getKeyStroke('Q', KeyEvent.CTRL_DOWN_MASK));
 		file.addSeparator();
@@ -117,7 +116,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
             public void actionPerformed(ActionEvent e) {
                 if (Desktop.isDesktopSupported()) {
                     try {
-                        PdfFile pdfFile = ((RupsController)observable).getPdfFile();
+                        PdfFile pdfFile = RupsMenuBar.this.controller.getPdfFile();
                         if ( pdfFile != null ) {
                             if ( pdfFile.getDirectory() != null ) {
                                 File myFile = new File(pdfFile.getDirectory(), pdfFile.getFilename());
@@ -143,16 +142,18 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable observable, Object obj) {
-		if (OPEN.equals(obj)) {
-			enableItems(true);
-			return;
-		}
-		if (CLOSE.equals(obj)) {
-			enableItems(false);
-			return;
-		}
-		if (FILE_MENU.equals(obj)) {
-			fileChooserAction.actionPerformed(null);
+		if (observable instanceof RupsController && obj instanceof RupsEvent) {
+			RupsEvent event = (RupsEvent) obj;
+			switch (event.getType()) {
+				case RupsEvent.CLOSE_DOCUMENT_EVENT:
+					enableItems(false);
+					break;
+				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+					enableItems(true);
+					break;
+				case RupsEvent.ROOT_NODE_CLICKED_EVENT:
+					fileOpenAction.actionPerformed(null);
+			}
 		}
 	}
 	

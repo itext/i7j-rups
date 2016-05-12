@@ -48,10 +48,9 @@ import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
-import com.itextpdf.rups.io.FileChooserAction;
-import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.FileCompareAction;
+import com.itextpdf.rups.event.*;
 import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
@@ -77,6 +76,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.StringTokenizer;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
  * the RUPS application: the menu bar, the panels,...
  */
 public class RupsController extends Observable
-        implements TreeSelectionListener, PageSelectionListener {
+        implements TreeSelectionListener, PageSelectionListener, Observer {
 
     // member variables
 
@@ -124,6 +124,8 @@ public class RupsController extends Observable
     protected Frame ownedFrame;
 
     private boolean pluginMode;
+
+    private ObjectLoader loader;
 
     // constructor
 
@@ -242,32 +244,28 @@ public class RupsController extends Observable
         return treePanel;
     }
 
-    // Observable
-
-    /**
-     * @see java.util.Observable#notifyObservers(java.lang.Object)
-     */
-    @Override
-    public void notifyObservers(Object obj) {
-        if (obj instanceof FileChooserAction) {
-            File file = ((FileChooserAction) obj).getFile();
-
-            if (obj instanceof FileCompareAction) {
-                compareWithFile(file);
-                return;
+    public void update(Observable o, Object arg) {
+        //Events that have come from non observable classes: ObjectLoader and FileChooserAction
+        if (o == null && arg instanceof RupsEvent) {
+            RupsEvent event = (RupsEvent) arg;
+            switch (event.getType()) {
+                case RupsEvent.CLOSE_DOCUMENT_EVENT:
+                    closeRoutine();
+                    break;
+                case RupsEvent.OPEN_FILE_EVENT:
+                    loadFile((File)event.getContent(), false);
+                    break;
+                case RupsEvent.SAVE_TO_FILE_EVENT:
+                    saveFile((File)event.getContent());
+                    break;
+                case RupsEvent.COMPARE_WITH_FILE_EVENT:
+                    compareWithFile((File)event.getContent());
+                    break;
+                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+                    setChanged();
+                    super.notifyObservers(event);
+                    break;
             }
-
-            /* save check */
-            if (((FileChooserAction) obj).isNewFile()) {
-                saveFile(file);
-            } else {
-                loadFile(file, false);
-            }
-            return;
-        }
-        if (obj instanceof FileCloseAction) {
-            closeRoutine();
-            return;
         }
     }
 
@@ -298,18 +296,7 @@ public class RupsController extends Observable
             pdfFile = new PdfFile(contents, readOnly);
             pdfFile.setFilename(fileName);
             pdfFile.setDirectory(directory);
-
-            setChanged();
-            super.notifyObservers(RupsMenuBar.OPEN);
-            final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, pluginMode);
-            if (!pluginMode) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        dialog.setVisible(true);
-                    }
-                });
-            }
-            readerController.startObjectLoader(pdfFile, dialog);
+            startObjectLoader();
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (PdfException de) {
@@ -412,12 +399,13 @@ public class RupsController extends Observable
     }
 
     public void closeRoutine() {
+        loader = null;
         PdfDocument docToClose = null;
         if (pdfFile != null && pdfFile.getPdfDocument() != null)
             docToClose = pdfFile.getPdfDocument();
         pdfFile = null;
         setChanged();
-        super.notifyObservers(RupsMenuBar.CLOSE);
+        super.notifyObservers(new CloseDocumentEvent());
         if (docToClose != null) {
             docToClose.close();
         }
@@ -471,9 +459,9 @@ public class RupsController extends Observable
     }
 
     public void waitForLoader() {
-        if (readerController.loader != null) {
+        if (loader != null) {
             try {
-                readerController.loader.join();
+                loader.join();
             } catch (InterruptedException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
                 logger.warn(LoggerMessages.WAITING_FOR_LOADER_ERROR, e);
@@ -488,7 +476,19 @@ public class RupsController extends Observable
         } else {
             logger.info(compareResult.getReport());
         }
-        readerController.notifyObservers(compareResult);
+        readerController.update(this, new PostCompareEvent(compareResult));
+    }
+
+    private void startObjectLoader() {
+        final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, pluginMode);
+        if (!pluginMode) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    dialog.setVisible(true);
+                }
+            });
+        }
+        loader = new ObjectLoader(this, pdfFile, pdfFile.getFilename(), dialog);
     }
 
     // tree selection
@@ -500,13 +500,13 @@ public class RupsController extends Observable
         Object selectednode = readerController.getPdfTree().getLastSelectedPathComponent();
         if (selectednode instanceof PdfTrailerTreeNode) {
             if (!pluginMode) {
-                menuBar.update(this, RupsMenuBar.FILE_MENU);
+                menuBar.update(this, new RootNodeClickedEvent());
             }
             readerController.getPdfTree().clearSelection();
             return;
         }
         if (selectednode instanceof PdfObjectTreeNode) {
-            readerController.update(this, selectednode);
+            readerController.update(this, new TreeNodeClickedEvent((PdfObjectTreeNode)selectednode));
         }
     }
 
