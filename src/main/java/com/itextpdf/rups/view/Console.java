@@ -61,22 +61,14 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
 /**
- * A Class that redirects everything written to System.out and System.err
- * to a JTextPane.
+ * A Class that is used for displaying logger messages to a JTextPane.
  */
 public class Console implements Observer {
-
-
 
     /**
      * Single Console instance.
      */
     private static Console console = null;
-
-    /**
-     * Custom PrintStream.
-     */
-    PrintStream printStream;
 
     /**
      * The StyleContext for the Console.
@@ -94,20 +86,6 @@ public class Console implements Observer {
      * Creates a new Console object.
      */
     private Console(boolean pluginMode) {
-        // Set up Custom
-        printStream = new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.CUSTOM)));
-
-        if (!pluginMode) {
-            // Set up System.out
-            System.setOut(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.SYSTEMOUT)), true));
-
-            // Set up System.err
-            System.setErr(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.SYSTEMERR)), true));
-        } else {
-            // Set up System.err
-            System.setErr(new PrintStream(new BufferedOutputStream(new ConsoleOutputStream(ConsoleStyleContext.CUSTOM)), true));
-        }
-
         // Add a scrolling text area
         textArea.setEditable(false);
     }
@@ -122,12 +100,6 @@ public class Console implements Observer {
         return console;
     }
 
-    public static synchronized void initConsoleInPluginMode() {
-        if (console == null) {
-            console = new Console(true);
-        }
-    }
-
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
@@ -137,20 +109,6 @@ public class Console implements Observer {
         }
         if (RupsMenuBar.OPEN.equals(obj)) {
             textArea.setText("");
-        }
-    }
-
-    /**
-     * Allows you to print something to the custom PrintStream.
-     *
-     * @param    s    the message you want to send to the Console
-     */
-    public void println(String s) {
-        if (printStream == null) {
-            System.out.println(s);
-        } else {
-            printStream.println(s);
-            printStream.flush();
         }
     }
 
@@ -172,20 +130,13 @@ public class Console implements Observer {
     }
 
     /**
-     * Get the custom PrintStream of the console.
-     */
-    public PrintStream getPrintStream() {
-        return printStream;
-    }
-
-    /**
      * Get the JTextArea to which everything is written.
      */
     public JTextPane getTextArea() {
         return textArea;
     }
 
-    class ConsoleOutputStream extends OutputStream {
+    static class ConsoleOutputStream extends OutputStream {
 
         private String type;
 
@@ -212,7 +163,7 @@ public class Console implements Observer {
     /**
      * The style context defining the styles of each type of PrintStream.
      */
-    class ConsoleStyleContext extends StyleContext {
+    static class ConsoleStyleContext extends StyleContext {
 
         /**
          * A Serial Version UID.
@@ -221,15 +172,15 @@ public class Console implements Observer {
         /**
          * The name of the Style used for Custom messages
          */
-        public static final String CUSTOM = "Custom";
+        public static final String INFO = "Info";
         /**
          * The name of the Style used for System.out
          */
-        public static final String SYSTEMOUT = "SystemOut";
+        public static final String DEBUG = "Debug";
         /**
          * The name of the Style used for System.err
          */
-        public static final String SYSTEMERR = "SystemErr";
+        public static final String ERROR = "Error";
 
         /**
          * Creates the style context for the Console.
@@ -237,11 +188,11 @@ public class Console implements Observer {
         public ConsoleStyleContext() {
             super();
             Style root = getStyle(DEFAULT_STYLE);
-            Style s = addStyle(CUSTOM, root);
+            Style s = addStyle(INFO, root);
             StyleConstants.setForeground(s, Color.BLACK);
-            s = addStyle(SYSTEMOUT, root);
+            s = addStyle(DEBUG, root);
             StyleConstants.setForeground(s, Color.GREEN);
-            s = addStyle(SYSTEMERR, root);
+            s = addStyle(ERROR, root);
             StyleConstants.setForeground(s, Color.RED);
         }
     }

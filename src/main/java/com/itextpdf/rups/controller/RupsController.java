@@ -138,9 +138,6 @@ public class RupsController extends Observable
         this.ownedFrame = frame;
         menuBar = new RupsMenuBar(this);
         addObserver(menuBar);
-        if (pluginMode) {
-            Console.initConsoleInPluginMode();
-        }
         Console console = Console.getInstance();
         addObserver(console);
         readerController = new PdfReaderController(this, this, pluginMode);

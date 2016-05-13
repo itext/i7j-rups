@@ -44,9 +44,9 @@
  */
 package com.itextpdf.rups.view.itext.treenodes;
 
-import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.rups.view.icons.IconTreeNode;
 
 public class StructureTreeNode extends IconTreeNode {
 

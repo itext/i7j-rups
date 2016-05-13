@@ -44,10 +44,10 @@
  */
 package com.itextpdf.rups.view.itext.treenodes;
 
-import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.view.icons.IconTreeNode;
 
 /**
  * A FormTreeNode is a standard node in a FormTree.

@@ -44,19 +44,9 @@
  */
 package com.itextpdf.rups;
 
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.kernel.Version;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import javax.swing.WindowConstants;
 
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure

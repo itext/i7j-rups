@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration>
+
+    <appender name="DEFAULT_APP" class="com.itextpdf.rups.view.StyleAppender">
+        <encoder>
+            <pattern>%date [%thread] %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="INFO_APP" class="com.itextpdf.rups.view.StyleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>%-5level - %msg%n</pattern>
+        </encoder>
+        <styleType>Info</styleType>
+    </appender>
+
+    <appender name="DEBUG_APP" class="com.itextpdf.rups.view.StyleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <Pattern>[%thread] %-5level %logger - %msg%n</Pattern>
+        </encoder>
+        <styleType>Debug</styleType>
+    </appender>
+
+    <appender name="IMPORTANT_APP" class="com.itextpdf.rups.view.StyleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <Pattern>[%thread] %-5level %logger - %msg%n</Pattern>
+        </encoder>
+        <styleType>Error</styleType>
+    </appender>
+
+    <logger name="com.itextpdf" additivity="false">
+        <appender-ref ref="IMPORTANT_APP"/>
+        <appender-ref ref="INFO_APP"/>
+        <appender-ref ref="DEBUG_APP"/>
+    </logger>
+
+    <root level="DEBUG">
+        <appender-ref ref="DEFAULT_APP" />
+    </root>
+
+</configuration>
