@@ -112,7 +112,8 @@ public class Rups {
 
     public boolean compareWithDocument(final PdfDocument document) {
         SwingHelper.invokeSync(new Runnable() {
-            public void run() {lastCompareResult = getController().compareWithDocument(document);
+            public void run() {
+                lastCompareResult = getController().compareWithDocument(document);
             }
         });
         return isEqual();
@@ -121,7 +122,8 @@ public class Rups {
     public boolean compareWithFile(final File file) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                lastCompareResult = getController().compareWithFile(file);           }
+                lastCompareResult = getController().compareWithFile(file);
+            }
         });
         return isEqual();
     }
@@ -129,7 +131,8 @@ public class Rups {
     public boolean compareWithStream(final InputStream is) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                lastCompareResult = getController().compareWithStream(is);           }
+                lastCompareResult = getController().compareWithStream(is);
+            }
         });
         return isEqual();
     }
@@ -147,6 +150,7 @@ public class Rups {
     protected static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
         frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
+        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(Rups.class.getResource("logo.png")));
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content
         frame.setJMenuBar(controller.getMenuBar());

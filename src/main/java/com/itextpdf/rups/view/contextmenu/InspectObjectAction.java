@@ -1,5 +1,6 @@
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -36,6 +37,7 @@ public class InspectObjectAction extends AbstractRupsAction {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int)(screen.getWidth() * .70), (int)(screen.getHeight() * .70));
         frame.setLocation((int)(screen.getWidth() * .05), (int)(screen.getHeight() * .05));
+        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(Rups.class.getResource("logo.png")));
         frame.setResizable(true);
 
         frame.setVisible(true);
