@@ -218,7 +218,7 @@ public class PdfReaderController extends Observable implements Observer {
      * Getter for the panel that will show the contents
      * of a PDF Object (except for PdfStreams: only the
      * Stream Dictionary will be shown; the content stream
-     * is shown in a StreamTextArea object).
+     * is shown in a SyntaxHighlightedStreamPane object).
      *
      * @return the PdfObjectPanel
      */
@@ -238,7 +238,7 @@ public class PdfReaderController extends Observable implements Observer {
      * Getter for the object that holds the TextPane
      * with the content stream of a PdfStream object.
      *
-     * @return a StreamTextArea
+     * @return a SyntaxHighlightedStreamPane
      */
     public SyntaxHighlightedStreamPane getStreamPane() {
         return streamPane;
@@ -326,13 +326,13 @@ public class PdfReaderController extends Observable implements Observer {
      * in the streamArea too.
      */
     public void render(PdfObject object) {
-        objectPanel.render(object);
-        streamPane.render(object);
         if (object instanceof PdfStream) {
             editorTabs.setSelectedComponent(streamPane);
         } else {
             editorTabs.setSelectedIndex(editorTabs.getComponentCount() - 1);
         }
+        objectPanel.render(object);
+        streamPane.render(object);
     }
 
     /**

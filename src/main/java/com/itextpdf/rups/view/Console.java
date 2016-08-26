@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.event.ConsoleWriteEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.SwingHelper;
 
@@ -64,7 +65,7 @@ import javax.swing.text.StyleContext;
 /**
  * A Class that is used for displaying logger messages to a JTextPane.
  */
-public class Console implements Observer {
+public class Console extends Observable implements Observer {
 
     /**
      * Single Console instance.
@@ -131,28 +132,34 @@ public class Console implements Observer {
                     }
                     doc.insertString(doc.getLength(), msg, attset);
                     textArea.setCaretPosition(textArea.getDocument().getLength());
+                    setChanged();
+                    notifyObservers(new ConsoleWriteEvent());
                 } catch (BadLocationException ignored) {
                 }
             }
         }, true);
     }
 
-    private void clearWithBuffer(String message) {
-        if (message == null) {
-            message = "";
-        }
-        try {
-            String backupString = textArea.getText(
-                    Math.max(textArea.getDocument().getLength() - BUFFER_SIZE, 0),
-                    Math.min(textArea.getDocument().getLength(), BUFFER_SIZE));
-            textArea.setText("");
-            Document doc = textArea.getDocument();
-            doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
-            doc.insertString(doc.getLength(), message, styleContext.getStyle(ConsoleStyleContext.INFO));
-        } catch (Exception any) {
-            textArea.setText(message);
-        }
-        textArea.setCaretPosition(textArea.getDocument().getLength());
+    private void clearWithBuffer(final String message) {
+        SwingHelper.invokeSync(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String backupString = textArea.getText(
+                            Math.max(textArea.getDocument().getLength() - BUFFER_SIZE, 0),
+                            Math.min(textArea.getDocument().getLength(), BUFFER_SIZE));
+                    textArea.setText("");
+                    Document doc = textArea.getDocument();
+                    doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
+                    doc.insertString(doc.getLength(), message == null ? "" : message, styleContext.getStyle(ConsoleStyleContext.INFO));
+                } catch (Exception any) {
+                    textArea.setText(message == null ? "" : message);
+                }
+                textArea.setCaretPosition(textArea.getDocument().getLength());
+                setChanged();
+                notifyObservers(new ConsoleWriteEvent());
+            }
+        }, true);
     }
 
     /**

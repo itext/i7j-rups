@@ -140,6 +140,7 @@ public class RupsController extends Observable
         addObserver(menuBar);
         Console console = Console.getInstance();
         addObserver(console);
+        console.addObserver(this);
         readerController = new PdfReaderController(this, this, pluginMode);
         addObserver(readerController);
         masterPanel = new JPanel(new BorderLayout());
@@ -264,6 +265,15 @@ public class RupsController extends Observable
                     break;
             }
         }
+        //Events from observable classes
+        if (o != null && arg instanceof RupsEvent) {
+            RupsEvent event = (RupsEvent) arg;
+            switch (event.getType()) {
+                case RupsEvent.CONSOLE_WRITE_EVENT:
+                    readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
+                    break;
+            }
+        }
     }
 
     /**
@@ -322,7 +332,8 @@ public class RupsController extends Observable
                     inputStream.close();
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
+                logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
             }
         }
         return res;
@@ -341,7 +352,8 @@ public class RupsController extends Observable
                 byteArrayOutputStream.close();
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
+                logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
             }
         }
         return byteArrayOutputStream.toByteArray();
@@ -390,7 +402,8 @@ public class RupsController extends Observable
                 }
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
+                logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
             }
         }
     }
@@ -416,7 +429,8 @@ public class RupsController extends Observable
             return compareResult;
         } catch (Exception e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.COMPARING_ERROR, e);
+            logger.warn(LoggerMessages.COMPARING_ERROR);
+            logger.debug(LoggerMessages.COMPARING_ERROR, e);
             return null;
         }
     }
@@ -428,7 +442,8 @@ public class RupsController extends Observable
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
+            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR);
+            logger.debug(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
             return null;
         } finally {
             if (cmpDocument != null) {
@@ -446,7 +461,8 @@ public class RupsController extends Observable
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
+            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR);
+            logger.debug(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
             return null;
         } finally {
             if (cmpDocument != null) {
@@ -461,7 +477,8 @@ public class RupsController extends Observable
                 loader.join();
             } catch (InterruptedException e) {
                 Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.warn(LoggerMessages.WAITING_FOR_LOADER_ERROR, e);
+                logger.error(LoggerMessages.WAITING_FOR_LOADER_ERROR);
+                logger.debug(LoggerMessages.WAITING_FOR_LOADER_ERROR, e);
             }
         }
     }

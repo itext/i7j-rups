@@ -147,10 +147,12 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
 							xfaTextArea.load(xfaFile);
 						} catch (IOException e) {
 							Logger logger = LoggerFactory.getLogger(FormTree.class);
-							logger.warn(LoggerMessages.XFA_LOADING_ERROR, e);
+							logger.warn(LoggerMessages.XFA_LOADING_ERROR);
+							logger.debug(LoggerMessages.XFA_LOADING_ERROR, e);
 						} catch (DocumentException e) {
 							Logger logger = LoggerFactory.getLogger(FormTree.class);
-							logger.warn(LoggerMessages.XML_DOM_PARSING_ERROR, e);
+							logger.error(LoggerMessages.XML_DOM_PARSING_ERROR);
+							logger.debug(LoggerMessages.XML_DOM_PARSING_ERROR, e);
 						}
 					}
 					setModel(new DefaultTreeModel(root));

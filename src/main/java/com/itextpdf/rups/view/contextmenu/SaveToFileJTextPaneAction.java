@@ -103,14 +103,16 @@ public class SaveToFileJTextPaneAction extends AbstractRupsAction {
 
             } catch (IOException e) { //TODO
                 Logger logger = LoggerFactory.getLogger(SaveToFileJTextPaneAction.class);
-                logger.warn(LoggerMessages.WRITING_FILE_ERROR, e);
+                logger.warn(LoggerMessages.WRITING_FILE_ERROR);
+                logger.debug(LoggerMessages.WRITING_FILE_ERROR, e);
             } finally {
                 try {
                     if (writer != null)
                         writer.close();
                 } catch (IOException e) { //TODO
                     Logger logger = LoggerFactory.getLogger(SaveToFileJTextPaneAction.class);
-                    logger.warn(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                    logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
+                    logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
                 }
             }
 

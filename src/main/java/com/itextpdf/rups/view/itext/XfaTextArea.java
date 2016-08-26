@@ -61,7 +61,7 @@ public class XfaTextArea extends JScrollPane {
 	protected JTextArea text;
 	
 	/**
-	 * Constructs a StreamTextArea.
+	 * Constructs a XFATextArea.
 	 */
 	public XfaTextArea() {
 		super();

@@ -15,6 +15,7 @@ public abstract class RupsEvent {
     public static final byte TREE_NODE_CLICKED_EVENT = 7;
     public static final byte OPEN_STRUCTURE_EVENT = 8;
     public static final byte OPEN_PLAIN_TEXT_EVENT = 9;
+    public static final byte CONSOLE_WRITE_EVENT = 10;
 
     public abstract int getType();
 

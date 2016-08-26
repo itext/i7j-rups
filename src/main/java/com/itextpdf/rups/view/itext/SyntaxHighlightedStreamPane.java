@@ -68,7 +68,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,8 +113,9 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             pdfStreamGetInputStreamMethod.setAccessible(true);
         } catch (Exception any) {
             pdfStreamGetInputStreamMethod = null;
-            LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class)
-                    .error("Reflection error from PdfStream. Editing of pdfStreams will be disabled", any);
+            Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
+            logger.error(LoggerMessages.REFLECTION_PDFSTREAM_ERROR);
+            logger.debug(LoggerMessages.REFLECTION_PDFSTREAM_ERROR, any);
         }
     }
 
@@ -141,8 +141,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 			RupsEvent event = (RupsEvent) obj;
 			switch (event.getType()) {
 				default:
-                    target = null;
-					text.setText("");
+                    clearPane();
 					break;
 			}
 		}
@@ -191,7 +190,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                                         ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
                                     } catch (Exception e) {
                                         Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-                                        logger.warn(LoggerMessages.UNHANDLED_EXCEPTION_DEFAULT, e);
+                                        logger.error(LoggerMessages.IMAGE_PARSING_ERROR);
+                                        logger.debug(LoggerMessages.IMAGE_PARSING_ERROR, e);
                                     }
                                 }
                             });
@@ -199,14 +199,16 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                             text.insertComponent(saveImage);
                         } catch (BadLocationException e) {
                             Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-                            logger.warn(LoggerMessages.UNHANDLED_EXCEPTION_DEFAULT, e);
+                            logger.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT);
+                            logger.debug(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e);
                         }
                     } else {
                         text.setText("Image can't be loaded.");
                     }
                 } catch (IOException e) {
                     Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-                    logger.warn(LoggerMessages.UNHANDLED_EXCEPTION_DEFAULT, e);
+                    logger.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT);
+                    logger.debug(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e);
                 }
             } else if ( stream.get(PdfName.Length1) != null ) {
                 try {
@@ -249,10 +251,11 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                         text.append(operator + newline, attributes);
                     }
                 } catch (PdfException | com.itextpdf.io.IOException e) {
+                    Logger logger = LoggerFactory.getLogger(getClass());
+                    logger.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR);
+                    logger.debug(LoggerMessages.PDFSTREAM_PARSING_ERROR, e);
                     if ( bb != null ) {
                         text.setText(new String(bb));
-                    } else {
-                        text.setText(e.getMessage());
                     }
                 } catch (IOException ignored) {
                 }
@@ -261,7 +264,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             }
         }
 		else {
-			update(null, null);
+			clearPane();
 			return;
 		}
 		text.repaint();
@@ -434,7 +437,12 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         }
         popupMenu.setSaveToStreamEnabled(false);
     }
-	
+
+    private void clearPane() {
+        target = null;
+        text.setText("");
+    }
+
 	/** a serial version id. */
 	private static final long serialVersionUID = -3699893393067753664L;
 
