@@ -87,6 +87,6 @@ public class PdfTreeContextMenuMouseListener extends ContextMenuMouseListener {
 
         // Make sure the selected item isn't an image
         PdfStream stream = (PdfStream) lastPath.getPdfObject();
-        return !PdfName.Image.equals(stream.get(PdfName.Subtype, false)); // Todo was: stream.get(PdfName.SUBTYPE) != PdfName.IMAGE
+        return !PdfName.Image.equals(stream.get(PdfName.Subtype));
     }
 }

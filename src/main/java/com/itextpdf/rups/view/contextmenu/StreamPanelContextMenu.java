@@ -44,6 +44,8 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+
 import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 
@@ -54,10 +56,15 @@ import javax.swing.text.DefaultEditorKit;
  *
  * @author Michael Demey
  */
-public class StreamPanelContextMenu {
+public class StreamPanelContextMenu extends JPopupMenu {
 
-    static final String COPY = "Copy";
-    static final String SELECTALL = "Select All";
+    private static final String COPY = "Copy";
+    private static final String SELECT_ALL = "Select All";
+    private static final String SAVE_TO_FILE = "Save to File";
+    private static final String SAVE_TO_STREAM = "Save to Stream";
+
+    private JMenuItem saveToStream;
+
 
     /**
      * Creates a context menu (right click menu) with two actions:
@@ -69,25 +76,33 @@ public class StreamPanelContextMenu {
      * @param textPane
      * @return
      */
-    public static JPopupMenu getContextMenu(final JTextPane textPane) {
-        final JPopupMenu menu = new JPopupMenu();
+    public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller) {
+        super();
         final JMenuItem copyItem = new JMenuItem();
         copyItem.setAction(new CopyToClipboardAction(COPY, textPane));
         copyItem.setText(COPY);
 
-        final JMenuItem selectAllItem = new JMenuItem(SELECTALL);
+        final JMenuItem selectAllItem = new JMenuItem(SELECT_ALL);
         selectAllItem.setAction(textPane.getActionMap().get(DefaultEditorKit.selectAllAction));
-        selectAllItem.setText(SELECTALL);
+        selectAllItem.setText(SELECT_ALL);
 
         JMenuItem saveToFile = new JMenuItem();
-        saveToFile.setText("Save to File");
-        saveToFile.setAction(new SaveToFileJTextPaneAction("Save to File", textPane));
+        saveToFile.setText(SAVE_TO_FILE);
+        saveToFile.setAction(new SaveToFileJTextPaneAction(SAVE_TO_FILE, textPane));
 
-        menu.add(copyItem);
-        menu.add(saveToFile);
-        menu.add(new JSeparator());
-        menu.add(selectAllItem);
+        saveToStream = new JMenuItem();
+        saveToStream.setText(SAVE_TO_STREAM);
+        saveToStream.setAction(new SaveToPdfStreamJTextPaneAction(SAVE_TO_STREAM, controller));
 
-        return menu;
+        add(saveToStream);
+        add(new JSeparator());
+        add(copyItem);
+        add(saveToFile);
+        add(new JSeparator());
+        add(selectAllItem);
+    }
+
+    public void setSaveToStreamEnabled(boolean enabled) {
+        saveToStream.setEnabled(enabled);
     }
 }
