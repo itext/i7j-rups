@@ -48,6 +48,8 @@ package com.itextpdf.rups;
 import java.io.File;
 import javax.swing.WindowConstants;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure
  * of a PDF file.
@@ -73,5 +75,14 @@ public class RupsLauncher {
             f = null;
         }
         Rups.startNewApplication(f, CLOSE_OPERATION);
+
+        LoggerFactory.getLogger(RupsLauncher.class).debug("bla");
+        LoggerFactory.getLogger(RupsLauncher.class).error("bla");
+        LoggerFactory.getLogger(RupsLauncher.class).warn("bla");
+        LoggerFactory.getLogger(RupsLauncher.class).info("bla");
+        LoggerFactory.getLogger(RupsLauncher.class).trace("bla");
+        for (int i = 0; i < 8200; ++i) {
+            LoggerFactory.getLogger(RupsLauncher.class).trace("bla");
+        }
     }
 }

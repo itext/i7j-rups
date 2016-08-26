@@ -105,10 +105,10 @@ public class Console implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (RupsMenuBar.CLOSE.equals(obj)) {
-            textArea.setText("");
+            textArea.setText("...document is closed.\n");
         }
         if (RupsMenuBar.OPEN.equals(obj)) {
-            textArea.setText("");
+            textArea.setText("...document is open.\n");
         }
     }
 

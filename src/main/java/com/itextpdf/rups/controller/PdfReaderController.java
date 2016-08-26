@@ -53,7 +53,10 @@ import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.DebugView;
 import com.itextpdf.rups.view.PageSelectionListener;
+import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
+import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
@@ -185,9 +188,11 @@ public class PdfReaderController extends Observable implements Observer {
         addObserver(objectPanel);
         streamPane = new SyntaxHighlightedStreamPane();
         addObserver(streamPane);
+        JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();
         editorTabs.addTab("Stream", null, streamPane, "Stream");
         editorTabs.addTab("XFA", null, form.getXfaTextArea(), "XFA Form XML file");
+        editorTabs.addTab("Debug info", null, debug, "Various debug-specific information");
     }
 
     /**
