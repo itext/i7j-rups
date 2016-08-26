@@ -6,7 +6,7 @@ import ch.qos.logback.core.OutputStreamAppender;
 
 public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
 
-    private static final String DEFAULT_STYLE_TYPE = Console.ConsoleStyleContext.DEBUG;
+    private static final String DEFAULT_STYLE_TYPE = Console.ConsoleStyleContext.BACKUP;
 
     String styleType = DEFAULT_STYLE_TYPE;
 
@@ -23,7 +23,7 @@ public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
     public void setStyleType(String styleType) {
         if (!styleType.equals(Console.ConsoleStyleContext.INFO) &&
                 !styleType.equals(Console.ConsoleStyleContext.ERROR) &&
-                !styleType.equals(Console.ConsoleStyleContext.DEBUG)) {
+                !styleType.equals(Console.ConsoleStyleContext.BACKUP)) {
             addError("Wrong style is set for appender named [" + name +"]. Using default style");
             styleType = DEFAULT_STYLE_TYPE;
         }

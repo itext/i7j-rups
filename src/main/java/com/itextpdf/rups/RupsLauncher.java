@@ -75,14 +75,5 @@ public class RupsLauncher {
             f = null;
         }
         Rups.startNewApplication(f, CLOSE_OPERATION);
-
-        LoggerFactory.getLogger(RupsLauncher.class).debug("bla");
-        LoggerFactory.getLogger(RupsLauncher.class).error("bla");
-        LoggerFactory.getLogger(RupsLauncher.class).warn("bla");
-        LoggerFactory.getLogger(RupsLauncher.class).info("bla");
-        LoggerFactory.getLogger(RupsLauncher.class).trace("bla");
-        for (int i = 0; i < 8200; ++i) {
-            LoggerFactory.getLogger(RupsLauncher.class).trace("bla");
-        }
     }
 }

@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.SwingHelper;
 
 import java.awt.Color;
@@ -82,6 +83,8 @@ public class Console implements Observer {
 
     private static final int MAX_TEXT_AREA_SIZE = 8192;
 
+    private static final int BUFFER_SIZE = 1024;
+
     /**
      * Creates a new Console object.
      */
@@ -104,11 +107,16 @@ public class Console implements Observer {
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     public void update(Observable observable, Object obj) {
-        if (RupsMenuBar.CLOSE.equals(obj)) {
-            textArea.setText("...document is closed.\n");
-        }
-        if (RupsMenuBar.OPEN.equals(obj)) {
-            textArea.setText("...document is open.\n");
+        if (obj instanceof RupsEvent) {
+            RupsEvent event = (RupsEvent) obj;
+            switch (event.getType()) {
+                case RupsEvent.CLOSE_DOCUMENT_EVENT:
+                    clearWithBuffer("...document is closed.\n");
+                    break;
+                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+                    clearWithBuffer("...document is open.\n");
+                    break;
+            }
         }
     }
 
@@ -119,7 +127,7 @@ public class Console implements Observer {
                     Document doc = textArea.getDocument();
                     AttributeSet attset = styleContext.getStyle(type);
                     if (doc.getLength() + msg.length() > MAX_TEXT_AREA_SIZE) {
-                        textArea.setText("...\n");
+                        clearWithBuffer("...too many output\n");
                     }
                     doc.insertString(doc.getLength(), msg, attset);
                     textArea.setCaretPosition(textArea.getDocument().getLength());
@@ -127,6 +135,24 @@ public class Console implements Observer {
                 }
             }
         }, true);
+    }
+
+    private void clearWithBuffer(String message) {
+        if (message == null) {
+            message = "";
+        }
+        try {
+            String backupString = textArea.getText(
+                    Math.max(textArea.getDocument().getLength() - BUFFER_SIZE, 0),
+                    Math.min(textArea.getDocument().getLength(), BUFFER_SIZE));
+            textArea.setText("");
+            Document doc = textArea.getDocument();
+            doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
+            doc.insertString(doc.getLength(), message, styleContext.getStyle(ConsoleStyleContext.INFO));
+        } catch (Exception any) {
+            textArea.setText(message);
+        }
+        textArea.setCaretPosition(textArea.getDocument().getLength());
     }
 
     /**
@@ -176,7 +202,7 @@ public class Console implements Observer {
         /**
          * The name of the Style used for System.out
          */
-        public static final String DEBUG = "Debug";
+        public static final String BACKUP = "Backup";
         /**
          * The name of the Style used for System.err
          */
@@ -190,8 +216,8 @@ public class Console implements Observer {
             Style root = getStyle(DEFAULT_STYLE);
             Style s = addStyle(INFO, root);
             StyleConstants.setForeground(s, Color.BLACK);
-            s = addStyle(DEBUG, root);
-            StyleConstants.setForeground(s, Color.GREEN);
+            s = addStyle(BACKUP, root);
+            StyleConstants.setForeground(s, Color.LIGHT_GRAY);
             s = addStyle(ERROR, root);
             StyleConstants.setForeground(s, Color.RED);
         }
