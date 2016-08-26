@@ -88,6 +88,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <failOnError>false</failOnError>
                     <links>
                         <link>http://api.itextpdf.com/itext/</link>
                     </links>
