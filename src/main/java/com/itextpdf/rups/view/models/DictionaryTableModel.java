@@ -191,7 +191,6 @@ public class DictionaryTableModel extends AbstractTableModel {
     public void removeRow(int rowNumber) {
         PdfName name = keys.get(rowNumber);
         keys.remove(rowNumber);
-        dictionary.remove(name);
 
         fireTableDataChanged();
     }

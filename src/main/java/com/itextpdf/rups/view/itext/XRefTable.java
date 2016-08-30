@@ -193,7 +193,7 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
 		if (evt != null)
 			super.valueChanged(evt);
 		if (controller != null && objects != null) {
-			controller.render(getObjectByRow(this.getSelectedRow()));
+			//controller.render(getObjectByRow(this.getSelectedRow()));
 			controller.selectNode(getObjectReferenceByRow(this.getSelectedRow()));
 		}
 	}

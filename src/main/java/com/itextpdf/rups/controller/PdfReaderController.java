@@ -44,9 +44,13 @@
  */
 package com.itextpdf.rups.controller;
 
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.event.NodeAddDictChildEvent;
+import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.OpenPlainTextEvent;
 import com.itextpdf.rups.event.OpenStructureEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -69,6 +73,7 @@ import java.awt.event.KeyListener;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -186,6 +191,7 @@ public class PdfReaderController extends Observable implements Observer {
 
         objectPanel = new PdfObjectPanel(pluginMode);
         addObserver(objectPanel);
+        objectPanel.addObserver(this);
         streamPane = new SyntaxHighlightedStreamPane();
         addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
@@ -222,8 +228,8 @@ public class PdfReaderController extends Observable implements Observer {
      *
      * @return the PdfObjectPanel
      */
-    public PdfObjectPanel getObjectPanel() {
-        return objectPanel;
+    public JPanel getObjectPanel() {
+        return objectPanel.getPanel();
     }
 
     /**
@@ -245,14 +251,10 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     /**
-     * Forwards updates from the RupsController to the Observers of this class.
-     *
-     * @param    observable    this should be the RupsController
-     * @param    obj    the object that has to be forwarded to the observers of PdfReaderController
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     public void update(Observable observable, Object obj) {
-        if (observable instanceof RupsController && obj instanceof RupsEvent) {
+        if (observable != null && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
@@ -296,7 +298,15 @@ public class PdfReaderController extends Observable implements Observer {
                             return;
                         }
                     }
-                    render(node.getPdfObject());
+                    render(node);
+                    break;
+                case RupsEvent.NODE_DELETE_DICT_CHILD_EVENT:
+                    node = ((NodeDeleteDictChildEvent.Content) event.getContent()).parent;
+                    PdfName key = ((NodeDeleteDictChildEvent.Content) event.getContent()).key;
+                    node.getDictionaryChildNode(key).setCustomTextColor(Color.RED);
+                    ((PdfDictionary)node.getPdfObject()).remove(key);
+                    pdfTree.repaint();
+                    render(node);
                     break;
             }
         }
@@ -325,13 +335,14 @@ public class PdfReaderController extends Observable implements Observer {
      * If the object is a PDF Stream, then the stream is shown
      * in the streamArea too.
      */
-    public void render(PdfObject object) {
+    public void render(PdfObjectTreeNode node) {
+        PdfObject object = node.getPdfObject();
         if (object instanceof PdfStream) {
             editorTabs.setSelectedComponent(streamPane);
         } else {
             editorTabs.setSelectedIndex(editorTabs.getComponentCount() - 1);
         }
-        objectPanel.render(object);
+        objectPanel.render(node);
         streamPane.render(object);
     }
 

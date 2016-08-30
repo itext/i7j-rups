@@ -49,6 +49,8 @@ import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
+import java.util.Enumeration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,6 +213,24 @@ public class PdfObjectTreeNode extends IconTreeNode {
 	public boolean isDictionaryNode(PdfName key) {
 		if (key == null) return false;
 		return key.equals(this.key);
+	}
+
+    /**
+     * Gets the ChildNode with specific key if this node is a dictionary. Otherwise return {@code null}
+     *
+     * @param key key of the node to find
+     * @return find node or {@code null}
+     */
+	public PdfObjectTreeNode getDictionaryChildNode(PdfName key) {
+        Enumeration<PdfObjectTreeNode> children = breadthFirstEnumeration();
+        PdfObjectTreeNode child;
+        while (children.hasMoreElements()) {
+            child = children.nextElement();
+            if (child.isDictionaryNode(key)) {
+                return child;
+            }
+        }
+        return null;
 	}
 
 	/**

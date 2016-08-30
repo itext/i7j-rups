@@ -146,25 +146,33 @@ public class TreeNodeFactory {
 		}
 	}
 
+//	public void expandDictNode(PdfObjectTreeNode dictNode, boolean update) {
+//        PdfObjectTreeNode leaf;
+//        for (PdfName element : dict.keySet()) {
+//            leaf = PdfObjectTreeNode.getInstance(dict, element);
+//            associateIfIndirect(leaf);
+//            addNodes(node, leaf);
+//            expandNode(leaf);
+//        }
+//    }
+
 	/**
 	 * Finds a specific child of dictionary node.
+     * This method will follow indirect references and expand nodes if necessary
+     *
 	 * @param	node	the node with a dictionary among its children
 	 * @param	key		the key of the item corresponding with the node we need
 	 */
 	@SuppressWarnings("unchecked")
 	public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
-		Enumeration<PdfObjectTreeNode> children = node.breadthFirstEnumeration();
-		PdfObjectTreeNode child;
-		while (children.hasMoreElements()) {
-			child = children.nextElement();
-			if (child.isDictionaryNode(key)) {
-				if (child.isIndirectReference()) {
-					expandNode(child);
-					child = (PdfObjectTreeNode)child.getFirstChild();
-				}
-				expandNode(child);
-				return child;
-			}
+        PdfObjectTreeNode child = node.getDictionaryChildNode(key);
+        if (child != null && child.isDictionaryNode(key)) {
+            if (child.isIndirectReference()) {
+                expandNode(child);
+                child = (PdfObjectTreeNode)child.getFirstChild();
+            }
+            expandNode(child);
+            return child;
 		}
 		return null;
 	}

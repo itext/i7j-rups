@@ -44,10 +44,13 @@
  */
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.view.icons.IconFetcher;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.models.DictionaryTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
@@ -62,9 +65,11 @@ import java.awt.event.MouseEvent;
 import java.util.Observable;
 import java.util.Observer;
 
-public class PdfObjectPanel extends JPanel implements Observer {
+public class PdfObjectPanel extends Observable implements Observer {
 
 	private boolean pluginMode;
+
+	private JPanel panel = new JPanel();
 
 	/** Name of a panel in the CardLayout. */
 	private static final String TEXT = "text";
@@ -80,6 +85,8 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	JTextArea text = new JTextArea();
 
     private JTableButtonMouseListener mouseListener;
+
+    private PdfObjectTreeNode target;
 	
 	/** Creates a PDF object panel. */
 	public PdfObjectPanel(boolean pluginMode) {
@@ -87,19 +94,19 @@ public class PdfObjectPanel extends JPanel implements Observer {
 		this.pluginMode = pluginMode;
 
 		// layout
-		setLayout(layout);
+		panel.setLayout(layout);
 
 		// dictionary / array / stream
 		JScrollPane dict_scrollpane = new JScrollPane();
 		dict_scrollpane.setViewportView(table);
-		add(dict_scrollpane, TABLE);
+		panel.add(dict_scrollpane, TABLE);
 		
 		// number / string / ...
 		JScrollPane text_scrollpane = new JScrollPane();
 		text_scrollpane.setViewportView(text);
-		add(text_scrollpane, TEXT);
+		panel.add(text_scrollpane, TEXT);
 
-        mouseListener = new JTableButtonMouseListener(table);
+        mouseListener = new JTableButtonMouseListener();
         table.addMouseListener(mouseListener);
 	}
 	
@@ -107,9 +114,14 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	 * Clear the object panel.
 	 */
 	public void clear() {
+        target = null;
 		text.setText(null);
-		layout.show(this, TEXT);
+		layout.show(panel, TEXT);
 	}
+
+    public JPanel getPanel() {
+        return panel;
+    }
 
 	/**
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
@@ -127,13 +139,15 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	
 	/**
 	 * Shows a PdfObject as text or in a table.
-	 * @param object	the object that needs to be shown.
+	 * @param node	the node's content that needs to be shown.
 	 */
-	public void render(PdfObject object) {
+	public void render(PdfObjectTreeNode node) {
+        target = node;
+        PdfObject object = node.getPdfObject();
 		if (object == null) {
 			text.setText(null);
-			layout.show(this, TEXT);
-			this.repaint();
+			layout.show(panel, TEXT);
+			panel.repaint();
 			text.repaint();
 			return;
 		}
@@ -144,21 +158,21 @@ public class PdfObjectPanel extends JPanel implements Observer {
 			if (!pluginMode) {
 				table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
 			}
-            layout.show(this, TABLE);
-			this.repaint();
+            layout.show(panel, TABLE);
+			panel.repaint();
 			break;
 		case PdfObject.ARRAY:
 			table.setModel(new PdfArrayTableModel((PdfArray)object));
-			layout.show(this, TABLE);
-			this.repaint();
+			layout.show(panel, TABLE);
+			panel.repaint();
 			break;
 		case PdfObject.STRING:
 			text.setText(((PdfString)object).toUnicodeString());
-			layout.show(this, TEXT);
+			layout.show(panel, TEXT);
 			break;
 		default:
 			text.setText(object.toString());
-			layout.show(this, TEXT);
+			layout.show(panel, TEXT);
 			break;
 		}
 	}
@@ -167,12 +181,6 @@ public class PdfObjectPanel extends JPanel implements Observer {
 	private static final long serialVersionUID = 1302283071087762494L;
 
     private class JTableButtonMouseListener extends MouseAdapter {
-        private final JTable table;
-
-        public JTableButtonMouseListener(JTable table) {
-            this.table = table;
-        }
-
         public void mouseClicked(MouseEvent e) {
             int selectedColumn = table.getSelectedColumn();
 
@@ -180,13 +188,13 @@ public class PdfObjectPanel extends JPanel implements Observer {
                 return;
             }
 
-            int selectedRow    = table.getSelectedRow();
+            int selectedRow = table.getSelectedRow();
             int rowCount = table.getRowCount();
 
             if ( rowCount == 1 || rowCount -1 == selectedRow ) {
-                // check if two fields are empty or not
-                String keyField = (String) table.getValueAt(selectedRow, 0);
                 String valueField = (String) table.getValueAt(selectedRow, 1);
+                String keyField = (String) table.getValueAt(selectedRow, 0);
+                // check if two fields are empty or not
 
                 if ( keyField  == null || "".equalsIgnoreCase(keyField.trim()) ) {
                     return;
@@ -224,8 +232,11 @@ public class PdfObjectPanel extends JPanel implements Observer {
             }
 
             /*Checking the row or column is valid or not*/
-            if (selectedRow < rowCount - 1 && selectedRow >= 0 ) {
-                ((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
+            if (selectedRow < rowCount - 1 && selectedRow >= 0 && target != null) {
+                PdfName key = (PdfName) table.getValueAt(selectedRow, 0);
+                PdfObjectPanel.this.setChanged();
+                PdfObjectPanel.this.notifyObservers(new NodeDeleteDictChildEvent(key, target));
+                //((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
             }
         }
     }
