@@ -45,6 +45,7 @@
 package com.itextpdf.rups.controller;
 
 import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.Version;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
@@ -304,6 +305,10 @@ public class RupsController extends Observable
             pdfFile.setFilename(fileName);
             pdfFile.setDirectory(directory);
             startObjectLoader();
+            if (!pluginMode) {
+                String directoryPath = directory == null ? "" : directory.getCanonicalPath() + File.separator;
+                ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + Version.getInstance().getVersion());
+            }
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (PdfException de) {
@@ -418,6 +423,9 @@ public class RupsController extends Observable
         super.notifyObservers(new CloseDocumentEvent());
         if (docToClose != null) {
             docToClose.close();
+        }
+        if (!pluginMode) {
+            ownedFrame.setTitle("iText RUPS " + Version.getInstance().getVersion());
         }
     }
 
