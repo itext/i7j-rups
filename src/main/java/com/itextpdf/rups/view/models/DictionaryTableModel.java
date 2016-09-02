@@ -44,22 +44,29 @@
  */
 package com.itextpdf.rups.view.models;
 
-import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.model.PdfSyntaxParser;
 
-import javax.swing.table.AbstractTableModel;
+import java.awt.Component;
 import java.util.ArrayList;
+import javax.swing.table.AbstractTableModel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A TableModel in case we want to show a PDF dictionary in a JTable.
  */
 public class DictionaryTableModel extends AbstractTableModel {
 
-
+    private RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
     private boolean pluginMode;
+    private PdfSyntaxParser parser;
     /**
      * A serial version UID.
      */
@@ -78,9 +85,10 @@ public class DictionaryTableModel extends AbstractTableModel {
      *
      * @param dictionary the dictionary we want to show
      */
-    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode) {
+    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode, PdfSyntaxParser parser) {
         this.pluginMode = pluginMode;
         this.dictionary = dictionary;
+        this.parser = parser;
         for (PdfName n : dictionary.keySet())
             this.keys.add(n);
     }
@@ -143,10 +151,10 @@ public class DictionaryTableModel extends AbstractTableModel {
                 tempValue = (String) aValue;
             }
         } else {
-            if ( columnIndex == 0) {
+            if (columnIndex == 0) {
                 String key = (String) aValue;
 
-                if ( key.contains("/")) {
+                if (key.contains("/")) {
                     key = key.replace("/", "");
                 }
 
@@ -157,16 +165,19 @@ public class DictionaryTableModel extends AbstractTableModel {
                 PdfObject pdfObject = dictionary.get(oldName, false);
                 dictionary.remove(oldName);
                 dictionary.put(newName, pdfObject);
+                fireTableCellUpdated(rowIndex, columnIndex);
             } else {
-                // todo improve situation here
                 String value = (String) aValue;
-                PdfObject pdfObject = dictionary.get(keys.get(rowIndex), false);
+                PdfObject oldValue = dictionary.get(keys.get(rowIndex), false);
 
-                if ( pdfObject instanceof PdfArray) {
-                    value = value.replaceAll(",", "");
+                // todo improve situation here
+                value = value.replaceAll(",", "");
+
+                PdfObject newValue = reedObjectFromBytes(value);
+                if (newValue != null) {
+                    dictionary.put(keys.get(rowIndex), new PdfLiteral(value));
+                    fireTableCellUpdated(rowIndex, columnIndex);
                 }
-
-                dictionary.put(keys.get(rowIndex), new PdfLiteral(value));
             }
         }
     }
@@ -188,28 +199,51 @@ public class DictionaryTableModel extends AbstractTableModel {
         }
     }
 
-    public void removeRow(int rowNumber) {
-        PdfName name = keys.get(rowNumber);
-        keys.remove(rowNumber);
-
+    public void removeRow(int rowIndex) {
+        fireTableRowsDeleted(rowIndex, rowIndex);
+        dictionary.remove(keys.get(rowIndex));
+        keys.remove(rowIndex);
         fireTableDataChanged();
     }
 
-    public void addRow(String keyField, String valueField) {
-        if ( keyField.startsWith("/")) {
-            keyField = keyField.replace("/", "");
+    public void validateTempRow(Component requster) {
+        if ( tempKey  == null || "".equalsIgnoreCase(tempKey.trim()) ) {
+            return;
         }
-
-        PdfName newEntry = new PdfName(keyField);
-
-        if ( !dictionary.containsKey(newEntry)) {
-            dictionary.put(newEntry, new PdfLiteral(valueField));
-            keys.add(newEntry);
+        if ( tempValue == null || "".equalsIgnoreCase(tempValue.trim()) ) {
+            return;
         }
+        tempKey = tempKey.replace("/", "");
 
-        fireTableDataChanged();
+        PdfName key = new PdfName(tempKey);
+        PdfObject value = reedObjectFromBytes(tempValue);
 
-        tempKey = "";
-        tempValue = "";
+        if (value == null) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.warn(LoggerMessages.INVALID_CHUNK_OF_SYNTAX);
+        } else if (dictionary.containsKey(key)) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.warn(LoggerMessages.KEY_ALREADY_EXIST);
+        } else if (value.getType() != PdfObject.LITERAL) {
+            dictionary.put(key, value);
+            keys.add(key);
+            fireTableRowsInserted(keys.size() - 1, keys.size() - 1);
+
+            tempKey = "";
+            tempValue = "";
+
+            fireTableDataChanged();
+        }
+    }
+
+    private PdfObject reedObjectFromBytes(String source) {
+        try {
+            return parser.parseString(source);
+        } catch (Exception any) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.warn(LoggerMessages.CANNOT_PARSE_PDF_OBJECT);
+            logger.debug(LoggerMessages.CANNOT_PARSE_PDF_OBJECT, any);
+        }
+        return null;
     }
 }

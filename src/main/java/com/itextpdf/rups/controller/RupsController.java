@@ -309,6 +309,7 @@ public class RupsController extends Observable
                 String directoryPath = directory == null ? "" : directory.getCanonicalPath() + File.separator;
                 ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + Version.getInstance().getVersion());
             }
+            readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } catch (PdfException de) {
@@ -427,6 +428,7 @@ public class RupsController extends Observable
         if (!pluginMode) {
             ownedFrame.setTitle("iText RUPS " + Version.getInstance().getVersion());
         }
+        readerController.getParser().setDocument(null);
     }
 
     public CompareTool.CompareResult compareWithDocument(PdfDocument document) {

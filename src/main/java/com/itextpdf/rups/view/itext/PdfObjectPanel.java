@@ -44,11 +44,15 @@
  */
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.NodeAddDictChildEvent;
 import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.PdfSyntaxParser;
+import com.itextpdf.rups.view.EditPdfObjectDialog;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.models.DictionaryTableModel;
@@ -59,6 +63,8 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfObject;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -89,7 +95,7 @@ public class PdfObjectPanel extends Observable implements Observer {
     private PdfObjectTreeNode target;
 	
 	/** Creates a PDF object panel. */
-	public PdfObjectPanel(boolean pluginMode) {
+	public PdfObjectPanel(boolean pluginMode, PdfSyntaxParser parser) {
 
 		this.pluginMode = pluginMode;
 
@@ -141,7 +147,7 @@ public class PdfObjectPanel extends Observable implements Observer {
 	 * Shows a PdfObject as text or in a table.
 	 * @param node	the node's content that needs to be shown.
 	 */
-	public void render(PdfObjectTreeNode node) {
+	public void render(PdfObjectTreeNode node, PdfSyntaxParser parser) {
         target = node;
         PdfObject object = node.getPdfObject();
 		if (object == null) {
@@ -154,7 +160,9 @@ public class PdfObjectPanel extends Observable implements Observer {
 		switch(object.getType()) {
 		case PdfObject.DICTIONARY:
 		case PdfObject.STREAM:
-			table.setModel(new DictionaryTableModel((PdfDictionary)object, pluginMode));
+			DictionaryTableModel model = new DictionaryTableModel((PdfDictionary)object, pluginMode, parser);
+            model.addTableModelListener(new DictionaryModelListener());
+			table.setModel(model);
 			if (!pluginMode) {
 				table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
 			}
@@ -192,51 +200,39 @@ public class PdfObjectPanel extends Observable implements Observer {
             int rowCount = table.getRowCount();
 
             if ( rowCount == 1 || rowCount -1 == selectedRow ) {
-                String valueField = (String) table.getValueAt(selectedRow, 1);
-                String keyField = (String) table.getValueAt(selectedRow, 0);
-                // check if two fields are empty or not
-
-                if ( keyField  == null || "".equalsIgnoreCase(keyField.trim()) ) {
-                    return;
-                }
-
-				if ( valueField == null || "".equalsIgnoreCase(valueField.trim()) ) {
-					return;
-				}
-
-				//Todo: add type chooser dialog when stream and array modification will be implemented
-//                Map<String, Byte> choiceMap = new HashMap<String, Byte>(9);
-//                choiceMap.put("Boolean", PdfObject.Boolean);
-//                choiceMap.put("Number", PdfObject.Number);
-//                choiceMap.put("String", PdfObject.String);
-//                choiceMap.put("Name", PdfObject.Name);
-//                choiceMap.put("Array", PdfObject.Array);
-//                choiceMap.put("Dictionary", PdfObject.Dictionary);
-//                choiceMap.put("Stream", PdfObject.Stream);
-//
-//                String[] choices = new String[choiceMap.size()];
-//                choiceMap.keySet().toArray(choices);
-//
-//                int defaultChoice = 0; // perhaps add some processing of the input to add to the UX
-//
-//                String input = (String) JOptionPane.showInputDialog(table, "What is the type of the new value?", "Value Type", JOptionPane.QUESTION_MESSAGE, null, choices, choices[defaultChoice]);
-//
-//                if ( input == null ) { // user cancelled input
-//                    return;
-//                }
-
-                // call addRow
-                ((DictionaryTableModel) table.getModel()).addRow(keyField, valueField);
-
+                ((DictionaryTableModel) table.getModel()).validateTempRow(panel);
                 return;
             }
 
             /*Checking the row or column is valid or not*/
             if (selectedRow < rowCount - 1 && selectedRow >= 0 && target != null) {
-                PdfName key = (PdfName) table.getValueAt(selectedRow, 0);
-                PdfObjectPanel.this.setChanged();
-                PdfObjectPanel.this.notifyObservers(new NodeDeleteDictChildEvent(key, target));
-                //((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
+                ((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
+            }
+        }
+    }
+
+    /**Notify PdfReader Controller about changes in DictionaryModel*/
+    private class DictionaryModelListener implements TableModelListener {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            int row = e.getFirstRow();
+            int col = e.getColumn();
+            if (row != e.getLastRow()) {
+                return;
+            }
+            PdfName key = (PdfName) table.getValueAt(row, 0);
+            PdfObject value = (PdfObject) table.getValueAt(row, 1);
+            switch (e.getType()) {
+                case TableModelEvent.UPDATE:
+                    break;
+                case TableModelEvent.DELETE:
+                    PdfObjectPanel.this.setChanged();
+                    PdfObjectPanel.this.notifyObservers(new NodeDeleteDictChildEvent(key, target));
+                    break;
+                case TableModelEvent.INSERT:
+                    PdfObjectPanel.this.setChanged();
+                    PdfObjectPanel.this.notifyObservers(new NodeAddDictChildEvent(key, value, target));
+                    break;
             }
         }
     }

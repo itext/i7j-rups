@@ -56,6 +56,7 @@ import com.itextpdf.rups.event.OpenStructureEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
 import com.itextpdf.rups.view.PageSelectionListener;
@@ -70,6 +71,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import java.awt.Color;
 import java.awt.event.KeyListener;
+import java.util.Dictionary;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
@@ -80,10 +82,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 /**
- * Controls the GUI components that get their content from iText's PdfReader.
+ * Controls the components that get their content from iText's PdfReader.
  */
 public class PdfReaderController extends Observable implements Observer {
 
@@ -137,6 +140,8 @@ public class PdfReaderController extends Observable implements Observer {
 
     private Stack<IconTreeNode> highlights = new Stack<IconTreeNode>();
 
+    private PdfSyntaxParser parser = new PdfSyntaxParser();
+
     /**
      * Constructs the PdfReaderController.
      * This is an Observable object to which all iText related GUI components
@@ -189,7 +194,7 @@ public class PdfReaderController extends Observable implements Observer {
             }
         });
 
-        objectPanel = new PdfObjectPanel(pluginMode);
+        objectPanel = new PdfObjectPanel(pluginMode, parser);
         addObserver(objectPanel);
         objectPanel.addObserver(this);
         streamPane = new SyntaxHighlightedStreamPane();
@@ -250,6 +255,10 @@ public class PdfReaderController extends Observable implements Observer {
         return streamPane;
     }
 
+    public PdfSyntaxParser getParser() {
+        return parser;
+    }
+
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
@@ -301,12 +310,16 @@ public class PdfReaderController extends Observable implements Observer {
                     render(node);
                     break;
                 case RupsEvent.NODE_DELETE_DICT_CHILD_EVENT:
-                    node = ((NodeDeleteDictChildEvent.Content) event.getContent()).parent;
-                    PdfName key = ((NodeDeleteDictChildEvent.Content) event.getContent()).key;
-                    node.getDictionaryChildNode(key).setCustomTextColor(Color.RED);
-                    ((PdfDictionary)node.getPdfObject()).remove(key);
-                    pdfTree.repaint();
-                    render(node);
+                    PdfObjectTreeNode parent = ((NodeDeleteDictChildEvent.Content) event.getContent()).parent;
+                    deleteTreeNodeChild(parent, ((NodeDeleteDictChildEvent.Content) event.getContent()).key);
+                    ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
+                    break;
+                case RupsEvent.NODE_ADD_DICT_CHILD_EVENT:
+                    parent = ((NodeAddDictChildEvent.Content) event.getContent()).parent;
+                    int index = addTreeNodeChild(parent, ((NodeAddDictChildEvent.Content) event.getContent()).key,
+                            ((NodeAddDictChildEvent.Content) event.getContent()).value);
+                    ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
+                    render(parent);
                     break;
             }
         }
@@ -342,7 +355,7 @@ public class PdfReaderController extends Observable implements Observer {
         } else {
             editorTabs.setSelectedIndex(editorTabs.getComponentCount() - 1);
         }
-        objectPanel.render(node);
+        objectPanel.render(node, parser);
         streamPane.render(object);
     }
 
@@ -397,4 +410,26 @@ public class PdfReaderController extends Observable implements Observer {
             highlights.pop().restoreDefaultTextColor();
         }
     }
+
+    private int deleteTreeNodeChild(PdfObjectTreeNode parent, PdfName key) {
+        PdfObjectTreeNode child = parent.getDictionaryChildNode(key);
+        int index = parent.getIndex(child);
+        parent.remove(index);
+        return index;
+    }
+
+    //Returns index of the added child
+    private int addTreeNodeChild(PdfObjectTreeNode parent, PdfName key, PdfObject value) {
+        return addTreeNodeChild(parent, key, value, parent.getChildCount());
+    }
+
+    //Returns index of the added child
+    private int addTreeNodeChild(PdfObjectTreeNode parent, PdfName key, PdfObject value, int index) {
+        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary)parent.getPdfObject(), key);
+        parent.insert(child, index);
+        nodes.expandNode(child);
+        return index;
+    }
+
+
 }
