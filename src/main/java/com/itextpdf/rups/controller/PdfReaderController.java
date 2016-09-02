@@ -316,10 +316,11 @@ public class PdfReaderController extends Observable implements Observer {
                     break;
                 case RupsEvent.NODE_ADD_DICT_CHILD_EVENT:
                     parent = ((NodeAddDictChildEvent.Content) event.getContent()).parent;
-                    int index = addTreeNodeChild(parent, ((NodeAddDictChildEvent.Content) event.getContent()).key,
-                            ((NodeAddDictChildEvent.Content) event.getContent()).value);
+                    addTreeNodeChild(parent,
+                            ((NodeAddDictChildEvent.Content) event.getContent()).key,
+                            ((NodeAddDictChildEvent.Content) event.getContent()).value,
+                            ((NodeAddDictChildEvent.Content) event.getContent()).index);
                     ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
-                    render(parent);
                     break;
             }
         }

@@ -54,6 +54,7 @@ import com.itextpdf.rups.model.PdfSyntaxParser;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
 import org.slf4j.Logger;
@@ -67,6 +68,8 @@ public class DictionaryTableModel extends AbstractTableModel {
     private RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
     private boolean pluginMode;
     private PdfSyntaxParser parser;
+    /**The owner component on witch will be displayed all messages*/
+    private Component parent;
     /**
      * A serial version UID.
      */
@@ -85,7 +88,7 @@ public class DictionaryTableModel extends AbstractTableModel {
      *
      * @param dictionary the dictionary we want to show
      */
-    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode, PdfSyntaxParser parser) {
+    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode, PdfSyntaxParser parser, Component owner) {
         this.pluginMode = pluginMode;
         this.dictionary = dictionary;
         this.parser = parser;
@@ -138,7 +141,7 @@ public class DictionaryTableModel extends AbstractTableModel {
         }
     }
 
-    private String tempKey, tempValue;
+    private String tempKey = "/", tempValue = "";
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
@@ -147,39 +150,51 @@ public class DictionaryTableModel extends AbstractTableModel {
         if (rowIndex == rowCount - 1) {
             if (columnIndex == 0) {
                 tempKey = (String) aValue;
+                if (!tempKey.startsWith("/")) {
+                    tempKey = "/" + tempKey;
+                }
             } else if (columnIndex == 1) {
                 tempValue = (String) aValue;
             }
         } else {
+            if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
+                Logger logger = LoggerFactory.getLogger(getClass());
+                logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+                return;
+            }
             if (columnIndex == 0) {
                 String key = (String) aValue;
 
-                if (key.contains("/")) {
-                    key = key.replace("/", "");
+                PdfName oldName = keys.get(rowIndex);
+                PdfName newName = getCorrectKey(key);
+                if (newName == null) {
+                    return;
                 }
 
-                PdfName oldName = keys.get(rowIndex);
-                PdfName newName = new PdfName(key);
-                keys.set(rowIndex, newName);
-
                 PdfObject pdfObject = dictionary.get(oldName, false);
-                dictionary.remove(oldName);
-                dictionary.put(newName, pdfObject);
-                fireTableCellUpdated(rowIndex, columnIndex);
+                removeRow(rowIndex);
+                addRow(newName, pdfObject);
             } else {
                 String value = (String) aValue;
                 PdfObject oldValue = dictionary.get(keys.get(rowIndex), false);
 
-                // todo improve situation here
-                value = value.replaceAll(",", "");
+                if (oldValue.getType() == PdfObject.ARRAY) {
+                    value = value.replaceAll(",", "");
+                }
+                if (oldValue.getType() == PdfObject.STRING) {
+                    value = "(" + value + ")";
+                }
 
-                PdfObject newValue = reedObjectFromBytes(value);
+                PdfObject newValue = parser.parseString(value, parent);
                 if (newValue != null) {
-                    dictionary.put(keys.get(rowIndex), new PdfLiteral(value));
-                    fireTableCellUpdated(rowIndex, columnIndex);
+                    PdfName oldName = keys.get(rowIndex);
+                    removeRow(rowIndex);
+                    addRow(oldName, newValue);
                 }
             }
         }
+
+        fireTableDataChanged();
     }
 
     /**
@@ -206,44 +221,60 @@ public class DictionaryTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public void validateTempRow(Component requster) {
-        if ( tempKey  == null || "".equalsIgnoreCase(tempKey.trim()) ) {
+    public void validateTempRow() {
+
+        if ("".equalsIgnoreCase(tempKey.trim()) || "".equalsIgnoreCase(tempValue.trim())) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.warn(LoggerMessages.FIELD_IS_EMPTY);
             return;
         }
-        if ( tempValue == null || "".equalsIgnoreCase(tempValue.trim()) ) {
+
+        PdfName key = getCorrectKey(tempKey);
+        if (key == null) {
             return;
         }
-        tempKey = tempKey.replace("/", "");
+        PdfObject value = parser.parseString(tempValue, parent);
 
-        PdfName key = new PdfName(tempKey);
-        PdfObject value = reedObjectFromBytes(tempValue);
+        if (value != null) {
+            if (dictionary.containsKey(key)) {
+                Logger logger = LoggerFactory.getLogger(getClass());
+                logger.warn(LoggerMessages.KEY_ALREADY_EXIST);
+            } else {
+                addRow(key, value);
 
-        if (value == null) {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.warn(LoggerMessages.INVALID_CHUNK_OF_SYNTAX);
-        } else if (dictionary.containsKey(key)) {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.warn(LoggerMessages.KEY_ALREADY_EXIST);
-        } else if (value.getType() != PdfObject.LITERAL) {
-            dictionary.put(key, value);
-            keys.add(key);
-            fireTableRowsInserted(keys.size() - 1, keys.size() - 1);
-
-            tempKey = "";
-            tempValue = "";
+                tempKey = "";
+                tempValue = "";
+            }
 
             fireTableDataChanged();
         }
     }
 
-    private PdfObject reedObjectFromBytes(String source) {
-        try {
-            return parser.parseString(source);
-        } catch (Exception any) {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.warn(LoggerMessages.CANNOT_PARSE_PDF_OBJECT);
-            logger.debug(LoggerMessages.CANNOT_PARSE_PDF_OBJECT, any);
+    private void addRow(PdfName key, PdfObject value) {
+        dictionary.put(key, value);
+        int index = -1;
+        for (PdfName name: dictionary.keySet()) {
+            ++index;
+            if (name.equals(key)) {
+                break;
+            }
         }
-        return null;
+        keys.add(index, key);
+        fireTableRowsInserted(index, index);
+    }
+
+    private PdfName getCorrectKey(String value) {
+        if (!value.startsWith("/")) {
+            value = "/" + value;
+        }
+        PdfObject result = parser.parseString(value);
+        if (result instanceof PdfName) {
+            return (PdfName) result;
+        }
+        else {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.error(LoggerMessages.KEY_ISNT_PDFNAME);
+            return null;
+        }
     }
 }

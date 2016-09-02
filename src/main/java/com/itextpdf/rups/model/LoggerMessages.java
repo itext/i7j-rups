@@ -22,8 +22,13 @@ public class LoggerMessages {
     public static final String UNEXPECTED_CHUNK_OF_SYNTAX = "Unexpected chunk of pdf syntax";
     public static final String INVALID_CHUNK_OF_SYNTAX = "Invalid chunk of pdf syntax";
     public static final String KEY_ALREADY_EXIST = "This key already exist in dictionary. Please edit existing entry.";
+    public static final String FIELD_IS_EMPTY = "Don't leave fields empty.";
+    public static final String PARSED_INPUT_WAS_TRUNCATED = "The input string was truncated.";
+    public static final String KEY_ISNT_PDFNAME = "Key value isn't value Name object.";
 
     //Exception messages
-    public static final String EDITING_REFERENCE_DISABLED_ERROR = "Trying to edit references when this feature was disabled.";
+    public static final String CHUNK_OF_THIS_TYPE_NOT_ALLOWED_HERE = " - the chunk of this type not allowed here.";
     public static final String EDITING_REFERENCE_NO_DOCUMENT_ERROR = "Trying to edit references when no document was specified.";
+    public static final String INCORRECT_SEQUENCE_OF_ARRAY_BRACKETS = "Incorrect sequence of array brackets";
+    public static final String INCORRECT_SEQUENCE_OF_DICTIONARY_BRACKETS = "Incorrect sequence of dictionary brackets";
 }

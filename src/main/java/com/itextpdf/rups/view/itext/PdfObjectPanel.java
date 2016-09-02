@@ -160,7 +160,7 @@ public class PdfObjectPanel extends Observable implements Observer {
 		switch(object.getType()) {
 		case PdfObject.DICTIONARY:
 		case PdfObject.STREAM:
-			DictionaryTableModel model = new DictionaryTableModel((PdfDictionary)object, pluginMode, parser);
+			DictionaryTableModel model = new DictionaryTableModel((PdfDictionary)object, pluginMode, parser, panel);
             model.addTableModelListener(new DictionaryModelListener());
 			table.setModel(model);
 			if (!pluginMode) {
@@ -200,7 +200,7 @@ public class PdfObjectPanel extends Observable implements Observer {
             int rowCount = table.getRowCount();
 
             if ( rowCount == 1 || rowCount -1 == selectedRow ) {
-                ((DictionaryTableModel) table.getModel()).validateTempRow(panel);
+                ((DictionaryTableModel) table.getModel()).validateTempRow();
                 return;
             }
 
@@ -231,7 +231,7 @@ public class PdfObjectPanel extends Observable implements Observer {
                     break;
                 case TableModelEvent.INSERT:
                     PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeAddDictChildEvent(key, value, target));
+                    PdfObjectPanel.this.notifyObservers(new NodeAddDictChildEvent(key, value, target, row));
                     break;
             }
         }

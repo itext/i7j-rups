@@ -10,8 +10,8 @@ public class NodeAddDictChildEvent extends RupsEvent {
 
     Content content;
 
-    public NodeAddDictChildEvent(PdfName key, PdfObject value, PdfObjectTreeNode parent) {
-        content = new Content(key, value, parent);
+    public NodeAddDictChildEvent(PdfName key, PdfObject value, PdfObjectTreeNode parent, int index) {
+        content = new Content(key, value, parent, index);
     }
 
     @Override
@@ -28,11 +28,13 @@ public class NodeAddDictChildEvent extends RupsEvent {
         public PdfName key;
         public PdfObject value;
         public PdfObjectTreeNode parent;
+        public int index;
 
-        public Content(PdfName key, PdfObject value, PdfObjectTreeNode parent) {
+        public Content(PdfName key, PdfObject value, PdfObjectTreeNode parent, int index) {
             this.key = key;
             this.value = value;
             this.parent = parent;
+            this.index = index;
         }
     }
 }
