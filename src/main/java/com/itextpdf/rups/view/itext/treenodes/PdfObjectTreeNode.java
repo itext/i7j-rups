@@ -172,13 +172,16 @@ public class PdfObjectTreeNode extends IconTreeNode {
 	}
 
 	/**
-	 * Getter for the object number in case the object is indirect.
+	 * Getter for the object number in case the object is indirect or if it is reference.
 	 * @return	-1 for direct objects; the object number for indirect objects
 	 */
 	public int getNumber() {
-		if (isIndirectReference()) {
-			return ((PdfIndirectReference)object).getObjNumber();
+		if (isIndirect() && object.getIndirectReference() != null) {
+			return object.getIndirectReference().getObjNumber();
 		}
+		if (isIndirectReference()) {
+            return ((PdfIndirectReference) object).getObjNumber();
+        }
 		return number;
 	}
 

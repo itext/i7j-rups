@@ -51,6 +51,7 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
+import com.itextpdf.rups.model.PdfSyntaxUtils;
 
 import java.awt.Component;
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class DictionaryTableModel extends AbstractTableModel {
             case 0:
                 return keys.get(rowIndex);
             case 1:
-                return dictionary.get(keys.get(rowIndex), false);
+                return PdfSyntaxUtils.getSyntaxString(dictionary.get(keys.get(rowIndex), false));
             default:
                 return null;
         }
@@ -176,15 +177,6 @@ public class DictionaryTableModel extends AbstractTableModel {
                 addRow(newName, pdfObject);
             } else {
                 String value = (String) aValue;
-                PdfObject oldValue = dictionary.get(keys.get(rowIndex), false);
-
-                if (oldValue.getType() == PdfObject.ARRAY) {
-                    value = value.replaceAll(",", "");
-                }
-                if (oldValue.getType() == PdfObject.STRING) {
-                    value = "(" + value + ")";
-                }
-
                 PdfObject newValue = parser.parseString(value, parent);
                 if (newValue != null) {
                     PdfName oldName = keys.get(rowIndex);

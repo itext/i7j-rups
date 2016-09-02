@@ -127,8 +127,8 @@ public class TreeNodeFactory {
 				return;
 			case PdfObject.ARRAY:
 				PdfArray array = (PdfArray)object;
-				for (PdfObject obj : array) {
-					leaf = PdfObjectTreeNode.getInstance(obj);
+				for (int i = 0; i < array.size(); ++i) {
+					leaf = PdfObjectTreeNode.getInstance(array.get(i, false));
 					associateIfIndirect(leaf);
 					addNodes(node, leaf);
 					expandNode(leaf);
@@ -137,24 +137,14 @@ public class TreeNodeFactory {
 			case PdfObject.DICTIONARY:
 			case PdfObject.STREAM:
 				PdfDictionary dict = (PdfDictionary)object;
-				for (PdfName element : dict.keySet()) {
-					leaf = PdfObjectTreeNode.getInstance(dict, element);
+				for (PdfName key : dict.keySet()) {
+					leaf = PdfObjectTreeNode.getInstance(dict, key);
 					associateIfIndirect(leaf);
 					addNodes(node, leaf);
 					expandNode(leaf);
 				}
 		}
 	}
-
-//	public void expandDictNode(PdfObjectTreeNode dictNode, boolean update) {
-//        PdfObjectTreeNode leaf;
-//        for (PdfName element : dict.keySet()) {
-//            leaf = PdfObjectTreeNode.getInstance(dict, element);
-//            associateIfIndirect(leaf);
-//            addNodes(node, leaf);
-//            expandNode(leaf);
-//        }
-//    }
 
 	/**
 	 * Finds a specific child of dictionary node.
