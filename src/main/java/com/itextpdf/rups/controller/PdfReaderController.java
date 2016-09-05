@@ -44,12 +44,15 @@
  */
 package com.itextpdf.rups.controller;
 
+import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.event.NodeAddArrayChildEvent;
 import com.itextpdf.rups.event.NodeAddDictChildEvent;
+import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
 import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.OpenPlainTextEvent;
 import com.itextpdf.rups.event.OpenStructureEvent;
@@ -60,8 +63,6 @@ import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
 import com.itextpdf.rups.view.PageSelectionListener;
-import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
-import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
@@ -71,7 +72,6 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import java.awt.Color;
 import java.awt.event.KeyListener;
-import java.util.Dictionary;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
@@ -310,17 +310,25 @@ public class PdfReaderController extends Observable implements Observer {
                     render(node);
                     break;
                 case RupsEvent.NODE_DELETE_DICT_CHILD_EVENT:
-                    PdfObjectTreeNode parent = ((NodeDeleteDictChildEvent.Content) event.getContent()).parent;
-                    deleteTreeNodeChild(parent, ((NodeDeleteDictChildEvent.Content) event.getContent()).key);
-                    ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
+                    deleteTreeNodeDictChild(
+                            ((NodeDeleteDictChildEvent.Content) event.getContent()).parent,
+                            ((NodeDeleteDictChildEvent.Content) event.getContent()).key);
                     break;
                 case RupsEvent.NODE_ADD_DICT_CHILD_EVENT:
-                    parent = ((NodeAddDictChildEvent.Content) event.getContent()).parent;
-                    addTreeNodeChild(parent,
+                    addTreeNodeDictChild(
+                            ((NodeAddDictChildEvent.Content) event.getContent()).parent,
                             ((NodeAddDictChildEvent.Content) event.getContent()).key,
-                            ((NodeAddDictChildEvent.Content) event.getContent()).value,
                             ((NodeAddDictChildEvent.Content) event.getContent()).index);
-                    ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
+                    break;
+                case RupsEvent.NODE_ADD_ARRAY_CHILD_EVENT:
+                    addTreeNodeArrayChild(
+                            ((NodeAddArrayChildEvent.Content) event.getContent()).parent,
+                            ((NodeAddArrayChildEvent.Content) event.getContent()).index);
+                    break;
+                case RupsEvent.NODE_DELETE_ARRAY_CHILD_EVENT:
+                    deleteTreeChild(
+                            ((NodeDeleteArrayChildEvent.Content) event.getContent()).parent,
+                            ((NodeDeleteArrayChildEvent.Content) event.getContent()).index);
                     break;
             }
         }
@@ -412,25 +420,36 @@ public class PdfReaderController extends Observable implements Observer {
         }
     }
 
-    private int deleteTreeNodeChild(PdfObjectTreeNode parent, PdfName key) {
+    private int deleteTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key) {
         PdfObjectTreeNode child = parent.getDictionaryChildNode(key);
         int index = parent.getIndex(child);
+        return deleteTreeChild(parent, index);
+    }
+
+    //Returns index of the added child
+    private int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index) {
+        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary)parent.getPdfObject(), key);
+        return addTreeNodeChild(parent, child, index);
+    }
+
+    //Returns index of the added child
+    private int addTreeNodeArrayChild(PdfObjectTreeNode parent, int index) {
+        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(((PdfArray) parent.getPdfObject()).get(index, false));
+        return addTreeNodeChild(parent, child, index);
+    }
+
+    private int deleteTreeChild(PdfObjectTreeNode parent, int index) {
         parent.remove(index);
+        ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
         return index;
     }
 
     //Returns index of the added child
-    private int addTreeNodeChild(PdfObjectTreeNode parent, PdfName key, PdfObject value) {
-        return addTreeNodeChild(parent, key, value, parent.getChildCount());
-    }
-
-    //Returns index of the added child
-    private int addTreeNodeChild(PdfObjectTreeNode parent, PdfName key, PdfObject value, int index) {
-        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary)parent.getPdfObject(), key);
+    private int addTreeNodeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
         parent.insert(child, index);
         nodes.expandNode(child);
+        ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
         return index;
     }
-
 
 }

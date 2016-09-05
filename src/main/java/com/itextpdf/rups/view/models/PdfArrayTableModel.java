@@ -44,40 +44,66 @@
  */
 package com.itextpdf.rups.view.models;
 
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
 import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.model.PdfSyntaxParser;
+import com.itextpdf.rups.model.PdfSyntaxUtils;
+
+import java.awt.Component;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A TableModel in case we want to show a PDF array in a JTable.
  */
-public class PdfArrayTableModel extends AbstractTableModel {
+public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 	
 	/** A serial version UID. */
 	private static final long serialVersionUID = 4665485782853993708L;
 	/** The PDF array. */
 	protected PdfArray array;
 
+    private boolean pluginMode;
+    private PdfSyntaxParser parser;
+    /**The owner component on witch will be displayed all messages*/
+    private Component parent;
+
+	private String tempValue = "";
+
 	/**
 	 * Creates the TableModel.
 	 * @param array a PDF array
 	 */
-	public PdfArrayTableModel(PdfArray array) {
+	public PdfArrayTableModel(PdfArray array, boolean pluginMode, PdfSyntaxParser parser, Component parent) {
 		this.array = array;
+        this.pluginMode = pluginMode;
+        this.parser = parser;
+        this.parent = parent;
 	}
-	
-	/**
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return pluginMode ? false : columnIndex < 1;
+    }
+
+    /**
 	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
 	public int getColumnCount() {
-		return 1;
+		return pluginMode ? 1 : 2;
 	}
 
 	/**
 	 * @see javax.swing.table.TableModel#getRowCount()
 	 */
 	public int getRowCount() {
-		return array.size();
+		return array.size() + 1;
 	}
 
 	/**
@@ -86,11 +112,36 @@ public class PdfArrayTableModel extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return array.get(rowIndex, false);
+			return rowIndex == array.size() ? tempValue : PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
 		default:
 			return null;
 		}
 	}
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        int rowCount = getRowCount();
+
+        if (rowIndex == rowCount - 1) {
+            if (columnIndex == 0) {
+                tempValue = (String) aValue;
+            }
+        } else {
+            if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
+                Logger logger = LoggerFactory.getLogger(getClass());
+                logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+                return;
+            }
+            if (columnIndex == 0) {
+                String value = (String) aValue;
+                PdfObject newValue = parser.parseString(value, parent);
+                if (newValue != null) {
+                    removeRow(rowIndex);
+                    addRow(rowIndex, newValue);
+                }
+            }
+        }
+    }
 
 	/**
 	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
@@ -99,10 +150,49 @@ public class PdfArrayTableModel extends AbstractTableModel {
 		switch (columnIndex) {
 		case 0:
 			return "Array";
+        case 1:
+            return "";
 		default:
 			return null;
 		}
 	}
 
+    @Override
+    public void removeRow(int rowIndex) {
+        fireTableRowsDeleted(rowIndex, rowIndex);
+        array.remove(rowIndex);
+        fireTableDataChanged();
+    }
+
+    @Override
+    public void validateTempRow() {
+        if ("".equalsIgnoreCase(tempValue.trim())) {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+            return;
+        }
+
+        PdfObject value = parser.parseString(tempValue, parent);
+
+        if (value != null) {
+            addRow(value);
+            tempValue = "";
+            fireTableDataChanged();
+        }
+    }
+
+    @Override
+    public int getButtonColumn() {
+        return 1;
+    }
+
+    private void addRow(int index, PdfObject value) {
+        array.add(index, value);
+        fireTableRowsInserted(index, index);
+    }
+
+    private void addRow(PdfObject value) {
+       addRow(array.size(), value);
+    }
 }
 

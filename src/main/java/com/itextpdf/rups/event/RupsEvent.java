@@ -18,6 +18,8 @@ public abstract class RupsEvent {
     public static final byte CONSOLE_WRITE_EVENT = 10;
     public static final byte NODE_ADD_DICT_CHILD_EVENT = 11;
     public static final byte NODE_DELETE_DICT_CHILD_EVENT = 12;
+    public static final byte NODE_ADD_ARRAY_CHILD_EVENT = 13;
+    public static final byte NODE_DELETE_ARRAY_CHILD_EVENT = 14;
 
     public abstract int getType();
 

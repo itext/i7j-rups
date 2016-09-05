@@ -50,12 +50,15 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.event.NodeAddArrayChildEvent;
 import com.itextpdf.rups.event.NodeAddDictChildEvent;
+import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
 import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import com.itextpdf.rups.view.models.AbstractPdfObjectPanelTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
@@ -123,6 +126,7 @@ public class PdfObjectPanel extends Observable implements Observer {
         // number / string / ...
         JScrollPane text_scrollpane = new JScrollPane();
         text_scrollpane.setViewportView(text);
+        text.setEditable(false);
         panel.add(text_scrollpane, TEXT);
 
         mouseListener = new JTableButtonMouseListener();
@@ -184,7 +188,12 @@ public class PdfObjectPanel extends Observable implements Observer {
                 panel.repaint();
                 break;
             case PdfObject.ARRAY:
-                table.setModel(new PdfArrayTableModel((PdfArray) object));
+                PdfArrayTableModel arrayModel = new PdfArrayTableModel((PdfArray) object, pluginMode, parser, panel);
+                arrayModel.addTableModelListener(new ArrayModelListener());
+                table.setModel(arrayModel);
+                if (!pluginMode) {
+                    table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
+                }
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;
@@ -208,7 +217,7 @@ public class PdfObjectPanel extends Observable implements Observer {
         public void mouseClicked(MouseEvent e) {
             int selectedColumn = table.getSelectedColumn();
 
-            if (selectedColumn != 2) {
+            if (selectedColumn != ((AbstractPdfObjectPanelTableModel) table.getModel()).getButtonColumn()) {
                 return;
             }
 
@@ -216,13 +225,13 @@ public class PdfObjectPanel extends Observable implements Observer {
             int rowCount = table.getRowCount();
 
             if (rowCount == 1 || rowCount - 1 == selectedRow) {
-                ((DictionaryTableModel) table.getModel()).validateTempRow();
+                ((AbstractPdfObjectPanelTableModel) table.getModel()).validateTempRow();
                 return;
             }
 
             /*Checking the row or column is valid or not*/
             if (selectedRow < rowCount - 1 && selectedRow >= 0 && target != null) {
-                ((DictionaryTableModel) table.getModel()).removeRow(selectedRow);
+                ((AbstractPdfObjectPanelTableModel) table.getModel()).removeRow(selectedRow);
             }
         }
     }
@@ -250,6 +259,32 @@ public class PdfObjectPanel extends Observable implements Observer {
                 case TableModelEvent.INSERT:
                     PdfObjectPanel.this.setChanged();
                     PdfObjectPanel.this.notifyObservers(new NodeAddDictChildEvent(key, value, target, row));
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Notify PdfReader Controller about changes in ArrayModel
+     */
+    private class ArrayModelListener implements TableModelListener {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            int row = e.getFirstRow();
+            if (row != e.getLastRow()) {
+                return;
+            }
+            PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);
+            switch (e.getType()) {
+                case TableModelEvent.UPDATE:
+                    break;
+                case TableModelEvent.DELETE:
+                    PdfObjectPanel.this.setChanged();
+                    PdfObjectPanel.this.notifyObservers(new NodeDeleteArrayChildEvent(row, target));
+                    break;
+                case TableModelEvent.INSERT:
+                    PdfObjectPanel.this.setChanged();
+                    PdfObjectPanel.this.notifyObservers(new NodeAddArrayChildEvent(value, target, row));
                     break;
             }
         }

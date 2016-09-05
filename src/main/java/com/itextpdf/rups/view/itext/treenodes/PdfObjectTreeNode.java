@@ -98,6 +98,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
 			case PdfObject.NAME:
 				icon = IconFetcher.getIcon("name.png");
 				return;
+			case PdfObject.LITERAL:
 			case PdfObject.NULL:
 				icon = IconFetcher.getIcon("null.png");
 				return;

@@ -64,9 +64,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A TableModel in case we want to show a PDF dictionary in a JTable.
  */
-public class DictionaryTableModel extends AbstractTableModel {
+public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
-    private RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
     private boolean pluginMode;
     private PdfSyntaxParser parser;
     /**The owner component on witch will be displayed all messages*/
@@ -93,6 +92,7 @@ public class DictionaryTableModel extends AbstractTableModel {
         this.pluginMode = pluginMode;
         this.dictionary = dictionary;
         this.parser = parser;
+        this.parent = owner;
         for (PdfName n : dictionary.keySet())
             this.keys.add(n);
     }
@@ -206,6 +206,12 @@ public class DictionaryTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
+    public int getButtonColumn() {
+        return 2;
+    }
+
+    @Override
     public void removeRow(int rowIndex) {
         fireTableRowsDeleted(rowIndex, rowIndex);
         dictionary.remove(keys.get(rowIndex));
@@ -213,6 +219,7 @@ public class DictionaryTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    @Override
     public void validateTempRow() {
 
         if ("".equalsIgnoreCase(tempKey.trim()) || "".equalsIgnoreCase(tempValue.trim())) {
@@ -234,7 +241,7 @@ public class DictionaryTableModel extends AbstractTableModel {
             } else {
                 addRow(key, value);
 
-                tempKey = "";
+                tempKey = "/";
                 tempValue = "";
             }
 
