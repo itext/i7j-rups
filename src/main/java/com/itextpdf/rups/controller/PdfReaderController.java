@@ -197,7 +197,7 @@ public class PdfReaderController extends Observable implements Observer {
         objectPanel = new PdfObjectPanel(pluginMode, parser);
         addObserver(objectPanel);
         objectPanel.addObserver(this);
-        streamPane = new SyntaxHighlightedStreamPane();
+        streamPane = new SyntaxHighlightedStreamPane(this);
         addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();
@@ -340,6 +340,7 @@ public class PdfReaderController extends Observable implements Observer {
      * @param node a node in the PdfTree
      */
     public void selectNode(PdfObjectTreeNode node) {
+        pdfTree.clearSelection();
         pdfTree.selectNode(node);
     }
 
@@ -365,7 +366,7 @@ public class PdfReaderController extends Observable implements Observer {
             editorTabs.setSelectedIndex(editorTabs.getComponentCount() - 1);
         }
         objectPanel.render(node, parser);
-        streamPane.render(object);
+        streamPane.render(node);
     }
 
     /**
@@ -420,36 +421,36 @@ public class PdfReaderController extends Observable implements Observer {
         }
     }
 
-    private int deleteTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key) {
+    //Todo: move all tree manipulations to PdfTree controller and make them private after the proper application structure will be implemented
+    public int deleteTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key) {
         PdfObjectTreeNode child = parent.getDictionaryChildNode(key);
         int index = parent.getIndex(child);
         return deleteTreeChild(parent, index);
     }
 
     //Returns index of the added child
-    private int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index) {
+    public int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index) {
         PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary)parent.getPdfObject(), key);
         return addTreeNodeChild(parent, child, index);
     }
 
     //Returns index of the added child
-    private int addTreeNodeArrayChild(PdfObjectTreeNode parent, int index) {
+    public int addTreeNodeArrayChild(PdfObjectTreeNode parent, int index) {
         PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(((PdfArray) parent.getPdfObject()).get(index, false));
         return addTreeNodeChild(parent, child, index);
     }
 
-    private int deleteTreeChild(PdfObjectTreeNode parent, int index) {
+    public int deleteTreeChild(PdfObjectTreeNode parent, int index) {
         parent.remove(index);
         ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
         return index;
     }
 
     //Returns index of the added child
-    private int addTreeNodeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
+    public int addTreeNodeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
         parent.insert(child, index);
         nodes.expandNode(child);
         ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
         return index;
     }
-
 }

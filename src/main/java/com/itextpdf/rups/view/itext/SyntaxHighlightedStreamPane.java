@@ -60,6 +60,7 @@ import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -103,7 +104,10 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
     protected StreamPanelContextMenu popupMenu;
 
-    protected PdfStream target;
+    protected PdfObjectTreeNode target;
+
+    //Todo: Remove that field after proper application structure will be implemented.
+    private PdfReaderController controller;
 
     private static Method pdfStreamGetInputStreamMethod;
 
@@ -122,11 +126,12 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	/**
 	 * Constructs a SyntaxHighlightedStreamPane.
 	 */
-	public SyntaxHighlightedStreamPane() {
+	public SyntaxHighlightedStreamPane(PdfReaderController controller) {
 		super();
 		initAttributes();
 		text = new ColorTextPane();
 		setViewportView(text);
+        this.controller = controller;
 
         popupMenu = new StreamPanelContextMenu(text, this);
         text.add(popupMenu);
@@ -151,10 +156,10 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	 * Renders the content stream of a PdfObject or empties the text area.
 	 * @param object	the object of which the content stream needs to be rendered
 	 */
-	public void render(PdfObject object) {
-        if (object instanceof PdfStream) {
-            PdfStream stream = (PdfStream)object;
-            target = stream;
+	public void render(PdfObjectTreeNode target) {
+        if (target.getPdfObject() instanceof PdfStream) {
+            PdfStream stream = (PdfStream)target.getPdfObject();
+            this.target = target;
             text.setText("");
             //Check if stream is image
             if(PdfName.Image.equals(stream.getAsName(PdfName.Subtype))){
@@ -272,7 +277,15 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	}
 
     public void saveToTarget() {
-        target.setData(text.getText().getBytes());
+        if (controller != null) {
+            if (((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
+                controller.deleteTreeNodeDictChild(target, PdfName.Filter);
+            }
+        }
+        ((PdfStream) target.getPdfObject()).setData(text.getText().getBytes());
+        if (controller != null) {
+            controller.selectNode(target);
+        }
     }
 
     protected void append(StringBuilder sb, PdfObject obj) {
@@ -429,10 +442,12 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         text.setEnabled(editable);
         if (pdfStreamGetInputStreamMethod != null && editable && target != null) {
             try {
-                popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target) == null);
+                popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target.getPdfObject()) == null);
                 return;
             } catch (Exception any) {
-                LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class).error("Cannot check for null inputStream from PdfStream", any);
+                Logger logger = LoggerFactory.getLogger(getClass());
+                logger.error(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR);
+                logger.debug(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR, any);
             }
         }
         popupMenu.setSaveToStreamEnabled(false);

@@ -43,11 +43,11 @@ public class InspectObjectAction extends AbstractRupsAction {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        final PdfObject pdfObject = ( (PdfObjectTreeNode) ( (PdfTree) invoker ).getSelectionPath().getLastPathComponent() ).getPdfObject();
-        final SyntaxHighlightedStreamPane syntaxHighlightedStreamPane = new SyntaxHighlightedStreamPane();
+        PdfObjectTreeNode node = (PdfObjectTreeNode) ( (PdfTree) invoker ).getSelectionPath().getLastPathComponent();
+        final SyntaxHighlightedStreamPane syntaxHighlightedStreamPane = new SyntaxHighlightedStreamPane(null);
 
         frame.add(syntaxHighlightedStreamPane);
-        syntaxHighlightedStreamPane.render(pdfObject);
+        syntaxHighlightedStreamPane.render(node);
 
         frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Cancel");
         frame.getRootPane().getActionMap().put("Cancel", new AbstractAction() {

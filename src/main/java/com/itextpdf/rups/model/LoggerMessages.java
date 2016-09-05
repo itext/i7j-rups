@@ -27,6 +27,7 @@ public class LoggerMessages {
     public static final String KEY_ISNT_PDFNAME = "Key value isn't value Name object.";
     public static final String NOT_AN_INTEGER_INDEX = "The typed index isn't integer.";
     public static final String NOT_IN_RANGE_INDEX = "The typed index is not in range.";
+    public static final String REFLECTION_INVOCATION_PDFSTREAM_ERROR = "Cannot check for null inputStream from PdfStream";
 
     //Exception messages
     public static final String CHUNK_OF_THIS_TYPE_NOT_ALLOWED_HERE = " - the chunk of this type not allowed here.";
