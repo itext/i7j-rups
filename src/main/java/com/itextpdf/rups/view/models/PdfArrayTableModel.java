@@ -45,10 +45,8 @@
 package com.itextpdf.rups.view.models;
 
 import javax.swing.JOptionPane;
-import javax.swing.table.AbstractTableModel;
 
 import com.itextpdf.kernel.pdf.PdfArray;
-import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
@@ -175,7 +173,34 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
         PdfObject value = parser.parseString(tempValue, parent);
 
         if (value != null) {
-            addRow(value);
+            int[] options = new int[array.size() + 1];
+            for (int i = 0; i < options.length; ++i) {
+                options[i] = i;
+            }
+            int index = -1;
+            while (true) {
+                String result = JOptionPane.showInputDialog(parent, "Choose array index", array.size());
+                if (result == null) {
+                    //canceled input
+                    return;
+                }
+                try {
+                    index = new Integer(result);
+                } catch (Exception any) {
+                    Logger logger = LoggerFactory.getLogger(getClass());
+                    logger.warn(LoggerMessages.NOT_AN_INTEGER_INDEX);
+                    logger.debug(LoggerMessages.NOT_AN_INTEGER_INDEX, any);
+                    continue;
+                }
+                if (0 <= index && index <= array.size()) {
+                    //correct input
+                    break;
+                } else {
+                    Logger logger = LoggerFactory.getLogger(getClass());
+                    logger.warn(LoggerMessages.NOT_IN_RANGE_INDEX);
+                }
+            }
+            addRow(index, value);
             tempValue = "";
             fireTableDataChanged();
         }
