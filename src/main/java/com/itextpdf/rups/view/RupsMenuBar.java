@@ -79,6 +79,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 	public static final String ABOUT = "About";
 
 	public static final String COMPARE_WITH = "Compare with...";
+
+	public static final String NEW_INDIRECT = "Add new indirect object";
 	/**
 	 * Caption for "Help versions".
 	 * @since iText 5.0.0 (renamed from VERSIONS)
@@ -128,7 +130,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                     }
                 }
             }
-        }, KeyStroke.getKeyStroke('O', KeyEvent.ALT_DOWN_MASK));
+        }, KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
+        addItem(file, NEW_INDIRECT, new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller), KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
         add(file);
         add(Box.createGlue());
         JMenu help = new JMenu(HELP_MENU);
@@ -187,6 +190,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         enableItem(SAVE_AS, enabled);
         enableItem(OPENINVIEWER, enabled);
 		enableItem(COMPARE_WITH, enabled);
+        enableItem(NEW_INDIRECT, enabled);
 	}
 	
 	/**

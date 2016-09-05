@@ -154,16 +154,15 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
 	/**
 	 * Renders the content stream of a PdfObject or empties the text area.
-	 * @param object	the object of which the content stream needs to be rendered
+	 * @param target	the node of which the content stream needs to be rendered
 	 */
 	public void render(PdfObjectTreeNode target) {
+        this.target = target;
         if (target.getPdfObject() instanceof PdfStream) {
             PdfStream stream = (PdfStream)target.getPdfObject();
-            this.target = target;
             text.setText("");
             //Check if stream is image
             if(PdfName.Image.equals(stream.getAsName(PdfName.Subtype))){
-                setTextEditableRoutine(false);
                 try {
                     //Convert byte array back to Image
                     if(!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber())return;
@@ -215,17 +214,19 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     logger.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT);
                     logger.debug(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e);
                 }
+                setTextEditableRoutine(false);
             } else if ( stream.get(PdfName.Length1) != null ) {
                 try {
+                    setTextEditableRoutine(true);
                     byte[] bytes = stream.getBytes(false);
                     text.setText(new String(bytes));
                     text.setCaretPosition(0);
-                    setTextEditableRoutine(true);
                 } catch (com.itextpdf.io.IOException e) {
                     text.setText("");
                     setTextEditableRoutine(false);
                 }
             } else if( stream.get(PdfName.Length1) == null ){
+                setTextEditableRoutine(true);
                 String newline = "\n";
                 byte[] bb = null;
                 try {
@@ -265,7 +266,6 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 } catch (IOException ignored) {
                 }
                 text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
-				setTextEditableRoutine(true);
             }
         }
 		else {
@@ -439,8 +439,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	}
 
     private void setTextEditableRoutine(boolean editable) {
-        text.setEnabled(editable);
-        if (pdfStreamGetInputStreamMethod != null && editable && target != null) {
+        text.setEditable(editable);
+        if (pdfStreamGetInputStreamMethod != null && editable && target != null && target.getPdfObject() instanceof PdfStream) {
             try {
                 popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target.getPdfObject()) == null);
                 return;
@@ -456,6 +456,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     private void clearPane() {
         target = null;
         text.setText("");
+        setTextEditableRoutine(false);
     }
 
 	/** a serial version id. */

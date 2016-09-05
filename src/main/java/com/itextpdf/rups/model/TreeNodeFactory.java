@@ -57,6 +57,9 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A factory that creates TreeNode objects corresponding with PDF objects.
  */
@@ -183,5 +186,12 @@ public class TreeNodeFactory {
 		catch(IllegalArgumentException iae) {
 			parent.setRecursive(true);
 		}
+	}
+
+	public void addNewIndirectObject(PdfObject object) {
+		objects.addNewIndirectObject(object);
+        nodes.add(PdfObjectTreeNode.getInstance(object, object.getIndirectReference().getObjNumber()));
+		Logger logger = LoggerFactory.getLogger(getClass());
+		logger.info("Tree node was successfully created for new indirect object");
 	}
 }

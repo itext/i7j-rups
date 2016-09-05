@@ -55,6 +55,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A factory that can produce all the indirect objects in a PDF file.
  */
@@ -249,4 +252,15 @@ public class IndirectObjectFactory {
 			return true;
 		}
 	}
+
+	void addNewIndirectObject(PdfObject object) {
+        object.makeIndirect(document);
+        ++n;
+        int idx = size();
+        idxToRef.put(idx, object.getIndirectReference().getObjNumber());
+        refToIdx.put(object.getIndirectReference().getObjNumber(), idx);
+        objects.add(object);
+        Logger logger = LoggerFactory.getLogger(getClass());
+        logger.info("New indirect object was successfully created. Its object number is: " + object.getIndirectReference().getObjNumber());
+    }
 }

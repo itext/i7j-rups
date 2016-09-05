@@ -96,6 +96,10 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
 					setModel(new JTableAutoModel(this));
 					TableColumn col= getColumnModel().getColumn(0);
 					col.setPreferredWidth(5);
+					break;
+                case RupsEvent.POST_NEW_INDIRECT_OBJECT_EVENT:
+                    setModel(new JTableAutoModel(this));
+                    break;
 			}
 		}
 	}

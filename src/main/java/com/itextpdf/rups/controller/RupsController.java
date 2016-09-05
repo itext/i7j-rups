@@ -47,6 +47,7 @@ package com.itextpdf.rups.controller;
 import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.Version;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.event.*;
@@ -55,6 +56,7 @@ import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
+import com.itextpdf.rups.view.NewIndirectPdfObjectDialog;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
@@ -263,6 +265,9 @@ public class RupsController extends Observable
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     setChanged();
                     super.notifyObservers(event);
+                    break;
+                case RupsEvent.NEW_INDIRECT_OBJECT_EVENT:
+                    showNewIndirectDialog();
                     break;
             }
         }
@@ -551,5 +556,14 @@ public class RupsController extends Observable
      */
     public PdfFile getPdfFile() {
         return pdfFile;
+    }
+
+    private void showNewIndirectDialog() {
+        NewIndirectPdfObjectDialog dialog = new NewIndirectPdfObjectDialog(ownedFrame, "Create new indirect object", readerController.getParser());
+        dialog.setVisible(true);
+        if (dialog.getResult() != null) {
+            setChanged();
+            notifyObservers(new PostNewIndirectObjectEvent(dialog.getResult()));
+        }
     }
 }

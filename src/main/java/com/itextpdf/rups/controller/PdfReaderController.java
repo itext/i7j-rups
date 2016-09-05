@@ -330,6 +330,11 @@ public class PdfReaderController extends Observable implements Observer {
                             ((NodeDeleteArrayChildEvent.Content) event.getContent()).parent,
                             ((NodeDeleteArrayChildEvent.Content) event.getContent()).index);
                     break;
+                case RupsEvent.POST_NEW_INDIRECT_OBJECT_EVENT:
+                    nodes.addNewIndirectObject((PdfObject) event.getContent());
+                    setChanged();
+                    notifyObservers(event);
+                    break;
             }
         }
     }

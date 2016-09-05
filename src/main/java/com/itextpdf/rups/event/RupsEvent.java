@@ -20,6 +20,8 @@ public abstract class RupsEvent {
     public static final byte NODE_DELETE_DICT_CHILD_EVENT = 12;
     public static final byte NODE_ADD_ARRAY_CHILD_EVENT = 13;
     public static final byte NODE_DELETE_ARRAY_CHILD_EVENT = 14;
+    public static final byte NEW_INDIRECT_OBJECT_EVENT = 15;
+    public static final byte POST_NEW_INDIRECT_OBJECT_EVENT = 16;
 
     public abstract int getType();
 
