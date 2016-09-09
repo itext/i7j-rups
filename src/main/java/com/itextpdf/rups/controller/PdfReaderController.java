@@ -197,7 +197,7 @@ public class PdfReaderController extends Observable implements Observer {
         objectPanel = new PdfObjectPanel(pluginMode, parser);
         addObserver(objectPanel);
         objectPanel.addObserver(this);
-        streamPane = new SyntaxHighlightedStreamPane(this);
+        streamPane = new SyntaxHighlightedStreamPane(this, pluginMode);
         addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();

@@ -126,14 +126,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	/**
 	 * Constructs a SyntaxHighlightedStreamPane.
 	 */
-	public SyntaxHighlightedStreamPane(PdfReaderController controller) {
+	public SyntaxHighlightedStreamPane(PdfReaderController controller, boolean pluginMode) {
 		super();
 		initAttributes();
 		text = new ColorTextPane();
 		setViewportView(text);
         this.controller = controller;
 
-        popupMenu = new StreamPanelContextMenu(text, this);
+        popupMenu = new StreamPanelContextMenu(text, this, pluginMode);
         text.add(popupMenu);
         text.addMouseListener(new ContextMenuMouseListener(popupMenu, text));
 	}

@@ -5,6 +5,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.SwingHelper;
+import com.itextpdf.rups.view.Console;
 
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -143,6 +144,15 @@ public class Rups {
                 if (lastCompareResult != null) {
                     getController().highlightChanges(lastCompareResult);
                 }
+            }
+        });
+    }
+
+    public void logToConsole(final String message) {
+        SwingHelper.invokeSync(new Runnable() {
+            @Override
+            public void run() {
+                Console.getInstance().printLn(message);
             }
         });
     }

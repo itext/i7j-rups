@@ -162,6 +162,10 @@ public class Console extends Observable implements Observer {
         }, true);
     }
 
+    public void printLn(String message) {
+        updateTextPane(message + "\n", ConsoleStyleContext.INFO);
+    }
+
     /**
      * Get the JTextArea to which everything is written.
      */
@@ -203,15 +207,15 @@ public class Console extends Observable implements Observer {
          */
         private static final long serialVersionUID = 7253870053566811171L;
         /**
-         * The name of the Style used for Custom messages
+         * The name of the Style used for Info messages
          */
         public static final String INFO = "Info";
         /**
-         * The name of the Style used for System.out
+         * The name of the Style used for chunks of text left after clean up
          */
         public static final String BACKUP = "Backup";
         /**
-         * The name of the Style used for System.err
+         * The name of the Style used for Error and Warning messages
          */
         public static final String ERROR = "Error";
 

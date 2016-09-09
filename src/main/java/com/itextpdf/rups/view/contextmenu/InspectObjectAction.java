@@ -44,7 +44,7 @@ public class InspectObjectAction extends AbstractRupsAction {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         PdfObjectTreeNode node = (PdfObjectTreeNode) ( (PdfTree) invoker ).getSelectionPath().getLastPathComponent();
-        final SyntaxHighlightedStreamPane syntaxHighlightedStreamPane = new SyntaxHighlightedStreamPane(null);
+        final SyntaxHighlightedStreamPane syntaxHighlightedStreamPane = new SyntaxHighlightedStreamPane(null, true);
 
         frame.add(syntaxHighlightedStreamPane);
         syntaxHighlightedStreamPane.render(node);
