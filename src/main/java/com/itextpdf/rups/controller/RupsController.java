@@ -51,6 +51,7 @@ import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.event.*;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
@@ -342,9 +343,7 @@ public class RupsController extends Observable
                 if (inputStream != null)
                     inputStream.close();
             } catch (IOException e) {
-                Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
-                logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
             }
         }
         return res;
@@ -362,9 +361,7 @@ public class RupsController extends Observable
             try {
                 byteArrayOutputStream.close();
             } catch (IOException e) {
-                Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
-                logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
             }
         }
         return byteArrayOutputStream.toByteArray();
@@ -412,9 +409,7 @@ public class RupsController extends Observable
                     fos.close();
                 }
             } catch (IOException e) {
-                Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
-                logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
             }
         }
     }
@@ -443,9 +438,7 @@ public class RupsController extends Observable
             highlightChanges(compareResult);
             return compareResult;
         } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.COMPARING_ERROR);
-            logger.debug(LoggerMessages.COMPARING_ERROR, e);
+            LoggerHelper.warn(LoggerMessages.COMPARING_ERROR, e, getClass());
             return null;
         }
     }
@@ -456,9 +449,7 @@ public class RupsController extends Observable
             cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
-            Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR);
-            logger.debug(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
+            LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
             return null;
         } finally {
             if (cmpDocument != null) {
@@ -475,9 +466,7 @@ public class RupsController extends Observable
             cmpDocument = new PdfDocument(reader);
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
-            Logger logger = LoggerFactory.getLogger(RupsController.class);
-            logger.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR);
-            logger.debug(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e);
+            LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
             return null;
         } finally {
             if (cmpDocument != null) {
@@ -491,19 +480,18 @@ public class RupsController extends Observable
             try {
                 loader.join();
             } catch (InterruptedException e) {
-                Logger logger = LoggerFactory.getLogger(RupsController.class);
-                logger.error(LoggerMessages.WAITING_FOR_LOADER_ERROR);
-                logger.debug(LoggerMessages.WAITING_FOR_LOADER_ERROR, e);
+                LoggerHelper.error(LoggerMessages.WAITING_FOR_LOADER_ERROR, e, getClass());
             }
         }
     }
 
     public void highlightChanges(CompareTool.CompareResult compareResult) {
-        Logger logger = LoggerFactory.getLogger(RupsController.class);
         if (compareResult.isOk()) {
-            logger.info("Documents are equal");
+            LoggerHelper.info("Documents are equal", getClass());
+            //logger.info("Documents are equal");
         } else {
-            logger.info(compareResult.getReport());
+            LoggerHelper.info(compareResult.getReport(), getClass());
+            //logger.info(compareResult.getReport());
         }
         readerController.update(this, new PostCompareEvent(compareResult));
     }

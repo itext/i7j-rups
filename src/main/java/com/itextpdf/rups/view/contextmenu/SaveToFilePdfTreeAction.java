@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -124,13 +125,9 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
                 fos.write(array);
                 fos.close();
             } catch (IOException e) { // TODO : Catch this exception properly
-                Logger logger = LoggerFactory.getLogger(SaveToFilePdfTreeAction.class);
-                logger.error(LoggerMessages.WRITING_FILE_ERROR);
-                logger.debug(LoggerMessages.WRITING_FILE_ERROR, e);
+                LoggerHelper.error(LoggerMessages.WRITING_FILE_ERROR, e, getClass());
             } catch (com.itextpdf.io.IOException e) { // TODO : Catch this exception properly
-                Logger logger = LoggerFactory.getLogger(SaveToFilePdfTreeAction.class);
-                logger.error(LoggerMessages.GETTING_PDF_STREAM_BYTES_ERROR);
-                logger.debug(LoggerMessages.GETTING_PDF_STREAM_BYTES_ERROR, e);
+                LoggerHelper.error(LoggerMessages.GETTING_PDF_STREAM_BYTES_ERROR, e, getClass());
             }
         }
     }

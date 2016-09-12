@@ -47,7 +47,7 @@
             <level>WARN</level>
         </filter>
         <encoder>
-            <Pattern>[%thread] %-5level %logger - %msg%n</Pattern>
+            <Pattern>%-5level - %msg%n</Pattern>
         </encoder>
         <styleType>Error</styleType>
     </appender>

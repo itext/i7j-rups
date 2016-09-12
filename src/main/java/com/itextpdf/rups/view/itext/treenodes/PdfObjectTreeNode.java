@@ -45,6 +45,7 @@
 package com.itextpdf.rups.view.itext.treenodes;
 
 import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
@@ -333,9 +334,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
 				}
 			}
 		}catch (NullPointerException e) {
-			Logger logger = LoggerFactory.getLogger(PdfObjectTreeNode.class);
-			logger.warn(LoggerMessages.PARENT_NODE_NULL_ERROR);
-			logger.debug(LoggerMessages.PARENT_NODE_NULL_ERROR, e);
+			LoggerHelper.warn(LoggerMessages.PARENT_NODE_NULL_ERROR, e, getClass());
 		}
 		return null;
 	}

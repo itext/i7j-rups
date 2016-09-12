@@ -49,10 +49,10 @@ import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.SwingHelper;
 
 import java.awt.Color;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Observable;
 import java.util.Observer;
-
 import javax.swing.JTextPane;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -112,10 +112,10 @@ public class Console extends Observable implements Observer {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    clearWithBuffer("...document is closed.\n");
+                    clearWithBuffer("");
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    clearWithBuffer("...document is open.\n");
+                    clearWithBuffer("");
                     break;
             }
         }
@@ -160,10 +160,6 @@ public class Console extends Observable implements Observer {
                 notifyObservers(new ConsoleWriteEvent());
             }
         }, true);
-    }
-
-    public void printLn(String message) {
-        updateTextPane(message + "\n", ConsoleStyleContext.INFO);
     }
 
     /**

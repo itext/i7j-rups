@@ -52,8 +52,7 @@ public class PdfSyntaxParser {
         try {
             result = parser.readObject();
             if (parser.nextValidToken()) {
-                Logger logger = LoggerFactory.getLogger(PdfSyntaxParser.class);
-                logger.warn(LoggerMessages.PARSED_INPUT_WAS_TRUNCATED);
+                LoggerHelper.warn(LoggerMessages.PARSED_INPUT_WAS_TRUNCATED, getClass());
             }
             if (openArraysCount != 0) {
                 throw new RuntimeException(LoggerMessages.INCORRECT_SEQUENCE_OF_ARRAY_BRACKETS);
@@ -73,9 +72,7 @@ public class PdfSyntaxParser {
                 }
             }
         } catch (Exception any) {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.warn(LoggerMessages.CANNOT_PARSE_PDF_OBJECT);
-            logger.debug(LoggerMessages.CANNOT_PARSE_PDF_OBJECT, any);
+            LoggerHelper.warn(LoggerMessages.CANNOT_PARSE_PDF_OBJECT, any, getClass());
             result = null;
         }
         return result;
@@ -91,8 +88,7 @@ public class PdfSyntaxParser {
     }
 
     private void addUnknownValue(PdfLiteral value) {
-        Logger logger = LoggerFactory.getLogger(PdfSyntaxParser.class);
-        logger.warn(LoggerMessages.UNEXPECTED_CHUNK_OF_SYNTAX + " : " + value);
+        LoggerHelper.warn(LoggerMessages.UNEXPECTED_CHUNK_OF_SYNTAX + " : " + value, getClass());
         unrecognizedChunks.add(value);
         isValid = false;
     }

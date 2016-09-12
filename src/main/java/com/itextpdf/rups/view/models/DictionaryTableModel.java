@@ -49,6 +49,7 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.PdfSyntaxUtils;
@@ -159,8 +160,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
             }
         } else {
             if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
-                Logger logger = LoggerFactory.getLogger(getClass());
-                logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+                LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
                 return;
             }
             if (columnIndex == 0) {
@@ -223,8 +223,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     public void validateTempRow() {
 
         if ("".equalsIgnoreCase(tempKey.trim()) || "".equalsIgnoreCase(tempValue.trim())) {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+            LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
             return;
         }
 
@@ -236,8 +235,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
         if (value != null) {
             if (dictionary.containsKey(key)) {
-                Logger logger = LoggerFactory.getLogger(getClass());
-                logger.warn(LoggerMessages.KEY_ALREADY_EXIST);
+                LoggerHelper.warn(LoggerMessages.KEY_ALREADY_EXIST, getClass());
             } else {
                 addRow(key, value);
 
@@ -271,8 +269,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
             return (PdfName) result;
         }
         else {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.error(LoggerMessages.KEY_ISNT_PDFNAME);
+            LoggerHelper.error(LoggerMessages.KEY_ISNT_PDFNAME, getClass());
             return null;
         }
     }

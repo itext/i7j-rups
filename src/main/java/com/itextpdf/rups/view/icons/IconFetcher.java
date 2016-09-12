@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view.icons;
 
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 
 import java.util.HashMap;
@@ -78,9 +79,7 @@ public class IconFetcher {
 				cache.put(filename, icon);
 			}
 			catch(Exception e) {
-				Logger logger = LoggerFactory.getLogger(IconFetcher.class);
-				logger.error(LoggerMessages.FINDING_ICON_ERROR + filename);
-				logger.debug(LoggerMessages.FINDING_ICON_ERROR + filename, e);
+				LoggerHelper.error(LoggerMessages.FINDING_ICON_ERROR + filename, e, IconFetcher.class);
 				return null;
 			}
 		}

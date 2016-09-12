@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -146,13 +147,9 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
 							xfaTree.load(xfaFile);
 							xfaTextArea.load(xfaFile);
 						} catch (IOException e) {
-							Logger logger = LoggerFactory.getLogger(FormTree.class);
-							logger.warn(LoggerMessages.XFA_LOADING_ERROR);
-							logger.debug(LoggerMessages.XFA_LOADING_ERROR, e);
+							LoggerHelper.warn(LoggerMessages.XFA_LOADING_ERROR, e, getClass());
 						} catch (DocumentException e) {
-							Logger logger = LoggerFactory.getLogger(FormTree.class);
-							logger.error(LoggerMessages.XML_DOM_PARSING_ERROR);
-							logger.debug(LoggerMessages.XML_DOM_PARSING_ERROR, e);
+							LoggerHelper.error(LoggerMessages.XML_DOM_PARSING_ERROR, e, getClass());
 						}
 					}
 					setModel(new DefaultTreeModel(root));

@@ -44,6 +44,7 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 
 import javax.swing.*;
@@ -102,17 +103,13 @@ public class SaveToFileJTextPaneAction extends AbstractRupsAction {
                 writer.write(textPane.getSelectedText());
 
             } catch (IOException e) { //TODO
-                Logger logger = LoggerFactory.getLogger(SaveToFileJTextPaneAction.class);
-                logger.warn(LoggerMessages.WRITING_FILE_ERROR);
-                logger.debug(LoggerMessages.WRITING_FILE_ERROR, e);
+                LoggerHelper.warn(LoggerMessages.WRITING_FILE_ERROR, e, getClass());
             } finally {
                 try {
                     if (writer != null)
                         writer.close();
                 } catch (IOException e) { //TODO
-                    Logger logger = LoggerFactory.getLogger(SaveToFileJTextPaneAction.class);
-                    logger.error(LoggerMessages.CLOSING_STREAM_ERROR);
-                    logger.debug(LoggerMessages.CLOSING_STREAM_ERROR, e);
+                    LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
                 }
             }
 

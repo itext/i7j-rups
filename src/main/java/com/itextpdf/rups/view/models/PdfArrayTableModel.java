@@ -48,6 +48,7 @@ import javax.swing.JOptionPane;
 
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.PdfSyntaxUtils;
@@ -126,8 +127,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
             }
         } else {
             if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
-                Logger logger = LoggerFactory.getLogger(getClass());
-                logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+                LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
                 return;
             }
             if (columnIndex == 0) {
@@ -165,8 +165,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public void validateTempRow() {
         if ("".equalsIgnoreCase(tempValue.trim())) {
-            Logger logger = LoggerFactory.getLogger(getClass());
-            logger.warn(LoggerMessages.FIELD_IS_EMPTY);
+            LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
             return;
         }
 
@@ -187,17 +186,14 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                 try {
                     index = new Integer(result);
                 } catch (Exception any) {
-                    Logger logger = LoggerFactory.getLogger(getClass());
-                    logger.warn(LoggerMessages.NOT_AN_INTEGER_INDEX);
-                    logger.debug(LoggerMessages.NOT_AN_INTEGER_INDEX, any);
+                    LoggerHelper.warn(LoggerMessages.NOT_AN_INTEGER_INDEX, any, getClass());
                     continue;
                 }
                 if (0 <= index && index <= array.size()) {
                     //correct input
                     break;
                 } else {
-                    Logger logger = LoggerFactory.getLogger(getClass());
-                    logger.warn(LoggerMessages.NOT_IN_RANGE_INDEX);
+                    LoggerHelper.warn(LoggerMessages.NOT_IN_RANGE_INDEX, getClass());
                 }
             }
             addRow(index, value);

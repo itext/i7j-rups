@@ -57,6 +57,7 @@ import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
@@ -117,9 +118,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             pdfStreamGetInputStreamMethod.setAccessible(true);
         } catch (Exception any) {
             pdfStreamGetInputStreamMethod = null;
-            Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-            logger.error(LoggerMessages.REFLECTION_PDFSTREAM_ERROR);
-            logger.debug(LoggerMessages.REFLECTION_PDFSTREAM_ERROR, any);
+            LoggerHelper.error(LoggerMessages.REFLECTION_PDFSTREAM_ERROR, any, PdfReaderController.class);
         }
     }
 
@@ -193,26 +192,20 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                                         fileDialog.setVisible(true);
                                         ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
                                     } catch (Exception e) {
-                                        Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-                                        logger.error(LoggerMessages.IMAGE_PARSING_ERROR);
-                                        logger.debug(LoggerMessages.IMAGE_PARSING_ERROR, e);
+                                        LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
                                     }
                                 }
                             });
                             text.append("\n", null);
                             text.insertComponent(saveImage);
                         } catch (BadLocationException e) {
-                            Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-                            logger.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT);
-                            logger.debug(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e);
+                            LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
                         }
                     } else {
                         text.setText("Image can't be loaded.");
                     }
                 } catch (IOException e) {
-                    Logger logger = LoggerFactory.getLogger(SyntaxHighlightedStreamPane.class);
-                    logger.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT);
-                    logger.debug(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e);
+                    LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
                 }
                 setTextEditableRoutine(false);
             } else if ( stream.get(PdfName.Length1) != null ) {
@@ -257,9 +250,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                         text.append(operator + newline, attributes);
                     }
                 } catch (PdfException | com.itextpdf.io.IOException e) {
-                    Logger logger = LoggerFactory.getLogger(getClass());
-                    logger.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR);
-                    logger.debug(LoggerMessages.PDFSTREAM_PARSING_ERROR, e);
+                    LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
                     if ( bb != null ) {
                         text.setText(new String(bb));
                     }
@@ -445,9 +436,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target.getPdfObject()) == null);
                 return;
             } catch (Exception any) {
-                Logger logger = LoggerFactory.getLogger(getClass());
-                logger.error(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR);
-                logger.debug(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR, any);
+                LoggerHelper.error(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR, any, getClass());
             }
         }
         popupMenu.setSaveToStreamEnabled(false);

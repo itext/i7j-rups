@@ -191,7 +191,6 @@ public class TreeNodeFactory {
 	public void addNewIndirectObject(PdfObject object) {
 		objects.addNewIndirectObject(object);
         nodes.add(PdfObjectTreeNode.getInstance(object, object.getIndirectReference().getObjNumber()));
-		Logger logger = LoggerFactory.getLogger(getClass());
-		logger.info("Tree node was successfully created for new indirect object");
+		LoggerHelper.info("Tree node was successfully created for new indirect object", getClass());
 	}
 }

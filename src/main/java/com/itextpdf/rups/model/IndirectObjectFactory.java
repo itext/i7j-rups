@@ -260,7 +260,6 @@ public class IndirectObjectFactory {
         idxToRef.put(idx, object.getIndirectReference().getObjNumber());
         refToIdx.put(object.getIndirectReference().getObjNumber(), idx);
         objects.add(object);
-        Logger logger = LoggerFactory.getLogger(getClass());
-        logger.info("New indirect object was successfully created. Its object number is: " + object.getIndirectReference().getObjNumber());
+        LoggerHelper.info("New indirect object was successfully created. Its object number is: " + object.getIndirectReference().getObjNumber(), getClass());
     }
 }
