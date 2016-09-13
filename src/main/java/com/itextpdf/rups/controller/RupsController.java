@@ -173,7 +173,7 @@ public class RupsController extends Observable
         info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
         JTabbedPane editorPane = readerController.getEditorTabs();
         JScrollPane cons = new JScrollPane(console.getTextArea());
-        console.getTextArea().addMouseListener(new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()), cons));
+        console.getTextArea().addMouseListener(new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()), console.getTextArea()));
         editorPane.addTab("Console", null, cons, "Console window (System.out/System.err)");
         editorPane.setSelectedComponent(cons);
         info.add(editorPane, JSplitPane.RIGHT);
