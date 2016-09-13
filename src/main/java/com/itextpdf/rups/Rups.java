@@ -113,27 +113,48 @@ public class Rups {
     }
 
     public boolean compareWithDocument(final PdfDocument document) {
+        return compareWithDocument(document, false);
+    }
+
+    public boolean compareWithDocument(final PdfDocument document, final boolean showResults) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 lastCompareResult = getController().compareWithDocument(document);
+                if (!showResults) {
+                    getController().highlightChanges(lastCompareResult);
+                }
             }
         });
         return isEqual();
     }
 
     public boolean compareWithFile(final File file) {
+        return compareWithFile(file, false);
+    }
+
+    public boolean compareWithFile(final File file, final boolean showResults) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 lastCompareResult = getController().compareWithFile(file);
+                if (!showResults) {
+                    getController().highlightChanges(lastCompareResult);
+                }
             }
         });
         return isEqual();
     }
 
     public boolean compareWithStream(final InputStream is) {
+        return compareWithStream(is, false);
+    }
+
+    public boolean compareWithStream(final InputStream is, final boolean showResults) {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
                 lastCompareResult = getController().compareWithStream(is);
+                if (!showResults) {
+                    getController().highlightChanges(lastCompareResult);
+                }
             }
         });
         return isEqual();
@@ -142,9 +163,7 @@ public class Rups {
     public void highlightLastSavedChanges() {
         SwingHelper.invokeSync(new Runnable() {
             public void run() {
-                if (lastCompareResult != null) {
-                    getController().highlightChanges(lastCompareResult);
-                }
+                getController().highlightChanges(lastCompareResult);
             }
         });
     }

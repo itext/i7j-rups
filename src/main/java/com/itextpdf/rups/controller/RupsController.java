@@ -261,7 +261,9 @@ public class RupsController extends Observable
                     saveFile((File)event.getContent());
                     break;
                 case RupsEvent.COMPARE_WITH_FILE_EVENT:
-                    compareWithFile((File)event.getContent());
+                    highlightChanges(null);
+                    CompareTool.CompareResult result = compareWithFile((File)event.getContent());
+                    highlightChanges(result);
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     setChanged();
@@ -432,15 +434,22 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithDocument(PdfDocument document) {
-        CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
-        try {
-            CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-            highlightChanges(compareResult);
-            return compareResult;
-        } catch (Exception e) {
-            LoggerHelper.warn(LoggerMessages.COMPARING_ERROR, e, getClass());
-            return null;
+        if (getPdfFile() == null || getPdfFile().getPdfDocument() == null) {
+            LoggerHelper.warn(LoggerMessages.NO_OPEN_DOCUMENT, getClass());
+        } else if (document == null) {
+            LoggerHelper.warn(LoggerMessages.COMPARED_DOCUMENT_IS_NULL, getClass());
+        } else if (document.isClosed()) {
+            LoggerHelper.warn(LoggerMessages.COMPARED_DOCUMENT_IS_CLOSED, getClass());
+        } else {
+            CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
+            try {
+                CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
+                return compareResult;
+            } catch (Exception e) {
+                LoggerHelper.warn(LoggerMessages.COMPARING_ERROR, e, getClass());
+            }
         }
+        return null;
     }
 
     public CompareTool.CompareResult compareWithFile(File file) {
@@ -485,15 +494,19 @@ public class RupsController extends Observable
         }
     }
 
+    /**
+     * Clear all previous highlights and highlights the changes from the compare result.
+     * If compare result is null will just clear all previous highlights.
+     */
     public void highlightChanges(CompareTool.CompareResult compareResult) {
-        if (compareResult.isOk()) {
-            LoggerHelper.info("Documents are equal", getClass());
-            //logger.info("Documents are equal");
-        } else {
-            LoggerHelper.info(compareResult.getReport(), getClass());
-            //logger.info(compareResult.getReport());
-        }
         readerController.update(this, new PostCompareEvent(compareResult));
+        if (compareResult != null) {
+            if (compareResult.isOk()) {
+                LoggerHelper.info("Documents are equal", getClass());
+            } else {
+                LoggerHelper.info(compareResult.getReport(), getClass());
+            }
+        }
     }
 
     private void startObjectLoader() {

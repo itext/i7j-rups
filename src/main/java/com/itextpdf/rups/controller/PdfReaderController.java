@@ -390,6 +390,9 @@ public class PdfReaderController extends Observable implements Observer {
 
     protected void highlightChanges(CompareTool.CompareResult compareResult) {
         clearHighlights();
+        if (compareResult == null) {
+            return;
+        }
         for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
             PdfObjectTreeNode currentNode = null;
             Stack<CompareTool.ObjectPath.IndirectPathItem> indirectPath = (Stack<CompareTool.ObjectPath.IndirectPathItem>)path.getIndirectPath().clone();
