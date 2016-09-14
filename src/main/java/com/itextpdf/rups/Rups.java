@@ -168,6 +168,15 @@ public class Rups {
         });
     }
 
+    public void clearHighlights() {
+        SwingHelper.invokeSync(new Runnable() {
+            @Override
+            public void run() {
+                getController().highlightChanges(null);
+            }
+        });
+    }
+
     public void logToConsole(final String message) {
         SwingHelper.invokeSync(new Runnable() {
             @Override
