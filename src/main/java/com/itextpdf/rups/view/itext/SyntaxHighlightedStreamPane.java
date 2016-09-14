@@ -66,6 +66,8 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -85,6 +87,9 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +111,10 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     protected StreamPanelContextMenu popupMenu;
 
     protected PdfObjectTreeNode target;
+
+    protected UndoManager manager;
+
+    private static int MAX_NUMBER_OF_EDITS = 8192;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private PdfReaderController controller;
@@ -135,6 +144,12 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         popupMenu = new StreamPanelContextMenu(text, this, pluginMode);
         text.add(popupMenu);
         text.addMouseListener(new ContextMenuMouseListener(popupMenu, text));
+
+        manager = new UndoManager();
+        manager.setLimit(MAX_NUMBER_OF_EDITS);
+        text.getDocument().addUndoableEditListener(manager);
+        text.registerKeyboardAction(new UndoAction(manager), KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+        text.registerKeyboardAction(new RedoAction(manager), KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
 	}
 
 	/**
@@ -156,6 +171,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 	 * @param target	the node of which the content stream needs to be rendered
 	 */
 	public void render(PdfObjectTreeNode target) {
+        manager.discardAllEdits();
+        manager.setLimit(0);
         this.target = target;
         if (target.getPdfObject() instanceof PdfStream) {
             PdfStream stream = (PdfStream)target.getPdfObject();
@@ -264,10 +281,13 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 			return;
 		}
 		text.repaint();
-		repaint();
+        manager.setLimit(MAX_NUMBER_OF_EDITS);
+        repaint();
 	}
 
     public void saveToTarget() {
+        manager.discardAllEdits();
+        manager.setLimit(0);
         if (controller != null) {
             if (((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
                 controller.deleteTreeNodeDictChild(target, PdfName.Filter);
@@ -277,6 +297,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         if (controller != null) {
             controller.selectNode(target);
         }
+        manager.setLimit(MAX_NUMBER_OF_EDITS);
     }
 
     protected void append(StringBuilder sb, PdfObject obj) {
@@ -444,6 +465,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
     private void clearPane() {
         target = null;
+        manager.discardAllEdits();
+        manager.setLimit(0);
         text.setText("");
         setTextEditableRoutine(false);
     }
@@ -454,7 +477,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 }
 
 class ColorTextPane extends JTextPane {
-	
+    
 	/**
 	 * Appends a string to the JTextPane, with style attributes applied.
 	 * @param s       the String to be appended
@@ -480,4 +503,36 @@ class ColorTextPane extends JTextPane {
 	}
 	
 	private static final long serialVersionUID = 1302283071087762495L;
+}
+
+class UndoAction extends AbstractAction {
+	private UndoManager manager;
+
+	public UndoAction(UndoManager manager) {
+		this.manager = manager;
+	}
+
+	public void actionPerformed(ActionEvent evt) {
+		try {
+			manager.undo();
+		} catch (CannotUndoException e) {
+			Toolkit.getDefaultToolkit().beep();
+		}
+	}
+}
+
+class RedoAction extends AbstractAction {
+	private UndoManager manager;
+
+	public RedoAction(UndoManager manager) {
+		this.manager = manager;
+	}
+
+	public void actionPerformed(ActionEvent evt) {
+		try {
+			manager.redo();
+		} catch (CannotRedoException e) {
+			Toolkit.getDefaultToolkit().beep();
+		}
+	}
 }
