@@ -91,9 +91,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
 	/** The text pane with the content stream. */
@@ -310,7 +307,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     int len = b.length;
                     String hex;
                     for (int k = 0; k < len; ++k) {
-                    	hex = Integer.toHexString(b[k]);
+                    	hex = Integer.toHexString((b[k] & 0xFF));
                     	if (hex.length() % 2 == 1)
                     		sb.append("0");
                     	sb.append(hex);
