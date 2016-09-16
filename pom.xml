@@ -4,7 +4,7 @@
     <groupId>com.itextpdf</groupId>
     <artifactId>itext-rups</artifactId>
     <name>itext-rups</name>
-    <version>7.0.2-SNAPSHOT</version>
+    <version>7.0.1</version>
     <description>Rups, a tool to view PDF structure in a swing gui.</description>
     <url>http://www.itextpdf.com/</url>
     <properties>
