@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.itextpdf</groupId>
     <artifactId>itext-rups</artifactId>
     <name>itext-rups</name>
-    <version>7.0.1-SNAPSHOT</version>
+    <version>7.0.2-SNAPSHOT</version>
     <description>Rups, a tool to view PDF structure in a swing gui.</description>
     <url>http://www.itextpdf.com/</url>
     <properties>
@@ -219,11 +218,11 @@
                                         <minVersion>1.7.0</minVersion>
                                     </jre>
                                     <versionInfo>
-                                        <fileVersion>7.0.1.0</fileVersion>
+                                        <fileVersion>7.0.2.0</fileVersion>
                                         <txtFileVersion>${project.version}</txtFileVersion>
                                         <fileDescription>Rups, object view of pdf content</fileDescription>
                                         <copyright>AGPL</copyright>
-                                        <productVersion>7.0.1.0</productVersion>
+                                        <productVersion>7.0.2.0</productVersion>
                                         <txtProductVersion>${project.version}</txtProductVersion>
                                         <productName>Rups</productName>
                                         <internalName>itext-rups</internalName>
