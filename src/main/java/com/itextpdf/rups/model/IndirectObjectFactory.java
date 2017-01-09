@@ -45,6 +45,7 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.io.util.IntHashtable;
+import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
@@ -131,7 +132,15 @@ public class IndirectObjectFactory {
 	public boolean storeNextObject() {
 		while (current < n) {
 			current++;
-			PdfObject object = document.getPdfObject(current);
+                        
+			PdfObject object = null;
+                        
+                        // attempt to read the object, if this fails keep object at 'null' (compatible with iText 5)
+                        try{
+                            object = document.getPdfObject(current);                            
+                        }catch(PdfException ex)
+                        {                            
+                        }
 
 			if (object != null) {
 				int idx = size();
