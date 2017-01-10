@@ -1,31 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.itextpdf</groupId>
+
+  	<groupId>com.itextpdf</groupId>
     <artifactId>itext-rups</artifactId>
-    <name>itext-rups</name>
     <version>7.0.2-SNAPSHOT</version>
-    <description>Rups, a tool to view PDF structure in a swing gui.</description>
+
+  	<name>itext-rups</name>
+    <description>RUPS, a tool to view PDF structure in a Swing GUI.</description>
     <url>http://www.itextpdf.com/</url>
-    <properties>
-        <logback.version>1.1.3</logback.version>
-        <dom4j.version>1.6.1</dom4j.version>
-        <junit.version>4.8.2</junit.version>
-        <bouncycastle.version>1.49</bouncycastle.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <launch4j.version>1.7.11</launch4j.version>
-    </properties>
-    <mailingLists>
+
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License v3</name>
+            <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>itext</id>
+            <name>iText Software</name>
+            <email>info@itextpdf.com</email>
+            <url>http://www.itextpdf.com</url>
+        </developer>
+    </developers>
+
+  	<mailingLists>
         <mailingList>
-            <name>iText Questions</name>
-            <subscribe>
-                http://lists.sourceforge.net/lists/listinfo/itext-questions
-            </subscribe>
-            <post>itext-questions@lists.sourceforge.net</post>
-            <archive>
-                http://news.gmane.org/gmane.comp.java.lib.itext.general
-            </archive>
+            <name>iText on StackOverflow</name>
+            <subscribe>http://stackoverflow.com/questions/tagged/itext</subscribe>
+            <archive>http://stackoverflow.com/questions/tagged/itext</archive>
             <otherArchives>
+                <otherArchive>http://news.gmane.org/gmane.comp.java.lib.itext.general</otherArchive>
                 <otherArchive>http://itext-general.2136553.n4.nabble.com/</otherArchive>
                 <otherArchive>http://www.junlu.com/2.html</otherArchive>
                 <otherArchive>http://sourceforge.net/mailarchive/forum.php?forum_id=3273</otherArchive>
@@ -33,51 +40,73 @@
             </otherArchives>
         </mailingList>
     </mailingLists>
-    <developers>
-        <developer>
-            <id>blowagie</id>
-            <name>Bruno Lowagie</name>
-            <email>bruno@lowagie.com</email>
-            <url>http://www.lowagie.com</url>
-        </developer>
-        <developer>
-            <id>psoares33</id>
-            <name>Paulo Soares</name>
-            <email>psoares33@users.sourceforge.net</email>
-        </developer>
-        <developer>
-            <id>mstorer</id>
-            <name>Mark Storer</name>
-            <email>mstorer3772@gmail.com</email>
-        </developer>
-        <developer>
-            <id>trumpetinc</id>
-            <name>Kevin Day</name>
-            <email>kevin@trumpetinc.com</email>
-        </developer>
-        <developer>
-            <id>xlv</id>
-            <name>Xavier Le Vourch</name>
-            <email>xavier.levourch@xlv-labs.com</email>
-            <url>http://www.xlv-labs.com</url>
-        </developer>
-    </developers>
-    <licenses>
-        <license>
-            <name>GNU Lesser General Public License v2.1</name>
-            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
-        </license>
-    </licenses>
+
     <scm>
-        <connection>scm:svn:https://itextrups.svn.sourceforge.net/svnroot/itextrups/trunk/</connection>
-        <url>http://itextrups.svn.sourceforge.net/viewvc/itextrups/</url>
+        <connection>ssh://git@git.itextsupport.com:7999/i7j/rups.git</connection>
+        <url>https://git.itextsupport.com/projects/I7J/repos/rups</url>
     </scm>
-    <build>
+
+  	<properties>
+        <logback.version>1.1.3</logback.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <junit.version>4.12</junit.version>
+        <bouncycastle.version>1.49</bouncycastle.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <launch4j.version>1.7.11</launch4j.version>
+    </properties>
+
+   	<dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>${dom4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+    </dependencies>
+
+  	<build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
+                <version>2.10.4</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -108,7 +137,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>3.0.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -119,8 +148,9 @@
                 </configuration>
             </plugin>
             <plugin>
+              	<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2</version>
+                <version>3.0.0</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -144,7 +174,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -157,7 +187,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -184,7 +214,8 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
+
+  	<profiles>
         <profile>
             <id>exe</id>
             <build>
@@ -239,58 +270,5 @@
             </build>
         </profile>
     </profiles>
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>${dom4j.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>io</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>kernel</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-    </dependencies>
+
 </project>
