@@ -1,1 +1,4 @@
-Closed source iText 7 code
+RUPS
+====
+
+A tool to view PDF structure in a Swing GUI.
