@@ -56,9 +56,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A factory that can produce all the indirect objects in a PDF file.
  */
@@ -134,13 +131,11 @@ public class IndirectObjectFactory {
 			current++;
                         
 			PdfObject object = null;
-                        
-                        // attempt to read the object, if this fails keep object at 'null' (compatible with iText 5)
-                        try{
-                            object = document.getPdfObject(current);                            
-                        }catch(PdfException ex)
-                        {                            
-                        }
+			// attempt to read the object, if this fails keep object at 'null' (compatible with iText 5)
+			try {
+				object = document.getPdfObject(current);
+			} catch (PdfException ex) {
+			}
 
 			if (object != null) {
 				int idx = size();
