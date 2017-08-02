@@ -3,9 +3,9 @@ package com.itextpdf.rups.io;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.event.SaveToFileEvent;
 
-import java.awt.Component;
-import java.util.Observer;
 import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.util.Observer;
 
 public class FileSaveAction extends FileChooserAction {
 

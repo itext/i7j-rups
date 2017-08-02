@@ -56,7 +56,7 @@ import java.awt.event.ActionEvent;
 
 public class CopyToClipboardAction extends AbstractRupsAction {
 
-	public CopyToClipboardAction(String name) {
+    public CopyToClipboardAction(String name) {
         super(name);
     }
 
@@ -68,18 +68,20 @@ public class CopyToClipboardAction extends AbstractRupsAction {
         boolean nothingSelected = false;
         JTextPane textPane = (JTextPane) invoker;
 
-        if ( textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0 ) {
+        if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
             nothingSelected = true;
             textPane.selectAll();
         }
 
         textPane.copy();
 
-        if ( nothingSelected ) {
+        if (nothingSelected) {
             textPane.select(0, 0);
         }
     }
 
-    /** A serial version UID */
-	private static final long serialVersionUID = 1301101461853323920L;
+    /**
+     * A serial version UID
+     */
+    private static final long serialVersionUID = 1301101461853323920L;
 }

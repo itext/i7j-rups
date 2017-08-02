@@ -24,7 +24,7 @@ public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
         if (!styleType.equals(Console.ConsoleStyleContext.INFO) &&
                 !styleType.equals(Console.ConsoleStyleContext.ERROR) &&
                 !styleType.equals(Console.ConsoleStyleContext.BACKUP)) {
-            addError("Wrong style is set for appender named [" + name +"]. Using default style");
+            addError("Wrong style is set for appender named [" + name + "]. Using default style");
             styleType = DEFAULT_STYLE_TYPE;
         }
         this.styleType = styleType;

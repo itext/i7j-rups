@@ -1,7 +1,6 @@
 package com.itextpdf.rups.event;
 
 import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 public class NodeDeleteDictChildEvent extends RupsEvent {

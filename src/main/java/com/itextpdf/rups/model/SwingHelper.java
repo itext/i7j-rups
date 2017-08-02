@@ -1,10 +1,7 @@
 package com.itextpdf.rups.model;
 
+import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
-import javax.swing.SwingUtilities;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SwingHelper {
 
@@ -22,7 +19,6 @@ public class SwingHelper {
                 if (!isSilent) {
                     LoggerHelper.warn(LoggerMessages.INVOKING_RUNNABLE_ERROR, e, SwingHelper.class);
                 }
-
             } catch (InvocationTargetException e) {
                 if (!isSilent) {
                     LoggerHelper.warn(LoggerMessages.RUNNABLE_CAUSE_EXCEPTION, e, SwingHelper.class);

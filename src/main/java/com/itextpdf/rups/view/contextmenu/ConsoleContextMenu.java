@@ -61,7 +61,7 @@ public class ConsoleContextMenu {
         copyToClipboard.setText("Copy to Clipboard");
         copyToClipboard.setAction(new CopyToClipboardAction("Copy to Clipboard", invoker));
         popup.add(copyToClipboard);
-        
+
         JMenuItem clear = new JMenuItem();
         clear.setText("Clear");
         clear.setAction(new ClearConsoleAction("Clear", invoker));

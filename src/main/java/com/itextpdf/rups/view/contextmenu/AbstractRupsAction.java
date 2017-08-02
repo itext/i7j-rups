@@ -56,19 +56,21 @@ import java.awt.event.ActionEvent;
 
 public abstract class AbstractRupsAction extends AbstractAction {
 
-    /** Serial version uid. */
-	private static final long serialVersionUID = -3581333233604596899L;
-	
-	protected Component invoker;
+    /**
+     * Serial version uid.
+     */
+    private static final long serialVersionUID = -3581333233604596899L;
+
+    protected Component invoker;
 
     public AbstractRupsAction(String name) {
         super(name);
     }
-    
+
     public AbstractRupsAction(String name, Component invoker) {
         super(name);
         this.invoker = invoker;
     }
-    
+
     public abstract void actionPerformed(ActionEvent e);
 }

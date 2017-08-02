@@ -71,11 +71,12 @@ public class StreamPanelContextMenu extends JPopupMenu {
      * Creates a context menu (right click menu) with two actions:
      * - copy
      * - select all
-     *
+     * <p>
      * Copy copies the selected text or when no text is selected, it copies the entire text.
      *
-     * @param textPane
-     * @return
+     * @param textPane   the text pane
+     * @param controller the controller
+     * @param pluginMode the plugin mode
      */
     public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller, boolean pluginMode) {
         super();

@@ -1,6 +1,5 @@
 package com.itextpdf.rups.event;
 
-import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfObject;
 
 public class PostNewIndirectObjectEvent extends RupsEvent {

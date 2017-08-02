@@ -1,7 +1,5 @@
 package com.itextpdf.rups.event;
 
-import java.io.File;
-
 public class NewIndirectObjectEvent extends RupsEvent {
 
     @Override

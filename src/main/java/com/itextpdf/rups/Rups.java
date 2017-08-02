@@ -6,15 +6,11 @@ import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.SwingHelper;
-import com.itextpdf.rups.view.Console;
 
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 
 public class Rups {
 
@@ -37,7 +33,9 @@ public class Rups {
     /**
      * Initializes the main components of the Rups application.
      *
-     * @param f a file that should be opened on launch
+     * @param f                a file that should be opened on launch
+     * @param onCloseOperation the close operation
+     * @return a new RUPS application
      */
     public static Rups startNewApplication(File f, final int onCloseOperation) {
         final Rups rups = new Rups();
@@ -205,10 +203,6 @@ public class Rups {
     }
 
     private boolean isEqual() {
-        if (lastCompareResult == null) {
-            return false;
-        } else {
-            return lastCompareResult.isOk();
-        }
+        return lastCompareResult != null && lastCompareResult.isOk();
     }
 }

@@ -44,11 +44,8 @@
  */
 package com.itextpdf.rups;
 
-
+import javax.swing.*;
 import java.io.File;
-import javax.swing.WindowConstants;
-
-import org.slf4j.LoggerFactory;
 
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure
@@ -58,17 +55,17 @@ public class RupsLauncher {
 
     /**
      * Allows people to plug in RUPS into their projects without RUPS shutting down the JVM.
-      */
+     */
     public static int CLOSE_OPERATION = WindowConstants.EXIT_ON_CLOSE;
 
-	// main method
-	/**
-	 * Main method. Starts the RUPS application.
-	 * @param	args	no arguments needed
-	 */
-	public static void main(String[] args) {
-		final File f;
-		if (args.length > 0) {
+    /**
+     * Main method. Starts the RUPS application.
+     *
+     * @param    args    no arguments needed
+     */
+    public static void main(String[] args) {
+        final File f;
+        if (args.length > 0) {
             String pathToFile = args[0];
             f = new File(pathToFile);
         } else {

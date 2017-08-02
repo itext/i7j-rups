@@ -5,10 +5,10 @@ import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 
+import javax.swing.*;
 import java.util.Observable;
 import java.util.Observer;
-import javax.swing.JTextArea;
-import javax.swing.SwingWorker;
+import java.util.concurrent.ExecutionException;
 
 public class PlainText extends JTextArea implements Observer {
 
@@ -32,7 +32,7 @@ public class PlainText extends JTextArea implements Observer {
                     loaded = false;
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    file = ((ObjectLoader)event.getContent()).getFile();
+                    file = ((ObjectLoader) event.getContent()).getFile();
                     loaded = false;
                     if (worker != null) {
                         worker.cancel(true);
@@ -57,7 +57,7 @@ public class PlainText extends JTextArea implements Observer {
                                 String text;
                                 try {
                                     text = get();
-                                } catch (Exception any) {
+                                } catch (InterruptedException | ExecutionException any) {
                                     text = "Error while loading text";
                                 }
                                 setText(text);

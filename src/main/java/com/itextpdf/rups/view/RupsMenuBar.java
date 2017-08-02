@@ -46,7 +46,10 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.io.*;
+import com.itextpdf.rups.io.FileCloseAction;
+import com.itextpdf.rups.io.FileCompareAction;
+import com.itextpdf.rups.io.FileOpenAction;
+import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.PdfFile;
 
@@ -63,64 +66,89 @@ import java.util.Observer;
 
 public class RupsMenuBar extends JMenuBar implements Observer {
 
-	/** Caption for the file menu. */
-	public static final String FILE_MENU = "File";
-	/** Caption for "Open file". */
-	public static final String OPEN = "Open";
-    /** Caption for "Open in PDF Viewer". */
+    /**
+     * Caption for the file menu.
+     */
+    public static final String FILE_MENU = "File";
+    /**
+     * Caption for "Open file".
+     */
+    public static final String OPEN = "Open";
+    /**
+     * Caption for "Open in PDF Viewer".
+     */
     public static final String OPENINVIEWER = "Open in PDF Viewer";
-    /** Caption for "Close file". */
-	public static final String CLOSE = "Close";
-    /** Caption for "Save as..." */
+    /**
+     * Caption for "Close file".
+     */
+    public static final String CLOSE = "Close";
+    /**
+     * Caption for "Save as..."
+     */
     public static final String SAVE_AS = "Save as...";
-	/** Caption for the help menu. */
-	public static final String HELP_MENU = "Help";
-	/** Caption for "Help about". */
-	public static final String ABOUT = "About";
+    /**
+     * Caption for the help menu.
+     */
+    public static final String HELP_MENU = "Help";
+    /**
+     * Caption for "Help about".
+     */
+    public static final String ABOUT = "About";
 
-	public static final String COMPARE_WITH = "Compare with...";
+    public static final String COMPARE_WITH = "Compare with...";
 
-	public static final String NEW_INDIRECT = "Add new indirect object";
-	/**
-	 * Caption for "Help versions".
-	 * @since iText 5.0.0 (renamed from VERSIONS)
-	 */
-	public static final String VERSION = "Version";
-	
-	/** The RupsController object. */
-	protected RupsController controller;
-	/** The action needed to open a file. */
-	protected FileOpenAction fileOpenAction;
-	/** The action needed to save a file. */
-	protected FileSaveAction fileSaverAction;
-	/** The HashMap with all the actions. */
-	protected HashMap<String, JMenuItem> items;
+    public static final String NEW_INDIRECT = "Add new indirect object";
+    /**
+     * Caption for "Help versions".
+     *
+     * @since iText 5.0.0 (renamed from VERSIONS)
+     */
+    public static final String VERSION = "Version";
 
-	protected FileCompareAction fileCompareAction;
-	/**
-	 * Creates a JMenuBar.
-	 * @param controller the controller to which this menu bar is added
-	 */
-	public RupsMenuBar(RupsController controller) {
-		this.controller = controller;
-		items = new HashMap<String, JMenuItem>();
-		fileOpenAction = new FileOpenAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
-		fileSaverAction = new FileSaveAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
-		fileCompareAction = new FileCompareAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
-		MessageAction message = new MessageAction();
-		JMenu file = new JMenu(FILE_MENU);
-		addItem(file, OPEN, fileOpenAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
-		addItem(file, CLOSE, new FileCloseAction(this.controller), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
+    /**
+     * The RupsController object.
+     */
+    protected RupsController controller;
+    /**
+     * The action needed to open a file.
+     */
+    protected FileOpenAction fileOpenAction;
+    /**
+     * The action needed to save a file.
+     */
+    protected FileSaveAction fileSaverAction;
+    /**
+     * The HashMap with all the actions.
+     */
+    protected HashMap<String, JMenuItem> items;
+
+    protected FileCompareAction fileCompareAction;
+
+    /**
+     * Creates a JMenuBar.
+     *
+     * @param controller the controller to which this menu bar is added
+     */
+    public RupsMenuBar(RupsController controller) {
+        this.controller = controller;
+        items = new HashMap<>();
+        fileOpenAction = new FileOpenAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+        fileSaverAction = new FileSaveAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+        fileCompareAction = new FileCompareAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+        MessageAction message = new MessageAction();
+        JMenu file = new JMenu(FILE_MENU);
+        addItem(file, OPEN, fileOpenAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
+        addItem(file, CLOSE, new FileCloseAction(this.controller), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, COMPARE_WITH, fileCompareAction, KeyStroke.getKeyStroke('Q', KeyEvent.CTRL_DOWN_MASK));
-		file.addSeparator();
+        file.addSeparator();
         addItem(file, OPENINVIEWER, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (Desktop.isDesktopSupported()) {
                     try {
                         PdfFile pdfFile = RupsMenuBar.this.controller.getPdfFile();
-                        if ( pdfFile != null ) {
-                            if ( pdfFile.getDirectory() != null ) {
+                        if (pdfFile != null) {
+                            if (pdfFile.getDirectory() != null) {
                                 File myFile = new File(pdfFile.getDirectory(), pdfFile.getFilename());
                                 Desktop.getDesktop().open(myFile);
                             }
@@ -138,70 +166,75 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         addItem(help, ABOUT, message);
         addItem(help, VERSION, message);
         add(help);
-		enableItems(false);
-	}
-	
-	/**
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 */
-	public void update(Observable observable, Object obj) {
-		if (observable instanceof RupsController && obj instanceof RupsEvent) {
-			RupsEvent event = (RupsEvent) obj;
-			switch (event.getType()) {
-				case RupsEvent.CLOSE_DOCUMENT_EVENT:
-					enableItems(false);
-					break;
-				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-					enableItems(true);
-					break;
-				case RupsEvent.ROOT_NODE_CLICKED_EVENT:
-					fileOpenAction.actionPerformed(null);
-			}
-		}
-	}
-	
-	/**
-	 * Create an item with a certain caption and a certain action,
-	 * then add the item to a menu.
-	 * @param menu	the menu to which the item has to be added
-	 * @param caption	the caption of the item
-	 * @param action	the action corresponding with the caption
-	 */
-	protected void addItem(JMenu menu, String caption, ActionListener action) {
+        enableItems(false);
+    }
+
+    /**
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
+    public void update(Observable observable, Object obj) {
+        if (observable instanceof RupsController && obj instanceof RupsEvent) {
+            RupsEvent event = (RupsEvent) obj;
+            switch (event.getType()) {
+                case RupsEvent.CLOSE_DOCUMENT_EVENT:
+                    enableItems(false);
+                    break;
+                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+                    enableItems(true);
+                    break;
+                case RupsEvent.ROOT_NODE_CLICKED_EVENT:
+                    fileOpenAction.actionPerformed(null);
+            }
+        }
+    }
+
+    /**
+     * Create an item with a certain caption and a certain action,
+     * then add the item to a menu.
+     *
+     * @param menu    the menu to which the item has to be added
+     * @param caption the caption of the item
+     * @param action  the action corresponding with the caption
+     */
+    protected void addItem(JMenu menu, String caption, ActionListener action) {
         addItem(menu, caption, action, null);
-	}
+    }
 
     protected void addItem(JMenu menu, String caption, ActionListener action, KeyStroke keyStroke) {
         JMenuItem item = new JMenuItem(caption);
         item.addActionListener(action);
-        if ( keyStroke != null ) {
+        if (keyStroke != null) {
             item.setAccelerator(keyStroke);
         }
         menu.add(item);
         items.put(caption, item);
     }
-	
-	/**
-	 * Enables/Disables a series of menu items.
-	 * @param enabled	true for enabling; false for disabling
-	 */
-	protected void enableItems(boolean enabled) {
-		enableItem(CLOSE, enabled);
+
+    /**
+     * Enables/Disables a series of menu items.
+     *
+     * @param enabled true for enabling; false for disabling
+     */
+    protected void enableItems(boolean enabled) {
+        enableItem(CLOSE, enabled);
         enableItem(SAVE_AS, enabled);
         enableItem(OPENINVIEWER, enabled);
-		enableItem(COMPARE_WITH, enabled);
+        enableItem(COMPARE_WITH, enabled);
         enableItem(NEW_INDIRECT, enabled);
-	}
-	
-	/**
-	 * Enables/disables a specific menu item
-	 * @param caption	the caption of the item that needs to be enabled/disabled
-	 * @param enabled	true for enabling; false for disabling
-	 */
-	protected void enableItem(String caption, boolean enabled) {
-		items.get(caption).setEnabled(enabled);
-	}
-	
-	/** A Serial Version UID. */
-	private static final long serialVersionUID = 6403040037592308742L;
+    }
+
+    /**
+     * Enables/disables a specific menu item
+     *
+     * @param caption the caption of the item that needs to be enabled/disabled
+     * @param enabled true for enabling; false for disabling
+     */
+    protected void enableItem(String caption, boolean enabled) {
+        items.get(caption).setEnabled(enabled);
+    }
+
+    /**
+     * A Serial Version UID.
+     */
+    private static final long serialVersionUID = 6403040037592308742L;
 }

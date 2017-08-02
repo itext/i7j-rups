@@ -3,12 +3,11 @@ package com.itextpdf.rups.io;
 import com.itextpdf.rups.event.CompareWithFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
 
-import java.awt.Component;
-import java.util.Observable;
-import java.util.Observer;
 import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.util.Observer;
 
-public class FileCompareAction extends FileChooserAction{
+public class FileCompareAction extends FileChooserAction {
 
 
     /**

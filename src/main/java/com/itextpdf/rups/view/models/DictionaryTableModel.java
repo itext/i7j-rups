@@ -44,9 +44,7 @@
  */
 package com.itextpdf.rups.view.models;
 
-import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.model.LoggerHelper;
@@ -54,13 +52,8 @@ import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.PdfSyntaxUtils;
 
-import java.awt.Component;
+import java.awt.*;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
-import javax.swing.table.AbstractTableModel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A TableModel in case we want to show a PDF dictionary in a JTable.
@@ -69,7 +62,9 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     private boolean pluginMode;
     private PdfSyntaxParser parser;
-    /**The owner component on witch will be displayed all messages*/
+    /**
+     * The owner component on witch will be displayed all messages
+     */
     private Component parent;
     /**
      * A serial version UID.
@@ -88,14 +83,16 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      * Creates the TableModel.
      *
      * @param dictionary the dictionary we want to show
+     * @param pluginMode the plugin mode
+     * @param parser     the pdf syntax parser
+     * @param owner      the owner
      */
     public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode, PdfSyntaxParser parser, Component owner) {
         this.pluginMode = pluginMode;
         this.dictionary = dictionary;
         this.parser = parser;
         this.parent = owner;
-        for (PdfName n : dictionary.keySet())
-            this.keys.add(n);
+        this.keys.addAll(dictionary.keySet());
     }
 
     /**
@@ -115,7 +112,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return pluginMode ? false : columnIndex < 2;
+        return !pluginMode && columnIndex < 2;
     }
 
     /**
@@ -250,7 +247,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     private void addRow(PdfName key, PdfObject value) {
         dictionary.put(key, value);
         int index = -1;
-        for (PdfName name: dictionary.keySet()) {
+        for (PdfName name : dictionary.keySet()) {
             ++index;
             if (name.equals(key)) {
                 break;
@@ -267,8 +264,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         PdfObject result = parser.parseString(value);
         if (result instanceof PdfName) {
             return (PdfName) result;
-        }
-        else {
+        } else {
             LoggerHelper.error(LoggerMessages.KEY_ISNT_PDFNAME, getClass());
             return null;
         }

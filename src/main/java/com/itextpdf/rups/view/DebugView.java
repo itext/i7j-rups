@@ -2,20 +2,11 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.model.SwingHelper;
 
-import java.awt.Color;
+import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Observable;
-import java.util.Observer;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Document;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 
 /**
  * A Class that is used for displaying debug messages to a JTextPane.
@@ -43,6 +34,8 @@ public class DebugView {
 
     /**
      * Console is a Singleton class: you can only get one DebugView.
+     *
+     * @return DebugView
      */
     public static synchronized DebugView getInstance() {
         if (debugView == null) {

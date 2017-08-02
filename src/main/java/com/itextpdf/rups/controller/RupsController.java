@@ -47,10 +47,14 @@ package com.itextpdf.rups.controller;
 import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.Version;
 import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
-import com.itextpdf.rups.event.*;
+import com.itextpdf.rups.event.CloseDocumentEvent;
+import com.itextpdf.rups.event.PostCompareEvent;
+import com.itextpdf.rups.event.PostNewIndirectObjectEvent;
+import com.itextpdf.rups.event.RootNodeClickedEvent;
+import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.event.TreeNodeClickedEvent;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -65,29 +69,29 @@ import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
-
-import java.io.*;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.StringTokenizer;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.StringTokenizer;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -98,7 +102,7 @@ public class RupsController extends Observable
 
     // member variables
 
-	/* file and controller */
+    /* file and controller */
     /**
      * The Pdf file that is currently open in the application.
      */
@@ -111,7 +115,7 @@ public class RupsController extends Observable
      */
     protected PdfReaderController readerController;
 
-	/* main components */
+    /* main components */
     /**
      * The JMenuBar for the RUPS application.
      */
@@ -135,6 +139,10 @@ public class RupsController extends Observable
 
     /**
      * Constructs the GUI components of the RUPS application.
+     *
+     * @param dimension the dimension
+     * @param frame the frame
+     * @param pluginMode the plugin mode
      */
     public RupsController(Dimension dimension, Frame frame, boolean pluginMode) {
         // creating components and controllers
@@ -189,7 +197,7 @@ public class RupsController extends Observable
 
                     try {
                         if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                            files = (java.util.List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                            files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
                         }
                         if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
 
@@ -208,7 +216,7 @@ public class RupsController extends Observable
                         } else {
                             loadFile(files.get(0), false);
                         }
-                    } catch (Exception e) {
+                    } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
                         JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
 
@@ -220,9 +228,6 @@ public class RupsController extends Observable
         masterPanel.add(masterComponent, BorderLayout.CENTER);
     }
 
-    /**
-     *
-     */
     public RupsController(Dimension dimension, File f, Frame frame, boolean pluginMode) {
         this(dimension, frame, pluginMode);
         loadFile(f, false);
@@ -230,6 +235,8 @@ public class RupsController extends Observable
 
     /**
      * Getter for the menubar.
+     *
+     * @return the menubar
      */
     public RupsMenuBar getMenuBar() {
         return menuBar;
@@ -237,6 +244,8 @@ public class RupsController extends Observable
 
     /**
      * Getter for the master component.
+     *
+     * @return the master component
      */
     public Component getMasterComponent() {
         return masterPanel;
@@ -255,14 +264,14 @@ public class RupsController extends Observable
                     closeRoutine();
                     break;
                 case RupsEvent.OPEN_FILE_EVENT:
-                    loadFile((File)event.getContent(), false);
+                    loadFile((File) event.getContent(), false);
                     break;
                 case RupsEvent.SAVE_TO_FILE_EVENT:
-                    saveFile((File)event.getContent());
+                    saveFile((File) event.getContent());
                     break;
                 case RupsEvent.COMPARE_WITH_FILE_EVENT:
                     highlightChanges(null);
-                    CompareTool.CompareResult result = compareWithFile((File)event.getContent());
+                    CompareTool.CompareResult result = compareWithFile((File) event.getContent());
                     highlightChanges(result);
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
@@ -287,6 +296,7 @@ public class RupsController extends Observable
 
     /**
      * @param file the file to load
+     * @param readOnly open the file read only or not
      */
     public void loadFile(File file, boolean readOnly) {
         try {
@@ -318,11 +328,7 @@ public class RupsController extends Observable
                 ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + Version.getInstance().getVersion());
             }
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
-        } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-        } catch (PdfException de) {
-            JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-        } catch (com.itextpdf.io.IOException ioe) {
+        } catch (IOException | PdfException | com.itextpdf.io.IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -335,7 +341,7 @@ public class RupsController extends Observable
      * @throws IOException
      */
     private byte[] readFileToByteArray(File file) throws IOException {
-        byte[] res = null;
+        byte[] res;
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
@@ -353,7 +359,7 @@ public class RupsController extends Observable
 
     private byte[] readStreamToByteArray(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int read = 0;
+        int read;
         byte[] buffer = new byte[4096];
         try {
             while ((read = inputStream.read(buffer)) != -1) {
@@ -399,12 +405,8 @@ public class RupsController extends Observable
 
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
             loadFile(file, false);
-        } catch (PdfException de) {
+        } catch (PdfException | IOException | com.itextpdf.io.IOException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-        } catch (com.itextpdf.io.IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
-        } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
                 if (fos != null) {
@@ -443,9 +445,8 @@ public class RupsController extends Observable
         } else {
             CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
             try {
-                CompareTool.CompareResult compareResult = compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-                return compareResult;
-            } catch (Exception e) {
+                return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
+            } catch (IOException e) {
                 LoggerHelper.warn(LoggerMessages.COMPARING_ERROR, e, getClass());
             }
         }
@@ -497,6 +498,8 @@ public class RupsController extends Observable
     /**
      * Clear all previous highlights and highlights the changes from the compare result.
      * If compare result is null will just clear all previous highlights.
+     *
+     * @param compareResult the compare result
      */
     public void highlightChanges(CompareTool.CompareResult compareResult) {
         readerController.update(this, new PostCompareEvent(compareResult));
@@ -536,7 +539,7 @@ public class RupsController extends Observable
             return;
         }
         if (selectednode instanceof PdfObjectTreeNode) {
-            readerController.update(this, new TreeNodeClickedEvent((PdfObjectTreeNode)selectednode));
+            readerController.update(this, new TreeNodeClickedEvent((PdfObjectTreeNode) selectednode));
         }
     }
 

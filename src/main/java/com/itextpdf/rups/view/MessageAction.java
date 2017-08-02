@@ -44,24 +44,22 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.kernel.Version;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JOptionPane;
-
-import com.itextpdf.kernel.Version;
-
 public class MessageAction implements ActionListener {
-	
-	public void actionPerformed(ActionEvent evt) {
-		String message = "Unspecified message";
-		if (RupsMenuBar.ABOUT.equals(evt.getActionCommand())) {
-			message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
-		}
-		else if (RupsMenuBar.VERSION.equals(evt.getActionCommand())) {
-			message = Version.getInstance().getVersion();
-		}
+
+    public void actionPerformed(ActionEvent evt) {
+        String message = "Unspecified message";
+        if (RupsMenuBar.ABOUT.equals(evt.getActionCommand())) {
+            message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
+        } else if (RupsMenuBar.VERSION.equals(evt.getActionCommand())) {
+            message = Version.getInstance().getVersion();
+        }
         JOptionPane.showMessageDialog(null, message);
-	}
+    }
 
 }

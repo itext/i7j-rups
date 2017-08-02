@@ -44,8 +44,6 @@
  */
 package com.itextpdf.rups.view.models;
 
-import javax.swing.JOptionPane;
-
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.model.LoggerHelper;
@@ -53,69 +51,77 @@ import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.PdfSyntaxUtils;
 
-import java.awt.Component;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * A TableModel in case we want to show a PDF array in a JTable.
  */
 public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
-	
-	/** A serial version UID. */
-	private static final long serialVersionUID = 4665485782853993708L;
-	/** The PDF array. */
-	protected PdfArray array;
+
+    /**
+     * A serial version UID.
+     */
+    private static final long serialVersionUID = 4665485782853993708L;
+    /**
+     * The PDF array.
+     */
+    protected PdfArray array;
 
     private boolean pluginMode;
     private PdfSyntaxParser parser;
-    /**The owner component on witch will be displayed all messages*/
+    /**
+     * The owner component on witch will be displayed all messages
+     */
     private Component parent;
 
-	private String tempValue = "";
+    private String tempValue = "";
 
-	/**
-	 * Creates the TableModel.
-	 * @param array a PDF array
-	 */
-	public PdfArrayTableModel(PdfArray array, boolean pluginMode, PdfSyntaxParser parser, Component parent) {
-		this.array = array;
+    /**
+     * Creates the TableModel.
+     *
+     * @param array      a PDF array
+     * @param pluginMode the plugin mode
+     * @param parser     the pdf syntax parser
+     * @param parent     the parent
+     */
+    public PdfArrayTableModel(PdfArray array, boolean pluginMode, PdfSyntaxParser parser, Component parent) {
+        this.array = array;
         this.pluginMode = pluginMode;
         this.parser = parser;
         this.parent = parent;
-	}
+    }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return pluginMode ? false : columnIndex < 1;
+        return !pluginMode && columnIndex < 1;
     }
 
     /**
-	 * @see javax.swing.table.TableModel#getColumnCount()
-	 */
-	public int getColumnCount() {
-		return pluginMode ? 1 : 2;
-	}
+     * @see javax.swing.table.TableModel#getColumnCount()
+     */
+    public int getColumnCount() {
+        return pluginMode ? 1 : 2;
+    }
 
-	/**
-	 * @see javax.swing.table.TableModel#getRowCount()
-	 */
-	public int getRowCount() {
-		return array.size() + 1;
-	}
+    /**
+     * @see javax.swing.table.TableModel#getRowCount()
+     */
+    public int getRowCount() {
+        return array.size() + 1;
+    }
 
-	/**
-	 * @see javax.swing.table.TableModel#getValueAt(int, int)
-	 */
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return rowIndex == array.size() ? tempValue : PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
-		default:
-			return null;
-		}
-	}
+    /**
+     * @see javax.swing.table.TableModel#getValueAt(int, int)
+     */
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return rowIndex == array.size() ? tempValue : PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
+            default:
+                return null;
+        }
+    }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
@@ -141,19 +147,19 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
         }
     }
 
-	/**
-	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-	 */
-	public String getColumnName(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return "Array";
-        case 1:
-            return "";
-		default:
-			return null;
-		}
-	}
+    /**
+     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+     */
+    public String getColumnName(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return "Array";
+            case 1:
+                return "";
+            default:
+                return null;
+        }
+    }
 
     @Override
     public void removeRow(int rowIndex) {
@@ -176,7 +182,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
             for (int i = 0; i < options.length; ++i) {
                 options[i] = i;
             }
-            int index = -1;
+            int index;
             while (true) {
                 String result = JOptionPane.showInputDialog(parent, "Choose array index", array.size());
                 if (result == null) {
@@ -185,7 +191,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                 }
                 try {
                     index = new Integer(result);
-                } catch (Exception any) {
+                } catch (NumberFormatException any) {
                     LoggerHelper.warn(LoggerMessages.NOT_AN_INTEGER_INDEX, any, getClass());
                     continue;
                 }
@@ -213,7 +219,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     }
 
     private void addRow(PdfObject value) {
-       addRow(array.size(), value);
+        addRow(array.size(), value);
     }
 }
 

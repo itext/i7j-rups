@@ -44,7 +44,6 @@
  */
 package com.itextpdf.rups.model;
 
-
 import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.crypto.BadPasswordException;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -62,84 +61,100 @@ import java.io.*;
  */
 public class PdfFile {
 
-	// member variables
-	
-	/** The directory where the file can be found (if the PDF was passed as a file). */
-	protected File directory = null;
-	
-	/** The original filename. */
-	protected String filename = null;
-	
-	/** The PdfReader object. */
-	//protected PdfReader reader = null;
+    // member variables
 
-	/** The PdfDocument object. */
-	protected PdfDocument document = null;
-	
-	/** The file permissions */
-	protected Permissions permissions = null;
+    /**
+     * The directory where the file can be found (if the PDF was passed as a file).
+     */
+    protected File directory = null;
 
-    /** Raw content */
+    /**
+     * The original filename.
+     */
+    protected String filename = null;
+
+    /** The PdfReader object. */
+    //protected PdfReader reader = null;
+
+    /**
+     * The PdfDocument object.
+     */
+    protected PdfDocument document = null;
+
+    /**
+     * The file permissions
+     */
+    protected Permissions permissions = null;
+
+    /**
+     * Raw content
+     */
     protected byte[] rawContent = null;
 
-	protected ByteArrayOutputStream baos = null;
+    protected ByteArrayOutputStream baos = null;
 
-	protected boolean readOnly = false;
-	
-	// constructors
-	/**
-	 * Constructs a PdfFile object.
-	 * @param	file	the File to read
-	 * @throws IOException 
-	 * @throws PdfException
-	 */
-	public PdfFile(File file) throws IOException, PdfException {
-		if (file == null)
-			throw new IOException("No file selected.");
-		directory = file.getParentFile();
-		filename = file.getName();
-		try {
-			readFile(new FileInputStream(file), false, readOnly);
-		}
-		catch(BadPasswordException bpe) {
-			readFile(new FileInputStream(file), true, readOnly);
-		}
-	}
-	
-	/**
-	 * Constructs a PdfFile object.
-	 * @param	file	the byte[] to read
-	 * @throws IOException 
-	 * @throws PdfException
-	 */
-	public PdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
+    protected boolean readOnly = false;
+
+    // constructors
+
+    /**
+     * Constructs a PdfFile object.
+     *
+     * @param file the File to read
+     * @throws IOException  an I/O exception
+     * @throws PdfException a PDF exception
+     */
+    public PdfFile(File file) throws IOException, PdfException {
+        if (file == null)
+            throw new IOException("No file selected.");
+        directory = file.getParentFile();
+        filename = file.getName();
+        try {
+            readFile(new FileInputStream(file), false, readOnly);
+        } catch (BadPasswordException bpe) {
+            readFile(new FileInputStream(file), true, readOnly);
+        }
+    }
+
+    /**
+     * Constructs a PdfFile object.
+     *
+     * @param file the byte[] to read
+     * @param readOnly read only
+     * @throws IOException  an I/O exception
+     * @throws PdfException a PDF exception
+     */
+    public PdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
         rawContent = file;
 
-		try {
-			readFile(new ByteArrayInputStream(file), false, readOnly);
-		}
-		catch(BadPasswordException bpe) {
-			readFile(new ByteArrayInputStream(file), true, readOnly);
-		}
-	}
-	
-	/**
-	 * Does the actual reading of the file into PdfReader and PDFFile.
-	 * @throws IOException
-	 * @throws PdfException
-	 */
-	protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
-		// reading the file into PdfReader
-		PdfReader reader;
-		PdfWriter writer;
-		permissions = new Permissions();
-		if (checkPass) {
-		    final JPasswordField passwordField = new JPasswordField(32);
+        try {
+            readFile(new ByteArrayInputStream(file), false, readOnly);
+        } catch (BadPasswordException bpe) {
+            readFile(new ByteArrayInputStream(file), true, readOnly);
+        }
+    }
 
-		    JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
+    /**
+     * Does the actual reading of the file into PdfReader and PDFFile.
+     *
+     * @param fis       inputstream
+     * @param checkPass check password
+     * @param readOnly  read only
+     * @throws IOException  an I/O exception
+     * @throws PdfException a PDF exception
+     */
+    protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
+        // reading the file into PdfReader
+        PdfReader reader;
+        PdfWriter writer;
+        permissions = new Permissions();
+        if (checkPass) {
+            final JPasswordField passwordField = new JPasswordField(32);
+
+            JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
                 private static final long serialVersionUID = 3695604506510737289L;
 
-				@Override
+                @Override
                 public void selectInitialValue() {
                     passwordField.requestFocusInWindow();
                 }
@@ -147,60 +162,60 @@ public class PdfFile {
 
             pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
 
-		    byte[] password = new String(passwordField.getPassword()).getBytes();
-		    reader = new PdfReader(fis, new ReaderProperties().setPassword(password));
-		    permissions.setEncrypted(true);
-		    permissions.setCryptoMode(reader.getCryptoMode());
-		    permissions.setPermissions((int)reader.getPermissions());
-		    if (reader.isOpenedWithFullPermission()) {
-		    	permissions.setOwnerPassword(password);
-		    	permissions.setUserPassword(reader.computeUserPassword());
-		    }
-		    else {
-		    	JOptionPane.showMessageDialog(null, "You opened the document using the user password instead of the owner password.");
-		    }
-		}
-		else {
-			reader = new PdfReader(fis);
-			permissions.setEncrypted(false);
-		}
-		baos = new ByteArrayOutputStream();
-		if (readOnly) {
-			document = new PdfDocument(reader);
-		} else {
-			writer = new PdfWriter(baos); //TODO: change writer mechanism
-			document = new PdfDocument(reader, writer);
-		}
-	}
+            byte[] password = new String(passwordField.getPassword()).getBytes();
+            reader = new PdfReader(fis, new ReaderProperties().setPassword(password));
+            permissions.setEncrypted(true);
+            permissions.setCryptoMode(reader.getCryptoMode());
+            permissions.setPermissions((int) reader.getPermissions());
+            if (reader.isOpenedWithFullPermission()) {
+                permissions.setOwnerPassword(password);
+                permissions.setUserPassword(reader.computeUserPassword());
+            } else {
+                JOptionPane.showMessageDialog(null, "You opened the document using the user password instead of the owner password.");
+            }
+        } else {
+            reader = new PdfReader(fis);
+            permissions.setEncrypted(false);
+        }
+        baos = new ByteArrayOutputStream();
+        if (readOnly) {
+            document = new PdfDocument(reader);
+        } else {
+            writer = new PdfWriter(baos); //TODO: change writer mechanism
+            document = new PdfDocument(reader, writer);
+        }
+    }
 
-	/**
-	 * Getter for iText's PdfDocument object.
-	 * @return	a PdfDocument object
-	 */
-	public PdfDocument getPdfDocument() {
-		return document;
-	}
-	
-	/**
-	 * Getter for the filename
-	 * @return the original filename
-	 * @since 5.0.3
-	 */
-	public String getFilename(){
-	    return filename;
-	}
+    /**
+     * Getter for iText's PdfDocument object.
+     *
+     * @return a PdfDocument object
+     */
+    public PdfDocument getPdfDocument() {
+        return document;
+    }
+
+    /**
+     * Getter for the filename
+     *
+     * @return the original filename
+     * @since 5.0.3
+     */
+    public String getFilename() {
+        return filename;
+    }
 
     public File getDirectory() {
         return directory;
     }
 
     public String getRawContent() {
-		try {
-			return new String(rawContent, "Cp1252");
-		} catch (UnsupportedEncodingException e) {
-			return "Wrong Encoding";
-		}
-	}
+        try {
+            return new String(rawContent, "Cp1252");
+        } catch (UnsupportedEncodingException e) {
+            return "Wrong Encoding";
+        }
+    }
 
     public void setDirectory(File directory) {
         this.directory = directory;
@@ -210,7 +225,7 @@ public class PdfFile {
         this.filename = filename;
     }
 
-	public ByteArrayOutputStream getByteArrayOutputStream() {
-		return baos;
-	}
+    public ByteArrayOutputStream getByteArrayOutputStream() {
+        return baos;
+    }
 }

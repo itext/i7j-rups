@@ -44,6 +44,8 @@
  */
 package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -54,9 +56,6 @@ import com.itextpdf.rups.view.itext.treenodes.PdfPageTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
 import com.itextpdf.rups.view.models.JTableAutoModelInterface;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfName;
-//import com.itextpdf.text.pdf.PdfPageLabels;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -71,127 +70,135 @@ import java.util.Observer;
  */
 public class PagesTable extends JTable implements JTableAutoModelInterface, Observer {
 
-	/** A list with page nodes. */
-	protected ArrayList<PdfPageTreeNode> list = new ArrayList<PdfPageTreeNode>();
-	/** Nodes in the FormTree correspond with nodes in the main PdfTree. */
-	protected PdfReaderController controller;
-	/***/
-	protected PageSelectionListener listener;
+    /**
+     * A list with page nodes.
+     */
+    protected ArrayList<PdfPageTreeNode> list = new ArrayList<PdfPageTreeNode>();
+    /**
+     * Nodes in the FormTree correspond with nodes in the main PdfTree.
+     */
+    protected PdfReaderController controller;
+    protected PageSelectionListener listener;
 
-	/**
-	 * Constructs a PagesTable.
-	 * @param	listener	the page navigation listener.
-	 */
-	public PagesTable(PdfReaderController controller, PageSelectionListener listener) {
-		this.controller = controller;
-		this.listener = listener;
-		setModel(new JTableAutoModel(this));
-	}
+    /**
+     * Constructs a PagesTable.
+     *
+     * @param controller the pdf reader controller
+     * @param listener   the page navigation listener
+     */
+    public PagesTable(PdfReaderController controller, PageSelectionListener listener) {
+        this.controller = controller;
+        this.listener = listener;
+        setModel(new JTableAutoModel(this));
+    }
 
-	/**
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 */
+    /**
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
     public void update(Observable observable, Object obj) {
-		if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-			RupsEvent event = (RupsEvent) obj;
-			switch (event.getType()) {
-				case RupsEvent.CLOSE_DOCUMENT_EVENT:
-					list = new ArrayList<PdfPageTreeNode>();
-					break;
-				case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-					ObjectLoader loader = (ObjectLoader)event.getContent();
-					String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
-					int i = 0;
-					TreeNodeFactory factory = loader.getNodes();
-					PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-					PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-					Enumeration<PdfPageTreeNode> p = new PageEnumerator((PdfDictionary)catalog.getPdfObject(), factory);
-					PdfPageTreeNode  child;
-					StringBuffer buf;
-					while (p.hasMoreElements()) {
-						child = p.nextElement();
-						buf = new StringBuffer("Page ");
-						buf.append(++i);
-						if (pageLabels != null) {
-							buf.append(" ( ");
-							buf.append(pageLabels[i - 1]);
-							buf.append(" )");
-						}
-						child.setUserObject(buf.toString());
-						list.add(child);
-					}
-					break;
-			}
-			setModel(new JTableAutoModel(this));
-			repaint();
-		}
-	}
+        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+            RupsEvent event = (RupsEvent) obj;
+            switch (event.getType()) {
+                case RupsEvent.CLOSE_DOCUMENT_EVENT:
+                    list = new ArrayList<PdfPageTreeNode>();
+                    break;
+                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+                    ObjectLoader loader = (ObjectLoader) event.getContent();
+                    String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
+                    int i = 0;
+                    TreeNodeFactory factory = loader.getNodes();
+                    PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+                    PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+                    Enumeration<PdfPageTreeNode> p = new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
+                    PdfPageTreeNode child;
+                    StringBuffer buf;
+                    while (p.hasMoreElements()) {
+                        child = p.nextElement();
+                        buf = new StringBuffer("Page ");
+                        buf.append(++i);
+                        if (pageLabels != null) {
+                            buf.append(" ( ");
+                            buf.append(pageLabels[i - 1]);
+                            buf.append(" )");
+                        }
+                        child.setUserObject(buf.toString());
+                        list.add(child);
+                    }
+                    break;
+            }
+            setModel(new JTableAutoModel(this));
+            repaint();
+        }
+    }
 
-	/**
-	 * @see javax.swing.JTable#getColumnCount()
-	 */
-	@Override
+    /**
+     * @see javax.swing.JTable#getColumnCount()
+     */
+    @Override
     public int getColumnCount() {
-		return 2;
-	}
+        return 2;
+    }
 
-	/**
-	 * @see javax.swing.JTable#getRowCount()
-	 */
-	@Override
+    /**
+     * @see javax.swing.JTable#getRowCount()
+     */
+    @Override
     public int getRowCount() {
-		return list.size();
-	}
+        return list.size();
+    }
 
     /**
      * @see javax.swing.JTable#getValueAt(int, int)
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-    	if (getRowCount() == 0) return null;
-		switch (columnIndex) {
-		case 0:
-			return "Object " + list.get(rowIndex).getNumber();
-		case 1:
-			return list.get(rowIndex);
-		}
-		return null;
-	}
-	/**
-	 * @see javax.swing.JTable#getColumnName(int)
-	 */
-	@Override
-    public String getColumnName(int columnIndex) {
-		switch (columnIndex) {
-		case 0:
-			return "Object";
-		case 1:
-			return "Page";
-		default:
-			return null;
-		}
-	}
+        if (getRowCount() == 0) return null;
+        switch (columnIndex) {
+            case 0:
+                return "Object " + list.get(rowIndex).getNumber();
+            case 1:
+                return list.get(rowIndex);
+        }
+        return null;
+    }
 
-	/**
-	 * @see javax.swing.JTable#valueChanged(javax.swing.event.ListSelectionEvent)
-	 */
-	@Override
-	public void valueChanged(ListSelectionEvent evt) {
-		if (evt != null)
-			super.valueChanged(evt);
-		if (controller == null)
-			return;
-		if (getRowCount() > 0) {
+    /**
+     * @see javax.swing.JTable#getColumnName(int)
+     */
+    @Override
+    public String getColumnName(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return "Object";
+            case 1:
+                return "Page";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * @see javax.swing.JTable#valueChanged(javax.swing.event.ListSelectionEvent)
+     */
+    @Override
+    public void valueChanged(ListSelectionEvent evt) {
+        if (evt != null)
+            super.valueChanged(evt);
+        if (controller == null)
+            return;
+        if (getRowCount() > 0) {
             int selectedRow = getSelectedRow();
-            if ( selectedRow >= 0 ) {
+            if (selectedRow >= 0) {
                 controller.selectNode(list.get(selectedRow));
                 if (listener != null)
                     listener.gotoPage(getSelectedRow() + 1);
             }
-		}
-	}
+        }
+    }
 
-	/** A serial version UID. */
-	private static final long serialVersionUID = -6523261089453886508L;
+    /**
+     * A serial version UID.
+     */
+    private static final long serialVersionUID = -6523261089453886508L;
 
 }

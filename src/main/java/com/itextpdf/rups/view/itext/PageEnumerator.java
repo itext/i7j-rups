@@ -44,49 +44,48 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-
-import com.itextpdf.rups.model.TreeNodeFactory;
-import com.itextpdf.rups.view.itext.treenodes.PdfPageTreeNode;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.itext.treenodes.PdfPageTreeNode;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 class PageEnumerator implements Enumeration<PdfPageTreeNode> {
 
-	protected List<PdfPageTreeNode> pages = new ArrayList<PdfPageTreeNode>();
-	protected TreeNodeFactory factory;
-	protected int cursor = 0;
-	
-	public PageEnumerator(PdfDictionary catalog, TreeNodeFactory factory) {
-		this.factory = factory;
-		expand( (PdfIndirectReference)catalog.get(PdfName.Pages, false), catalog.getAsDictionary(PdfName.Pages) );
-	}
-	
-	public boolean hasMoreElements() {
-		return cursor < pages.size();
-	}
+    protected List<PdfPageTreeNode> pages = new ArrayList<>();
+    protected TreeNodeFactory factory;
+    protected int cursor = 0;
 
-	public PdfPageTreeNode nextElement() {
-		return pages.get(cursor++);
-	}
+    public PageEnumerator(PdfDictionary catalog, TreeNodeFactory factory) {
+        this.factory = factory;
+        expand((PdfIndirectReference) catalog.get(PdfName.Pages, false), catalog.getAsDictionary(PdfName.Pages));
+    }
 
-	public void expand(PdfIndirectReference ref, PdfDictionary dict) {
-		if (dict == null)
-			return;
-		if (PdfName.Pages.equals(dict.getAsName(PdfName.Type))) {
-			PdfArray kids = dict.getAsArray(PdfName.Kids);
-			if (kids != null) {
-				for (int i = 0; i < kids.size(); i++) {
-					expand((PdfIndirectReference)kids.get(i, false), kids.getAsDictionary(i));
-				}
-			}
-		}
-		else if (PdfName.Page.equals(dict.getAsName(PdfName.Type))) {
-			pages.add((PdfPageTreeNode)factory.getNode(ref.getObjNumber()));
-		}
-	}
+    public boolean hasMoreElements() {
+        return cursor < pages.size();
+    }
+
+    public PdfPageTreeNode nextElement() {
+        return pages.get(cursor++);
+    }
+
+    public void expand(PdfIndirectReference ref, PdfDictionary dict) {
+        if (dict == null)
+            return;
+        if (PdfName.Pages.equals(dict.getAsName(PdfName.Type))) {
+            PdfArray kids = dict.getAsArray(PdfName.Kids);
+            if (kids != null) {
+                for (int i = 0; i < kids.size(); i++) {
+                    expand((PdfIndirectReference) kids.get(i, false), kids.getAsDictionary(i));
+                }
+            }
+        } else if (PdfName.Page.equals(dict.getAsName(PdfName.Type))) {
+            pages.add((PdfPageTreeNode) factory.getNode(ref.getObjNumber()));
+        }
+    }
 }

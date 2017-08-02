@@ -4,8 +4,6 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import javax.swing.text.AbstractDocument;
-
 public class NodeAddDictChildEvent extends RupsEvent {
 
     Content content;

@@ -1,32 +1,19 @@
 package com.itextpdf.rups.view;
 
-import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.NewIndirectObjectEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
 
@@ -40,7 +27,13 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
     private String btnString1 = "Enter";
     private String btnString2 = "Cancel";
 
-    /** Creates the reusable dialog. */
+    /**
+     * Creates the reusable dialog.
+     *
+     * @param parent parent Frame
+     * @param title  dialog title
+     * @param parser PdfSyntaxParser
+     */
     public NewIndirectPdfObjectDialog(Frame parent, String title, PdfSyntaxParser parser) {
         super(parent, true);
 
@@ -49,7 +42,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         this.parser = parser;
         textArea = new JTextArea();
         textArea.setMinimumSize(new Dimension(100, 200));
-        type = new JComboBox<String>(new String [] {"Stream", "Other"});
+        type = new JComboBox<String>(new String[]{"Stream", "Other"});
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setMinimumSize(new Dimension(100, 200));
@@ -102,7 +95,9 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         optionPane.addPropertyChangeListener(this);
     }
 
-    /** This method reacts to state changes in the option pane. */
+    /**
+     * This method reacts to state changes in the option pane.
+     */
     public void propertyChange(PropertyChangeEvent e) {
         String prop = e.getPropertyName();
 
@@ -134,7 +129,9 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         }
     }
 
-    /** This method clears the dialog and hides it. */
+    /**
+     * This method clears the dialog and hides it.
+     */
     public void clearAndHide() {
         textArea.setText(null);
         setVisible(false);

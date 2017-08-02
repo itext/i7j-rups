@@ -72,16 +72,16 @@ public class PdfTreeContextMenuMouseListener extends ContextMenuMouseListener {
 
         int row = tree.getClosestRowForLocation(event.getX(), event.getY());
         tree.setSelectionRow(row);
-        TreeSelectionModel selectionModel = ((PdfTree)component).getSelectionModel();
+        TreeSelectionModel selectionModel = ((PdfTree) component).getSelectionModel();
         TreePath[] paths = selectionModel.getSelectionPaths();
 
-        if ( paths == null || paths.length < 1 ) {
+        if (paths == null || paths.length < 1) {
             return false;
         }
 
         PdfObjectTreeNode lastPath = ((PdfObjectTreeNode) paths[0].getLastPathComponent());
 
-        if ( !lastPath.isStream() ) {
+        if (!lastPath.isStream()) {
             return false;
         }
 

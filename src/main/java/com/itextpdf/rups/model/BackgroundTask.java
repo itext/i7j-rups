@@ -44,8 +44,7 @@
  */
 package com.itextpdf.rups.model;
 
-import java.lang.reflect.InvocationTargetException;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 /**
  * Allows you to perform long lasting tasks in background.
@@ -53,10 +52,9 @@ import javax.swing.SwingUtilities;
  * (included in the JDK) instead of this custom Event Dispatching
  * code.
  */
-
 public abstract class BackgroundTask {
 
-	/**
+    /**
      * Inner class that holds the reference to the thread.
      */
     private static class ThreadWrapper {
@@ -66,7 +64,7 @@ public abstract class BackgroundTask {
         synchronized void clear() { thread = null; }
     }
 
-	/** A wrapper for the tread that executes a time-consuming task. */
+    /** A wrapper for the tread that executes a time-consuming task. */
     private ThreadWrapper thread;
 
     /**
@@ -76,15 +74,16 @@ public abstract class BackgroundTask {
      */
     public BackgroundTask() {
         final Runnable doFinished = new Runnable() {
-           public void run() { finished(); }
+            public void run() {
+                finished();
+            }
         };
 
         Runnable doConstruct = new Runnable() {
             public void run() {
                 try {
-                	doTask();
-                }
-                finally {
+                    doTask();
+                } finally {
                     thread.clear();
                 }
                 SwingUtilities.invokeLater(doFinished);
@@ -111,6 +110,8 @@ public abstract class BackgroundTask {
 
     /**
      * Wait for thread to finish what it's doing
+     *
+     * @throws InterruptedException an exception
      */
     public void join() throws InterruptedException {
         Thread t = thread.get();

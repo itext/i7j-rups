@@ -44,14 +44,17 @@
  */
 package com.itextpdf.rups.view.icons;
 
+import javax.swing.*;
 import java.awt.event.ActionListener;
-
-import javax.swing.Icon;
 
 /**
  * Special ActionListener to be implemented by Buttons that need an Icon.
  */
 public interface IconActionListener extends ActionListener {
-	/** Returns an Icon. */
-	public Icon getIcon();
+    /**
+     * Returns an Icon.
+     *
+     * @return an icon
+     */
+    Icon getIcon();
 }

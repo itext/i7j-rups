@@ -44,8 +44,8 @@
  */
 package com.itextpdf.rups.view.itext.treenodes;
 
-import java.util.List;
-
+import com.itextpdf.rups.view.icons.IconFetcher;
+import com.itextpdf.rups.view.icons.IconTreeNode;
 import org.dom4j.Attribute;
 import org.dom4j.Branch;
 import org.dom4j.Comment;
@@ -56,93 +56,91 @@ import org.dom4j.Node;
 import org.dom4j.ProcessingInstruction;
 import org.dom4j.Text;
 
-import com.itextpdf.rups.view.icons.IconFetcher;
-import com.itextpdf.rups.view.icons.IconTreeNode;
+import java.util.List;
 
 public class XdpTreeNode extends IconTreeNode {
 
-	/** A serial version UID. */
-	private static final long serialVersionUID = -6431790925424045933L;
+    /**
+     * A serial version UID.
+     */
+    private static final long serialVersionUID = -6431790925424045933L;
 
-	/**
-	 * Constructs an XdpTreeNode
-	 * @param node	the XML node
-	 */
-	@SuppressWarnings("unchecked")
+    /**
+     * Constructs an XdpTreeNode
+     *
+     * @param node the XML node
+     */
+    @SuppressWarnings("unchecked")
     public XdpTreeNode(Node node) {
-		super(null, node);
-		if (node instanceof Element) {
-			Element element = (Element)node;
-			addChildNodes(element.attributes());
-		}
-		if (node instanceof Branch) {
-			Branch branch = (Branch) node;
-			addChildNodes(branch.content());
-		}
-		if (node instanceof Attribute) {
-			icon = IconFetcher.getIcon("attribute.png");
-			return;
-    	}
-    	if (node instanceof Text) {
-    		icon = IconFetcher.getIcon("text.png");
-    		return;
-    	}
-    	if (node instanceof ProcessingInstruction) {
-    		icon = IconFetcher.getIcon("pi.png");
-    		return;
-    	}
-    	if (node instanceof Document) {
-    		icon = IconFetcher.getIcon("xfa.png");
-    		return;
-    	}
-    	icon = IconFetcher.getIcon("tag.png");
-	}
+        super(null, node);
+        if (node instanceof Element) {
+            Element element = (Element) node;
+            addChildNodes(element.attributes());
+        }
+        if (node instanceof Branch) {
+            Branch branch = (Branch) node;
+            addChildNodes(branch.content());
+        }
+        if (node instanceof Attribute) {
+            icon = IconFetcher.getIcon("attribute.png");
+            return;
+        }
+        if (node instanceof Text) {
+            icon = IconFetcher.getIcon("text.png");
+            return;
+        }
+        if (node instanceof ProcessingInstruction) {
+            icon = IconFetcher.getIcon("pi.png");
+            return;
+        }
+        if (node instanceof Document) {
+            icon = IconFetcher.getIcon("xfa.png");
+            return;
+        }
+        icon = IconFetcher.getIcon("tag.png");
+    }
 
-	private void addChildNodes(List <Node>list) {
-		for (Node node : list) {
-			Node n = node;
-			if (n instanceof Namespace) continue;
-			if (n instanceof Comment) continue;
-			this.add(new XdpTreeNode(n));
-		}
-	}
+    private void addChildNodes(List<Node> list) {
+        for (Node node : list) {
+            Node n = node;
+            if (n instanceof Namespace) continue;
+            if (n instanceof Comment) continue;
+            this.add(new XdpTreeNode(n));
+        }
+    }
 
-	public Node getNode() {
-    	return (Node)getUserObject();
-	}
+    public Node getNode() {
+        return (Node) getUserObject();
+    }
 
-	@Override
+    @Override
     public String toString() {
-		Node node = getNode();
-		if (node instanceof Element) {
-			Element e = (Element)node;
-			return e.getName();
-		}
-		if (node instanceof Attribute) {
-			Attribute a = (Attribute)node;
-			StringBuffer buf = new StringBuffer();
-			buf.append(a.getName());
-			buf.append("=\"");
-			buf.append(a.getValue());
-			buf.append('"');
-			return buf.toString();
-		}
-		if (node instanceof Text) {
-			Text t = (Text)node;
-			return t.getText();
-		}
-		if (node instanceof ProcessingInstruction) {
-			ProcessingInstruction pi = (ProcessingInstruction)node;
-			StringBuffer buf = new StringBuffer("<?");
-			buf.append(pi.getName());
-			buf.append(' ');
-			buf.append(pi.getText());
-			buf.append("?>");
-			return buf.toString();
-		}
-		if (node instanceof Document) {
-			return "XFA Document";
-		}
-		return getNode().toString();
-	}
+        Node node = getNode();
+        if (node instanceof Element) {
+            Element e = (Element) node;
+            return e.getName();
+        }
+        if (node instanceof Attribute) {
+            Attribute a = (Attribute) node;
+            return a.getName() +
+                    "=\"" +
+                    a.getValue() +
+                    '"';
+        }
+        if (node instanceof Text) {
+            Text t = (Text) node;
+            return t.getText();
+        }
+        if (node instanceof ProcessingInstruction) {
+            ProcessingInstruction pi = (ProcessingInstruction) node;
+            return "<?" + pi.getName() +
+                    ' ' +
+                    pi.getText() +
+                    "?>";
+        }
+        if (node instanceof Document) {
+            return "XFA Document";
+        }
+        return getNode().toString();
+    }
 }

@@ -10,14 +10,11 @@ import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.JOptionPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PdfSyntaxParser {
     private int openArraysCount = 0;
@@ -71,7 +68,7 @@ public class PdfSyntaxParser {
                     result = null;
                 }
             }
-        } catch (Exception any) {
+        } catch (IOException | RuntimeException any) {
             LoggerHelper.warn(LoggerMessages.CANNOT_PARSE_PDF_OBJECT, any, getClass());
             result = null;
         }
