@@ -61,6 +61,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
@@ -175,9 +176,9 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
             PdfObjectTreeNode kids = factory.getChildNode(object_node, PdfName.K);
             loadKids(factory, leaf, kids);
         } else if (object_node.isArray()) {
-            Enumeration<PdfObjectTreeNode> children = object_node.children();
+            Enumeration<TreeNode> children = object_node.children();
             while (children.hasMoreElements()) {
-                loadKids(factory, structure_node, children.nextElement());
+                loadKids(factory, structure_node, (PdfObjectTreeNode) children.nextElement());
             }
         } else if (object_node.isIndirectReference()) {
             loadKids(factory, structure_node, (PdfObjectTreeNode) object_node.getFirstChild());

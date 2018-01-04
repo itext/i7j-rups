@@ -47,6 +47,7 @@ package com.itextpdf.rups.view.itext.treenodes;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.io.OutputStreamResource;
 
+import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -93,11 +94,11 @@ public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
      */
     @SuppressWarnings("unchecked")
     public void writeTo(OutputStream os) throws IOException {
-        Enumeration<FormTreeNode> children = this.children();
+        Enumeration<TreeNode> children = this.children();
         FormTreeNode node;
         PdfStream stream;
         while (children.hasMoreElements()) {
-            node = children.nextElement();
+            node = (FormTreeNode) children.nextElement();
             stream = (PdfStream) node.getCorrespondingPdfObjectNode().getPdfObject();
             os.write(stream.getBytes());
         }

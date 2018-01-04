@@ -63,6 +63,7 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Observable;
@@ -179,9 +180,9 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
         if (object_node.isIndirectReference()) {
             loadFields(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
         } else if (object_node.isArray()) {
-            Enumeration<PdfObjectTreeNode> children = object_node.children();
+            Enumeration<TreeNode> children = object_node.children();
             while (children.hasMoreElements()) {
-                loadFields(factory, form_node, children.nextElement());
+                loadFields(factory, form_node, (PdfObjectTreeNode) children.nextElement());
             }
         } else if (object_node.isDictionary()) {
             FormTreeNode leaf = new FormTreeNode(object_node);
@@ -205,12 +206,12 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
         if (object_node.isIndirectReference()) {
             loadXfa(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
         } else if (object_node.isArray()) {
-            Enumeration<PdfObjectTreeNode> children = object_node.children();
+            Enumeration<TreeNode> children = object_node.children();
             PdfObjectTreeNode key;
             PdfObjectTreeNode value;
             while (children.hasMoreElements()) {
-                key = children.nextElement();
-                value = children.nextElement();
+                key = (PdfObjectTreeNode) children.nextElement();
+                value = (PdfTrailerTreeNode) children.nextElement();
                 if (value.isIndirectReference()) {
                     factory.expandNode(value);
                     value = (PdfObjectTreeNode) value.getFirstChild();
