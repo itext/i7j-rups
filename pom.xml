@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>itext-rups</artifactId>
-  <version>7.0.2-SNAPSHOT</version>
+  <version>7.1.2-SNAPSHOT</version>
 
   <name>itext-rups</name>
   <description>RUPS, a tool to view PDF structure in a Swing GUI.</description>
