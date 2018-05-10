@@ -77,6 +77,11 @@ import java.util.Observer;
 public class FormTree extends JTree implements TreeSelectionListener, Observer {
 
     /**
+     * A serial version UID.
+     */
+    private static final long serialVersionUID = -3584003547303700407L;
+
+    /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
     protected PdfReaderController controller;
@@ -193,37 +198,6 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
     }
 
     /**
-     * Method that will load the nodes that refer to XFA streams.
-     *
-     * @param form_node   the parent node in the form tree
-     * @param object_node the object node that will be used to create a child node
-     */
-    @SuppressWarnings("unchecked")
-    private void loadXfa(TreeNodeFactory factory, XfaTreeNode form_node, PdfObjectTreeNode object_node) {
-        if (object_node == null)
-            return;
-        factory.expandNode(object_node);
-        if (object_node.isIndirectReference()) {
-            loadXfa(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
-        } else if (object_node.isArray()) {
-            Enumeration<TreeNode> children = object_node.children();
-            PdfObjectTreeNode key;
-            PdfObjectTreeNode value;
-            while (children.hasMoreElements()) {
-                key = (PdfObjectTreeNode) children.nextElement();
-                value = (PdfTrailerTreeNode) children.nextElement();
-                if (value.isIndirectReference()) {
-                    factory.expandNode(value);
-                    value = (PdfObjectTreeNode) value.getFirstChild();
-                }
-                form_node.addPacket(key.getPdfObject().toString(), value);
-            }
-        } else if (object_node.isStream()) {
-            form_node.addPacket("xdp", object_node);
-        }
-    }
-
-    /**
      * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
      */
     public void valueChanged(TreeSelectionEvent evt) {
@@ -246,8 +220,34 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
     }
 
     /**
-     * A serial version UID.
+     * Method that will load the nodes that refer to XFA streams.
+     *
+     * @param form_node   the parent node in the form tree
+     * @param object_node the object node that will be used to create a child node
      */
-    private static final long serialVersionUID = -3584003547303700407L;
+    @SuppressWarnings("unchecked")
+    void loadXfa(TreeNodeFactory factory, XfaTreeNode form_node, PdfObjectTreeNode object_node) {
+        if (object_node == null)
+            return;
+        factory.expandNode(object_node);
+        if (object_node.isIndirectReference()) {
+            loadXfa(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
+        } else if (object_node.isArray()) {
+            Enumeration<TreeNode> children = object_node.children();
+            PdfObjectTreeNode key;
+            PdfObjectTreeNode value;
+            while (children.hasMoreElements()) {
+                key = (PdfObjectTreeNode) children.nextElement();
+                value = (PdfObjectTreeNode) children.nextElement();
+                if (value.isIndirectReference()) {
+                    factory.expandNode(value);
+                    value = (PdfObjectTreeNode) value.getFirstChild();
+                }
+                form_node.addPacket(key.getPdfObject().toString(), value);
+            }
+        } else if (object_node.isStream()) {
+            form_node.addPacket("xdp", object_node);
+        }
+    }
 
 }
