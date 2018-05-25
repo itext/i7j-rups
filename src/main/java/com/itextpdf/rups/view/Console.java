@@ -124,7 +124,7 @@ public class Console extends Observable implements Observer {
     }
 
     private void updateTextPane(final String msg, final String type) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 try {
                     Document doc = textArea.getDocument();
@@ -139,11 +139,11 @@ public class Console extends Observable implements Observer {
                 } catch (BadLocationException ignored) {
                 }
             }
-        }, true);
+        });
     }
 
     private void clearWithBuffer(final String message) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -161,7 +161,7 @@ public class Console extends Observable implements Observer {
                 setChanged();
                 notifyObservers(new ConsoleWriteEvent());
             }
-        }, true);
+        });
     }
 
     /**

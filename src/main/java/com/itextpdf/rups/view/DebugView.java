@@ -49,7 +49,7 @@ public class DebugView {
     }
 
     private void updateTextPane(final String msg) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 Document doc = textArea.getDocument();
                 if (textArea.getLineCount() >= MAX_LINES) {
@@ -65,7 +65,7 @@ public class DebugView {
                 textArea.append(msg);
                 textArea.setCaretPosition(textArea.getDocument().getLength());
             }
-        }, true);
+        });
     }
 
     static class DebugOutputStream extends OutputStream {

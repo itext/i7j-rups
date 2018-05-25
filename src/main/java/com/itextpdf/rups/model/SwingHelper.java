@@ -5,25 +5,17 @@ import java.lang.reflect.InvocationTargetException;
 
 public class SwingHelper {
 
-    public static void invokeSync(Runnable runnable) {
-        invokeSync(runnable, false);
-    }
-
-    public static void invokeSync(Runnable runnable, boolean isSilent) {
+    /**
+     * If the current thread is an AWT dispatch thread then runnable will be invoked immediately.
+     * Otherwise it will be executed asynchronously.
+     *
+     * @param runnable
+     */
+    public static void invoke(Runnable runnable) {
         if (SwingUtilities.isEventDispatchThread()) {
             runnable.run();
         } else {
-            try {
-                SwingUtilities.invokeAndWait(runnable);
-            } catch (InterruptedException e) {
-                if (!isSilent) {
-                    LoggerHelper.warn(LoggerMessages.INVOKING_RUNNABLE_ERROR, e, SwingHelper.class);
-                }
-            } catch (InvocationTargetException e) {
-                if (!isSilent) {
-                    LoggerHelper.warn(LoggerMessages.RUNNABLE_CAUSE_EXCEPTION, e, SwingHelper.class);
-                }
-            }
+            SwingUtilities.invokeLater(runnable);
         }
     }
 }

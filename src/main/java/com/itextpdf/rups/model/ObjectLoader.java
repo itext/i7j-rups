@@ -135,26 +135,26 @@ public class ObjectLoader extends BackgroundTask {
     public void doTask() {
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 progress.setMessage("Reading the Cross-Reference table");
                 progress.setTotal(n);
             }
         });
         while (objects.storeNextObject()) {
-            SwingHelper.invokeSync(new Runnable() {
+            SwingHelper.invoke(new Runnable() {
                 public void run() {
                     progress.setValue(objects.getCurrent());
                 }
             });
         }
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 progress.setTotal(0);
             }
         });
         nodes = new TreeNodeFactory(objects);
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 progress.setMessage("Updating GUI");
             }

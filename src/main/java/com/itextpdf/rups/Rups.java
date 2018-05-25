@@ -39,7 +39,7 @@ public class Rups {
      */
     public static Rups startNewApplication(File f, final int onCloseOperation) {
         final Rups rups = new Rups();
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame();
                 // defines the size and location
@@ -57,7 +57,7 @@ public class Rups {
 
     public static Rups startNewPlugin(final JComponent comp, final Dimension size, final Frame frame) {
         final Rups rups = new Rups();
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 RupsController controller = new RupsController(size, frame, true);
                 comp.add(controller.getMasterComponent());
@@ -68,7 +68,7 @@ public class Rups {
     }
 
     public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 getController().loadFile(f, readOnly);
             }
@@ -77,7 +77,7 @@ public class Rups {
     }
 
     public void loadDocumentFromStream(final InputStream inputStream, final String name, final File directory, final boolean readOnly) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 getController().loadFileFromStream(inputStream, name, directory, readOnly);
             }
@@ -86,7 +86,7 @@ public class Rups {
     }
 
     public void loadDocumentFromRawContent(final byte[] bytes, final String name, final File directory, final boolean readOnly) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 getController().loadRawContent(bytes, name, directory, readOnly);
             }
@@ -95,7 +95,7 @@ public class Rups {
     }
 
     public void closeDocument() {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 getController().closeRoutine();
             }
@@ -103,7 +103,7 @@ public class Rups {
     }
 
     public void saveDocumentAs(final File f) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 getController().saveFile(f);
             }
@@ -115,7 +115,7 @@ public class Rups {
     }
 
     public boolean compareWithDocument(final PdfDocument document, final boolean showResults) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 lastCompareResult = getController().compareWithDocument(document);
                 if (!showResults) {
@@ -131,7 +131,7 @@ public class Rups {
     }
 
     public boolean compareWithFile(final File file, final boolean showResults) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 lastCompareResult = getController().compareWithFile(file);
                 if (!showResults) {
@@ -147,7 +147,7 @@ public class Rups {
     }
 
     public boolean compareWithStream(final InputStream is, final boolean showResults) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 lastCompareResult = getController().compareWithStream(is);
                 if (!showResults) {
@@ -159,7 +159,7 @@ public class Rups {
     }
 
     public void highlightLastSavedChanges() {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 getController().highlightChanges(lastCompareResult);
             }
@@ -167,7 +167,7 @@ public class Rups {
     }
 
     public void clearHighlights() {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             @Override
             public void run() {
                 getController().highlightChanges(null);
@@ -176,12 +176,12 @@ public class Rups {
     }
 
     public void logToConsole(final String message) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             @Override
             public void run() {
                 LoggerHelper.info(message, getClass());
             }
-        }, true);
+        });
     }
 
     protected static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
