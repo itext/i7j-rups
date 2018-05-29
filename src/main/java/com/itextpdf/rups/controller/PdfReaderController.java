@@ -162,7 +162,7 @@ public class PdfReaderController extends Observable implements Observer {
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
         JPopupMenu menu = PdfTreeContextMenu.getPopupMenu(pdfTree);
-        pdfTree.add(menu);
+        pdfTree.setComponentPopupMenu(menu);
         pdfTree.addMouseListener(new PdfTreeContextMenuMouseListener(menu, pdfTree));
         addObserver(pdfTree);
 
