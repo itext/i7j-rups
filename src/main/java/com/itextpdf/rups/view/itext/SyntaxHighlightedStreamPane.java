@@ -150,7 +150,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         this.controller = controller;
 
         popupMenu = new StreamPanelContextMenu(text, this, pluginMode);
-        text.add(popupMenu);
+        text.setComponentPopupMenu(popupMenu);
         text.addMouseListener(new ContextMenuMouseListener(popupMenu, text));
 
         manager = new UndoManager();
