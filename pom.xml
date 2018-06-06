@@ -336,5 +336,40 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>mac</id>
+      <build>
+        <finalName>RUPS-${project.version}</finalName>
+        <resources>
+          <resource>
+            <directory>src/main/resources</directory>
+          </resource>
+          <resource>
+            <directory>config</directory>
+          </resource>
+        </resources>
+        <plugins>
+          <plugin>
+            <groupId>sh.tak.appbundler</groupId>
+            <artifactId>appbundle-maven-plugin</artifactId>
+            <version>1.2.0</version>
+            <configuration>
+                <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
+                <dictionaryFile>Info.plist</dictionaryFile> -->
+                <generateDiskImageFile>false</generateDiskImageFile>
+                <iconFile>logo.icns</iconFile>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>bundle</goal>
+                    </goals>
+                </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
