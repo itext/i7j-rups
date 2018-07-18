@@ -163,7 +163,13 @@ public class ObjectLoader extends BackgroundTask {
 
     @Override
     public void finished() {
-        observer.update(null, new PostOpenDocumentEvent(this));
+        try {
+            observer.update(null, new PostOpenDocumentEvent(this));
+        } catch (Exception ex) {
+            ErrorDialogPane.showErrorDialog(progress, ex);
+            // print to console as well
+            ex.printStackTrace();
+        }
         progress.setVisible(false);
     }
 }
