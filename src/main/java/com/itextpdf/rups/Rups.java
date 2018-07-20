@@ -53,6 +53,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Observer;
 
 public class Rups {
 
@@ -247,4 +248,12 @@ public class Rups {
     private boolean isEqual() {
         return lastCompareResult != null && lastCompareResult.isOk();
     }
+
+    public void registerEventObserver(Observer observer) {
+        getController().addObserver(observer);
+    }
+    public void unregisterEventObserver(Observer observer) {
+        getController().deleteObserver(observer);
+    }
+
 }

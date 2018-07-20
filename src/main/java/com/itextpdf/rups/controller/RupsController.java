@@ -55,6 +55,7 @@ import com.itextpdf.rups.event.PostNewIndirectObjectEvent;
 import com.itextpdf.rups.event.RootNodeClickedEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.event.TreeNodeClickedEvent;
+import com.itextpdf.rups.event.backgroundTask.BackgroundTaskEvent;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -137,6 +138,9 @@ public class RupsController extends Observable
 
     // constructor
 
+    public PdfReaderController getReaderController() {
+        return readerController;
+    }
     /**
      * Constructs the GUI components of the RUPS application.
      *
@@ -281,6 +285,12 @@ public class RupsController extends Observable
                 case RupsEvent.NEW_INDIRECT_OBJECT_EVENT:
                     showNewIndirectDialog();
                     break;
+            }
+        } else if (o == null && arg instanceof BackgroundTaskEvent) {
+            BackgroundTaskEvent event = (BackgroundTaskEvent) arg;
+            if (event.getType() == BackgroundTaskEvent.FINISHED) {
+                setChanged();
+                super.notifyObservers(arg);
             }
         }
         //Events from observable classes
