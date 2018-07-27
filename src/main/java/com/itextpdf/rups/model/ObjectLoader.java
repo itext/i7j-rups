@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,110 +44,132 @@
  */
 package com.itextpdf.rups.model;
 
-import java.util.Observer;
-
 import com.itextpdf.rups.event.PostOpenDocumentEvent;
-//import com.itextpdf.kernel.pdf.PdfReader;
+
+import java.util.Observer;
 
 /**
  * Loads the necessary iText PDF objects in Background.
  */
 public class ObjectLoader extends BackgroundTask {
-	/** This is the object that wait for task to complete. */
-	protected Observer observer;
-	/** RUPS's PdfFile object. */
-	protected PdfFile file;
-	/** The factory that can provide PDF objects. */
-	protected IndirectObjectFactory objects;
-	/** The factory that can provide tree nodes. */
-	protected TreeNodeFactory nodes;
-	/** a human readable name for this loaded */
-	private String loaderName;
+    /**
+     * This is the object that wait for task to complete.
+     */
+    protected Observer observer;
+    /**
+     * RUPS's PdfFile object.
+     */
+    protected PdfFile file;
+    /**
+     * The factory that can provide PDF objects.
+     */
+    protected IndirectObjectFactory objects;
+    /**
+     * The factory that can provide tree nodes.
+     */
+    protected TreeNodeFactory nodes;
+    /**
+     * a human readable name for this loaded
+     */
+    private String loaderName;
 
-	private ProgressDialog progress;
-	
-	/**
-	 * Creates a new ObjectLoader.
-	 * @param	observer	the object that will forward the changes.
-	 * @param	file		the PdfFile from which the objects will be read.
-	 */
-	public ObjectLoader(Observer observer, PdfFile file, String loaderName, ProgressDialog progress) {
-		this.observer = observer;
-		this.file = file;
-		this.loaderName = loaderName;
-		this.progress = progress;
-		start();
-	}
-	
-	/**
-	 * Getter for the PdfReader object.
-	 * @return	a reader object
-	 */
-	public PdfFile getFile() {
-		return file;
-	}
+    private ProgressDialog progress;
 
-	/**
-	 * Getter for the object factory.
-	 * @return	an indirect object factory
-	 */
-	public IndirectObjectFactory getObjects() {
-		return objects;
-	}
+    /**
+     * Creates a new ObjectLoader.
+     *
+     * @param loaderName the loader name
+     * @param progress   the progress dialog
+     * @param observer   the object that will forward the changes.
+     * @param file       the PdfFile from which the objects will be read.
+     */
+    public ObjectLoader(Observer observer, PdfFile file, String loaderName, ProgressDialog progress) {
+        this.observer = observer;
+        this.file = file;
+        this.loaderName = loaderName;
+        this.progress = progress;
+        start();
+    }
 
-	/**
-	 * Getter for the tree node factory.
-	 * @return	a tree node factory
-	 */
-	public TreeNodeFactory getNodes() {
-		return nodes;
-	}
-	
-	/**
-	 * getter for a human readable name representing this loader
-	 * @return the human readable name
-	 * @since 5.0.3
-	 */
-	public String getLoaderName(){
-	    return loaderName;
-	}
-	
-	/**
-	 * @see com.itextpdf.rups.model.BackgroundTask#doTask()
-	 */
-	@Override
-	public void doTask() {
-		objects = new IndirectObjectFactory(file.getPdfDocument());
-		final int n = objects.getXRefMaximum();
-		SwingHelper.invokeSync(new Runnable() {
-			public void run() {
-				progress.setMessage("Reading the Cross-Reference table");
-				progress.setTotal(n);
-			}
-		});
-		while (objects.storeNextObject()) {
-			SwingHelper.invokeSync(new Runnable() {
-				public void run() {
-					progress.setValue(objects.getCurrent());
-				}
-			});
-		}
-		SwingHelper.invokeSync(new Runnable() {
-			public void run() {
-				progress.setTotal(0);
-			}
-		});
-		nodes = new TreeNodeFactory(objects);
-		SwingHelper.invokeSync(new Runnable() {
-			public void run() {
-				progress.setMessage("Updating GUI");
-			}
-		});
-	}
+    /**
+     * Getter for the PdfReader object.
+     *
+     * @return a reader object
+     */
+    public PdfFile getFile() {
+        return file;
+    }
 
-	@Override
-	public void finished() {
-		observer.update(null, new PostOpenDocumentEvent(this));
-		progress.setVisible(false);
-	}
+    /**
+     * Getter for the object factory.
+     *
+     * @return an indirect object factory
+     */
+    public IndirectObjectFactory getObjects() {
+        return objects;
+    }
+
+    /**
+     * Getter for the tree node factory.
+     *
+     * @return a tree node factory
+     */
+    public TreeNodeFactory getNodes() {
+        return nodes;
+    }
+
+    /**
+     * getter for a human readable name representing this loader
+     *
+     * @return the human readable name
+     * @since 5.0.3
+     */
+    public String getLoaderName() {
+        return loaderName;
+    }
+
+    /**
+     * @see BackgroundTask#doTask()
+     */
+    @Override
+    public void doTask() {
+        objects = new IndirectObjectFactory(file.getPdfDocument());
+        final int n = objects.getXRefMaximum();
+        SwingHelper.invoke(new Runnable() {
+            public void run() {
+                progress.setMessage("Reading the Cross-Reference table");
+                progress.setTotal(n);
+            }
+        });
+        while (objects.storeNextObject()) {
+            SwingHelper.invoke(new Runnable() {
+                public void run() {
+                    progress.setValue(objects.getCurrent());
+                }
+            });
+        }
+        SwingHelper.invoke(new Runnable() {
+            public void run() {
+                progress.setTotal(0);
+            }
+        });
+        nodes = new TreeNodeFactory(objects);
+        SwingHelper.invoke(new Runnable() {
+            public void run() {
+                progress.setMessage("Updating GUI");
+            }
+        });
+    }
+
+    @Override
+    public void finished() {
+        try {
+            observer.update(null, new PostOpenDocumentEvent(this));
+        } catch (Exception ex) {
+            ErrorDialogPane.showErrorDialog(progress, ex);
+            // print to console as well
+            ex.printStackTrace();
+        }
+        progress.setVisible(false);
+    }
 }

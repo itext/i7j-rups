@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,153 +44,155 @@
  */
 package com.itextpdf.rups.model;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-
-import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
-import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
 
 /**
  * A factory that creates TreeNode objects corresponding with PDF objects.
  */
 public class TreeNodeFactory {
 
-	/** The factory that can produce all indirect objects. */
-	protected IndirectObjectFactory objects;
-	/** An list containing the nodes of every indirect object. */
-	protected ArrayList<PdfObjectTreeNode> nodes = new ArrayList<PdfObjectTreeNode>();
+    /**
+     * The factory that can produce all indirect objects.
+     */
+    protected IndirectObjectFactory objects;
+    /**
+     * An list containing the nodes of every indirect object.
+     */
+    protected ArrayList<PdfObjectTreeNode> nodes = new ArrayList<PdfObjectTreeNode>();
 
-	/**
-	 * Creates a factory that can produce TreeNode objects
-	 * corresponding with PDF objects.
-	 * @param objects	a factory that can produce all the indirect objects of a PDF file.
-	 */
-	public TreeNodeFactory(IndirectObjectFactory objects) {
-		this.objects = objects;
-		for (int i = 0; i < objects.size(); i++) {
-			int ref = objects.getRefByIndex(i);
-			nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDF_NULL, ref));
-		}
-	}
+    /**
+     * Creates a factory that can produce TreeNode objects
+     * corresponding with PDF objects.
+     *
+     * @param objects a factory that can produce all the indirect objects of a PDF file.
+     */
+    public TreeNodeFactory(IndirectObjectFactory objects) {
+        this.objects = objects;
+        for (int i = 0; i < objects.size(); i++) {
+            int ref = objects.getRefByIndex(i);
+            nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDF_NULL, ref));
+        }
+    }
 
-	/**
-	 * Gets a TreeNode for an indirect objects.
-	 * @param ref	the reference number of the indirect object.
-	 * @return	the TreeNode representing the PDF object
-	 */
-	public PdfObjectTreeNode getNode(int ref) {
-		int idx = objects.getIndexByRef(ref);
-		PdfObjectTreeNode node = nodes.get(idx);
-		if (node.getPdfObject().isNull()) {
-			node = PdfObjectTreeNode.getInstance(objects.loadObjectByReference(ref), ref);
-			nodes.set(idx, node);
-		}
-		return node;
-	}
+    /**
+     * Gets a TreeNode for an indirect objects.
+     *
+     * @param ref the reference number of the indirect object.
+     * @return the TreeNode representing the PDF object
+     */
+    public PdfObjectTreeNode getNode(int ref) {
+        int idx = objects.getIndexByRef(ref);
+        PdfObjectTreeNode node = nodes.get(idx);
+        if (node.getPdfObject().isNull()) {
+            node = PdfObjectTreeNode.getInstance(objects.loadObjectByReference(ref), ref);
+            nodes.set(idx, node);
+        }
+        return node;
+    }
 
-	protected void associateIfIndirect(PdfObjectTreeNode node){
-		PdfIndirectReference ref = null;
-		if (node != null && node.getPdfObject() != null) {
-			ref = node.getPdfObject().getIndirectReference();
-		}
-		if (ref != null) {
-			int idx = objects.getIndexByRef(ref.getObjNumber());
-			nodes.set(idx, node);
-		}
-	}
+    protected void associateIfIndirect(PdfObjectTreeNode node) {
+        PdfIndirectReference ref = null;
+        if (node != null && node.getPdfObject() != null) {
+            ref = node.getPdfObject().getIndirectReference();
+        }
+        if (ref != null) {
+            int idx = objects.getIndexByRef(ref.getObjNumber());
+            nodes.set(idx, node);
+        }
+    }
 
-	/**
-	 * Creates the Child TreeNode objects for a PDF object TreeNode.
-	 * @param node	the parent node
-	 */
-	public void expandNode(PdfObjectTreeNode node) {
-		if (node.getChildCount() > 0) {
-			return;
-		}
-		PdfObject object = node.getPdfObject();
-		PdfObjectTreeNode leaf;
+    /**
+     * Creates the Child TreeNode objects for a PDF object TreeNode.
+     *
+     * @param node the parent node
+     */
+    public void expandNode(PdfObjectTreeNode node) {
+        if (node.getChildCount() > 0) return;
+        PdfObject object = node.getPdfObject();
+        PdfObjectTreeNode leaf;
 
-		switch (object.getType()) {
-			case PdfObject.INDIRECT_REFERENCE:
-				PdfIndirectReference ref = (PdfIndirectReference)object;
-				leaf = getNode(ref.getObjNumber());
-				addNodes(node, leaf);
-				if (leaf instanceof PdfPagesTreeNode)
-					expandNode(leaf);
-				return;
-			case PdfObject.ARRAY:
-				PdfArray array = (PdfArray)object;
-				for (int i = 0; i < array.size(); ++i) {
-					leaf = PdfObjectTreeNode.getInstance(array.get(i, false));
-					associateIfIndirect(leaf);
-					addNodes(node, leaf);
-					expandNode(leaf);
-				}
-				return;
-			case PdfObject.DICTIONARY:
-			case PdfObject.STREAM:
-				PdfDictionary dict = (PdfDictionary)object;
-				for (PdfName key : dict.keySet()) {
-					leaf = PdfObjectTreeNode.getInstance(dict, key);
-					associateIfIndirect(leaf);
-					addNodes(node, leaf);
-					expandNode(leaf);
-				}
-		}
-	}
+        switch (object.getType()) {
+            case PdfObject.INDIRECT_REFERENCE:
+                PdfIndirectReference ref = (PdfIndirectReference) object;
+                leaf = getNode(ref.getObjNumber());
+                addNodes(node, leaf);
+                if (leaf instanceof PdfPagesTreeNode)
+                    expandNode(leaf);
+                break;
+            case PdfObject.ARRAY:
+                PdfArray array = (PdfArray) object;
+                for (int i = 0; i < array.size(); ++i) {
+                    leaf = PdfObjectTreeNode.getInstance(array.get(i, false));
+                    associateIfIndirect(leaf);
+                    addNodes(node, leaf);
+                    expandNode(leaf);
+                }
+                break;
+            case PdfObject.DICTIONARY:
+            case PdfObject.STREAM:
+                PdfDictionary dict = (PdfDictionary) object;
+                for (PdfName key : dict.keySet()) {
+                    leaf = PdfObjectTreeNode.getInstance(dict, key);
+                    associateIfIndirect(leaf);
+                    addNodes(node, leaf);
+                    expandNode(leaf);
+                }
+                break;
+        }
+    }
 
-	/**
-	 * Finds a specific child of dictionary node.
+    /**
+     * Finds a specific child of dictionary node.
      * This method will follow indirect references and expand nodes if necessary
      *
-	 * @param	node	the node with a dictionary among its children
-	 * @param	key		the key of the item corresponding with the node we need
-	 */
-	@SuppressWarnings("unchecked")
-	public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
+     * @param node the node with a dictionary among its children
+     * @param key  the key of the item corresponding with the node we need
+     * @return a specific child of dictionary node
+     */
+    @SuppressWarnings("unchecked")
+    public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
         PdfObjectTreeNode child = node.getDictionaryChildNode(key);
         if (child != null && child.isDictionaryNode(key)) {
             if (child.isIndirectReference()) {
                 expandNode(child);
-                child = (PdfObjectTreeNode)child.getFirstChild();
+                child = (PdfObjectTreeNode) child.getFirstChild();
             }
             expandNode(child);
             return child;
-		}
-		return null;
-	}
+        }
+        return null;
+    }
 
-	/**
-	 * Tries adding a child node to a parent node without
-	 * throwing an exception. Normally, if the child node is already
-	 * added as one of the ancestors, an IllegalArgumentException is
-	 * thrown (to avoid an endless loop). Loops like this are allowed
-	 * in PDF, not in a JTree.
-	 * @param parent	the parent node
-	 * @param child		a child node
-	 */
-	private void addNodes(PdfObjectTreeNode parent, PdfObjectTreeNode child) {
-		try {
-			parent.add(child);
-		}
-		catch(IllegalArgumentException iae) {
-			parent.setRecursive(true);
-		}
-	}
+    /**
+     * Tries adding a child node to a parent node without
+     * throwing an exception. Normally, if the child node is already
+     * added as one of the ancestors, an IllegalArgumentException is
+     * thrown (to avoid an endless loop). Loops like this are allowed
+     * in PDF, not in a JTree.
+     *
+     * @param parent the parent node
+     * @param child  a child node
+     */
+    private void addNodes(PdfObjectTreeNode parent, PdfObjectTreeNode child) {
+        try {
+            parent.add(child);
+        } catch (IllegalArgumentException iae) {
+            parent.setRecursive(true);
+        }
+    }
 
-	public void addNewIndirectObject(PdfObject object) {
-		objects.addNewIndirectObject(object);
+    public void addNewIndirectObject(PdfObject object) {
+        objects.addNewIndirectObject(object);
         nodes.add(PdfObjectTreeNode.getInstance(object, object.getIndirectReference().getObjNumber()));
-		LoggerHelper.info("Tree node was successfully created for new indirect object", getClass());
-	}
+        LoggerHelper.info("Tree node was successfully created for new indirect object", getClass());
+    }
 }

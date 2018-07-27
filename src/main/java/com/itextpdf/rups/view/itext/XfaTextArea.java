@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,40 +44,42 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import java.io.IOException;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-
 import com.itextpdf.rups.io.OutputStreamResource;
 import com.itextpdf.rups.io.TextAreaOutputStream;
+
+import javax.swing.*;
+import java.io.IOException;
 
 /**
  * TextArea that visualizes the XFA XML file.
  */
 public class XfaTextArea extends JScrollPane {
-	
-	/** The text area with the content stream. */
-	protected JTextArea text;
-	
-	/**
-	 * Constructs a XFATextArea.
-	 */
-	public XfaTextArea() {
-		super();
-		text = new JTextArea();
-		setViewportView(text);
-	}
-	
-	public void clear() {
-		text.setText("");
-	}
-	
-	public void load(OutputStreamResource xml) throws IOException {
-		TextAreaOutputStream stream = new TextAreaOutputStream(text);
-		xml.writeTo(stream);
-	}
 
-	/** A Serial Version UID. */
-	private static final long serialVersionUID = -8275229961781669457L;
+    /**
+     * The text area with the content stream.
+     */
+    protected JTextArea text;
+
+    /**
+     * Constructs a XFATextArea.
+     */
+    public XfaTextArea() {
+        super();
+        text = new JTextArea();
+        setViewportView(text);
+    }
+
+    public void clear() {
+        text.setText("");
+    }
+
+    public void load(OutputStreamResource xml) throws IOException {
+        TextAreaOutputStream stream = new TextAreaOutputStream(text);
+        xml.writeTo(stream);
+    }
+
+    /**
+     * A Serial Version UID.
+     */
+    private static final long serialVersionUID = -8275229961781669457L;
 }

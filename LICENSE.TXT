@@ -1,4 +1,4 @@
-This application uses next third-party libraries:
+This application uses following third-party libraries:
 
 SLF4j under the MIT license:
  Copyright (c) 2004-2013 QOS.ch
@@ -30,7 +30,7 @@ Logback: the reliable, generic, fast and flexible logging framework.
  the terms of the Eclipse Public License v1.0 as published by
  the Eclipse Foundation ( http://www.eclipse.org/legal/epl-v10.html )
 
-Bouncy Castle APIs under the next license:
+Bouncy Castle APIs under the following license:
  Copyright (c) 2000 - 2016 The Legion of the Bouncy Castle Inc.
  (https://www.bouncycastle.org)
 
@@ -40,7 +40,7 @@ Bouncy Castle APIs under the next license:
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-DOM4j under the next license:
+DOM4j under the following license:
  Redistribution and use of this software and associated documentation ("Software"), with or without modification, are permitted provided that the following conditions are met:
 
  1. Redistributions of source code must retain copyright statements and notices. Redistributions must also contain a copy of this document.

@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,65 +44,67 @@
  */
 package com.itextpdf.rups.io;
 
+import javax.swing.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import javax.swing.JTextArea;
 
 /**
  * Everything writing to this OutputStream will be shown in a JTextArea.
  */
 public class TextAreaOutputStream extends OutputStream {
-	/** The text area to which we want to write. */
-	protected JTextArea text;
-	
-	/**
-	 * Constructs a TextAreaOutputStream.
-	 * @param text	the text area to which we want to write.
-	 * @throws IOException
-	 */
-	public TextAreaOutputStream(JTextArea text) throws IOException {
-		this.text = text;
-		clear();
-	}
+    /**
+     * The text area to which we want to write.
+     */
+    protected JTextArea text;
 
-	/**
-	 * Clear the text area.
-	 */
-	public void clear() {
-		text.setText("");
-	}
-	
-	/**
-	 * @see java.io.OutputStream#write(int)
-	 */
-	@Override
-	public void write(int i) throws IOException {
-		byte[] b = { (byte)i };
-		write(b, 0, 1);
-	}
+    /**
+     * Constructs a TextAreaOutputStream.
+     *
+     * @param text the text area to which we want to write.
+     * @throws IOException an exception
+     */
+    public TextAreaOutputStream(JTextArea text) throws IOException {
+        this.text = text;
+        clear();
+    }
 
-	/**
-	 * @see java.io.OutputStream#write(byte[], int, int)
-	 */
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		String snippet = new String(b, off, len, "UTF-8");
-		text.append(snippet);
-	}
+    /**
+     * Clear the text area.
+     */
+    public void clear() {
+        text.setText("");
+    }
 
-	/**
-	 * @see java.io.OutputStream#write(byte[])
-	 */
-	@Override
-	public void write(byte[] b) throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		byte[] snippet = new byte[1024];
-		int bytesread;
-		while ((bytesread = bais.read(snippet)) > 0) {
-			write(snippet, 0, bytesread);
-		}
-	}
-	
+    /**
+     * @see java.io.OutputStream#write(int)
+     */
+    @Override
+    public void write(int i) throws IOException {
+        byte[] b = {(byte) i};
+        write(b, 0, 1);
+    }
+
+    /**
+     * @see java.io.OutputStream#write(byte[], int, int)
+     */
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        String snippet = new String(b, off, len, "UTF-8");
+        text.append(snippet);
+    }
+
+    /**
+     * @see java.io.OutputStream#write(byte[])
+     */
+    @Override
+    public void write(byte[] b) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(b);
+        byte[] snippet = new byte[1024];
+        int bytesread;
+        while ((bytesread = bais.read(snippet)) > 0) {
+            write(snippet, 0, bytesread);
+        }
+    }
+
 }

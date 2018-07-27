@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,36 +44,39 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
-
 import com.itextpdf.rups.model.XfaFile;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XdpTreeNode;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  * Tree that visualizes the XFA information.
  */
 public class XfaTree extends JTree {
 
-	/**
-	 * Constructs an XfaTree.
-	 */
-	public XfaTree() {
-		super();
-	}
-	
-	public void clear() {
-		setCellRenderer(new IconTreeCellRenderer());
-		setModel(new DefaultTreeModel(new IconTreeNode("xfa.png")));
-	}
-	public void load(XfaFile file) {
-		setCellRenderer(new IconTreeCellRenderer());
-		setModel(new DefaultTreeModel(new XdpTreeNode(file.getXfaDocument())));
-	}
+    /**
+     * Constructs an XfaTree.
+     */
+    public XfaTree() {
+        super();
+    }
 
-	/** A Serial Version UID. */
-	private static final long serialVersionUID = -5072971223015095193L;
+    public void clear() {
+        setCellRenderer(new IconTreeCellRenderer());
+        setModel(new DefaultTreeModel(new IconTreeNode("xfa.png")));
+    }
+
+    public void load(XfaFile file) {
+        setCellRenderer(new IconTreeCellRenderer());
+        setModel(new DefaultTreeModel(new XdpTreeNode(file.getXfaDocument())));
+    }
+
+    /**
+     * A Serial Version UID.
+     */
+    private static final long serialVersionUID = -5072971223015095193L;
 
 }

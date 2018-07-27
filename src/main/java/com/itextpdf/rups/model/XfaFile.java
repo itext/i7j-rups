@@ -1,8 +1,6 @@
 /*
- * $Id$
- *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,59 +42,78 @@
  */
 package com.itextpdf.rups.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.itextpdf.rups.io.OutputStreamResource;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.itextpdf.rups.io.OutputStreamResource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringReader;
 
-/** Class that deals with the XFA file that can be inside a PDF file. */
+/**
+ * Class that deals with the XFA file that can be inside a PDF file.
+ */
 public class XfaFile implements OutputStreamResource {
 
-	/** The X4J Document object (XML). */
-	protected Document xfaDocument;
-	
-	/**
-	 * Constructs an XFA file from an OutputStreamResource.
-	 * This resource can be an XML file or a node in a RUPS application.
-	 * @param	resource	the XFA resource
-	 * @throws IOException 
-	 * @throws DocumentException 
-	 */
-	public XfaFile(OutputStreamResource resource) throws IOException, DocumentException {
-		// Is there a way to avoid loading everything in memory?
-		// Can we somehow get the XML from the PDF as an InputSource, Reader or InputStream?
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		resource.writeTo(baos);
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		SAXReader reader = new SAXReader();
-		xfaDocument = reader.read(bais);
-	}
+    /**
+     * The X4J Document object (XML).
+     */
+    protected Document xfaDocument;
 
-	/**
-	 * Getter for the XFA Document object.
-	 * @return	a Document object (X4J)
-	 */
-	public Document getXfaDocument() {
-		return xfaDocument;
-	}
+    /**
+     * Constructs an XFA file from an OutputStreamResource.
+     * This resource can be an XML file or a node in a RUPS application.
+     *
+     * @throws IOException       an I/O exception
+     * @throws DocumentException a document exception
+     * @param    resource    the XFA resource
+     */
+    public XfaFile(OutputStreamResource resource) throws IOException, DocumentException {
+        // Is there a way to avoid loading everything in memory?
+        // Can we somehow get the XML from the PDF as an InputSource, Reader or InputStream?
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resource.writeTo(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        SAXReader reader = new SAXReader();
+        reader.setEntityResolver(new SafeEmptyEntityResolver());
+        xfaDocument = reader.read(bais);
+    }
 
-	/**
-	 * Writes a formatted XML file to the OutputStream.
-	 * @see com.itextpdf.rups.io.OutputStreamResource#writeTo(java.io.OutputStream)
-	 */
-	public void writeTo(OutputStream os) throws IOException {
-		if (xfaDocument == null)
-			return;
-		OutputFormat format = new OutputFormat("   ", true);
+    /**
+     * Getter for the XFA Document object.
+     *
+     * @return a Document object (X4J)
+     */
+    public Document getXfaDocument() {
+        return xfaDocument;
+    }
+
+    /**
+     * Writes a formatted XML file to the OutputStream.
+     *
+     * @see com.itextpdf.rups.io.OutputStreamResource#writeTo(java.io.OutputStream)
+     */
+    public void writeTo(OutputStream os) throws IOException {
+        if (xfaDocument == null)
+            return;
+        OutputFormat format = new OutputFormat("   ", true);
         XMLWriter writer = new XMLWriter(os, format);
         writer.write(xfaDocument);
-	}
+    }
+
+    // Prevents XXE attacks
+    private static class SafeEmptyEntityResolver implements EntityResolver {
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+            return new InputSource(new StringReader(""));
+        }
+    }
+
 }

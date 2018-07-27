@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,42 +47,39 @@ package com.itextpdf.rups.view.icons;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 
+import javax.swing.*;
 import java.util.HashMap;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class that fetches the icons in com.itextpdf.rups.view.icons.
  */
 public class IconFetcher {
-	
-	/** Cache with icons. */
-	protected static HashMap<String, Icon> cache = new HashMap<String, Icon>();
-	
-	/**
-	 * Gets an Icon with a specific name.
-	 * @param	filename	the filename of the Icon.
-	 * @return	an Icon
-	 */
-	public static Icon getIcon(String filename) {
-		if (filename == null) {
-			return null;
-		}
-		Icon icon = cache.get(filename);
-		if (icon == null) {
-			try {
-				icon = new ImageIcon(IconFetcher.class.getResource(filename));
-				cache.put(filename, icon);
-			}
-			catch(Exception e) {
-				LoggerHelper.error(LoggerMessages.FINDING_ICON_ERROR + filename, e, IconFetcher.class);
-				return null;
-			}
-		}
-		return icon;
-	}
+
+    /**
+     * Cache with icons.
+     */
+    protected static HashMap<String, Icon> cache = new HashMap<String, Icon>();
+
+    /**
+     * Gets an Icon with a specific name.
+     *
+     * @param    filename    the filename of the Icon.
+     * @return an Icon
+     */
+    public static Icon getIcon(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        Icon icon = cache.get(filename);
+        if (icon == null) {
+            try {
+                icon = new ImageIcon(IconFetcher.class.getResource(filename));
+                cache.put(filename, icon);
+            } catch (Exception e) {
+                LoggerHelper.error(LoggerMessages.FINDING_ICON_ERROR + filename, e, IconFetcher.class);
+                return null;
+            }
+        }
+        return icon;
+    }
 }

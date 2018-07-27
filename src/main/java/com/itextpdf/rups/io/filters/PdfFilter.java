@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,38 +44,35 @@
  */
 package com.itextpdf.rups.io.filters;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
-import javax.swing.filechooser.FileFilter;
-
-
 /**
- * Filters PDF files in a JFileChooser.
+ * Filters PDF files in a {@link JFileChooser}.
  */
 public class PdfFilter extends FileFilter {
 
-	/** A public instance of the PdfFilter. */
-	public static final PdfFilter INSTANCE = new PdfFilter();
-	
     /**
-     *
-     * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
-     * @param f File
-     * @return boolean
+     * A public instance of the PdfFilter.
      */
-    public boolean accept(File f) {
-		if (f.isDirectory()) return true;
-		if (f.getName().toLowerCase().endsWith(".pdf")) return true;
-		return false;
-	}
+    public static final PdfFilter INSTANCE = new PdfFilter();
 
     /**
-     *
-     * @see javax.swing.filechooser.FileFilter#getDescription()
+     * @param f File
+     * @return boolean
+     * @see FileFilter#accept(java.io.File)
+     */
+    public boolean accept(File f) {
+        return f.isDirectory() || f.getName().toLowerCase().endsWith(".pdf");
+    }
+
+    /**
      * @return String
+     * @see FileFilter#getDescription()
      */
     public String getDescription() {
-		return "*.pdf PDF files";
-	}
+        return "*.pdf PDF files";
+    }
 
 }

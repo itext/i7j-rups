@@ -1,32 +1,61 @@
+/*
+    This file is part of the iText (R) project.
+    Copyright (c) 2007-2018 iText Group NV
+    Authors: iText Software.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation with the addition of the
+    following permission added to Section 15 as permitted in Section 7(a):
+    FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
+    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    OF THIRD PARTY RIGHTS
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program; if not, see http://www.gnu.org/licenses or write to
+    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+    Boston, MA, 02110-1301 USA, or download the license from the following URL:
+    http://itextpdf.com/terms-of-use/
+
+    The interactive user interfaces in modified source and object code versions
+    of this program must display Appropriate Legal Notices, as required under
+    Section 5 of the GNU Affero General Public License.
+
+    In accordance with Section 7(b) of the GNU Affero General Public License,
+    a covered work must retain the producer line in every PDF that is created
+    or manipulated using iText.
+
+    You can be released from the requirements of the license by purchasing
+    a commercial license. Buying such a license is mandatory as soon as you
+    develop commercial activities involving the iText software without
+    disclosing the source code of your own applications.
+    These activities include: offering paid services to customers as an ASP,
+    serving PDFs on the fly in a web application, shipping iText with a closed
+    source product.
+
+    For more information, please contact iText Software Corp. at this
+    address: sales@itextpdf.com
+ */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.NewIndirectObjectEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
 
@@ -40,7 +69,13 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
     private String btnString1 = "Enter";
     private String btnString2 = "Cancel";
 
-    /** Creates the reusable dialog. */
+    /**
+     * Creates the reusable dialog.
+     *
+     * @param parent parent Frame
+     * @param title  dialog title
+     * @param parser PdfSyntaxParser
+     */
     public NewIndirectPdfObjectDialog(Frame parent, String title, PdfSyntaxParser parser) {
         super(parent, true);
 
@@ -49,7 +84,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         this.parser = parser;
         textArea = new JTextArea();
         textArea.setMinimumSize(new Dimension(100, 200));
-        type = new JComboBox<String>(new String [] {"Stream", "Other"});
+        type = new JComboBox<String>(new String[]{"Stream", "Other"});
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setMinimumSize(new Dimension(100, 200));
@@ -102,7 +137,9 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         optionPane.addPropertyChangeListener(this);
     }
 
-    /** This method reacts to state changes in the option pane. */
+    /**
+     * This method reacts to state changes in the option pane.
+     */
     public void propertyChange(PropertyChangeEvent e) {
         String prop = e.getPropertyName();
 
@@ -134,7 +171,9 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         }
     }
 
-    /** This method clears the dialog and hides it. */
+    /**
+     * This method clears the dialog and hides it.
+     */
     public void clearAndHide() {
         textArea.setText(null);
         setVisible(false);

@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,24 +66,29 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-import com.itextpdf.rups.view.itext.*;
+import com.itextpdf.rups.view.itext.FormTree;
+import com.itextpdf.rups.view.itext.OutlineTree;
+import com.itextpdf.rups.view.itext.PagesTable;
+import com.itextpdf.rups.view.itext.PdfObjectPanel;
+import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.PlainText;
+import com.itextpdf.rups.view.itext.StructureTree;
+import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import java.awt.Color;
-import java.awt.event.KeyListener;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Stack;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import java.awt.*;
+import java.awt.event.KeyListener;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Stack;
 
 /**
  * Controls the components that get their content from iText's PdfReader.
@@ -149,6 +154,7 @@ public class PdfReaderController extends Observable implements Observer {
      *
      * @param treeSelectionListener when somebody selects a tree node, this listener listens to the event
      * @param pageSelectionListener when somebody changes a page, this listener changes accordingly
+     * @param pluginMode the plugin mode
      */
     public PdfReaderController(TreeSelectionListener treeSelectionListener,
                                PageSelectionListener pageSelectionListener, boolean pluginMode) {
@@ -156,7 +162,7 @@ public class PdfReaderController extends Observable implements Observer {
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
         JPopupMenu menu = PdfTreeContextMenu.getPopupMenu(pdfTree);
-        pdfTree.add(menu);
+        pdfTree.setComponentPopupMenu(menu);
         pdfTree.addMouseListener(new PdfTreeContextMenuMouseListener(menu, pdfTree));
         addObserver(pdfTree);
 
@@ -240,6 +246,8 @@ public class PdfReaderController extends Observable implements Observer {
     /**
      * Getter for the tabs with the editor windows
      * (to which the Console window will be added).
+     *
+     * @return the tabs with the editor windows
      */
     public JTabbedPane getEditorTabs() {
         return editorTabs;
@@ -295,8 +303,7 @@ public class PdfReaderController extends Observable implements Observer {
 
                         KeyListener[] listeners = pdfTree.getKeyListeners();
 
-                        for (int i = 0; i < listeners.length; i++) {
-                            KeyListener listener = listeners[i];
+                        for (KeyListener listener : listeners) {
                             if (listener instanceof PdfTreeNavigationListener) {
                                 keyboardNav = ((PdfTreeNavigationListener) listener).isLastActionKeyboardNavigation();
                             }
@@ -362,6 +369,8 @@ public class PdfReaderController extends Observable implements Observer {
      * Renders the syntax of a PdfObject in the objectPanel.
      * If the object is a PDF Stream, then the stream is shown
      * in the streamArea too.
+     *
+     * @param node the pdfobject treenode
      */
     public void render(PdfObjectTreeNode node) {
         PdfObject object = node.getPdfObject();
@@ -395,7 +404,7 @@ public class PdfReaderController extends Observable implements Observer {
         }
         for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
             PdfObjectTreeNode currentNode = null;
-            Stack<CompareTool.ObjectPath.IndirectPathItem> indirectPath = (Stack<CompareTool.ObjectPath.IndirectPathItem>)path.getIndirectPath().clone();
+            Stack<CompareTool.ObjectPath.IndirectPathItem> indirectPath = (Stack<CompareTool.ObjectPath.IndirectPathItem>) path.getIndirectPath().clone();
             while (!indirectPath.empty()) {
                 CompareTool.ObjectPath.IndirectPathItem indirectPathItem = indirectPath.pop();
                 currentNode = nodes.getNode(indirectPathItem.getOutObject().getObjNumber());
@@ -403,7 +412,7 @@ public class PdfReaderController extends Observable implements Observer {
                     nodes.expandNode(currentNode);
                 }
             }
-            Stack<CompareTool.ObjectPath.LocalPathItem> localPath = (Stack<CompareTool.ObjectPath.LocalPathItem>)path.getLocalPath().clone();
+            Stack<CompareTool.ObjectPath.LocalPathItem> localPath = (Stack<CompareTool.ObjectPath.LocalPathItem>) path.getLocalPath().clone();
             currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
             while (!localPath.empty() && currentNode != null) {
                 nodes.expandNode(currentNode);
@@ -438,7 +447,7 @@ public class PdfReaderController extends Observable implements Observer {
 
     //Returns index of the added child
     public int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index) {
-        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary)parent.getPdfObject(), key);
+        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary) parent.getPdfObject(), key);
         return addTreeNodeChild(parent, child, index);
     }
 
@@ -450,7 +459,7 @@ public class PdfReaderController extends Observable implements Observer {
 
     public int deleteTreeChild(PdfObjectTreeNode parent, int index) {
         parent.remove(index);
-        ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
+        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
         return index;
     }
 
@@ -458,7 +467,7 @@ public class PdfReaderController extends Observable implements Observer {
     public int addTreeNodeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
         parent.insert(child, index);
         nodes.expandNode(child);
-        ((DefaultTreeModel)pdfTree.getModel()).reload(parent);
+        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
         return index;
     }
 }

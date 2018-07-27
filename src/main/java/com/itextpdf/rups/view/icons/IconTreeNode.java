@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,55 +44,65 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import java.awt.Color;
-import javax.swing.Icon;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 
 /**
  * A tree node with a specific icon.
  */
 public class IconTreeNode extends DefaultMutableTreeNode {
 
-	/** The icon that has to be used for this TreeNode. */
-	protected Icon icon;
-	protected Color textColor;
+    /**
+     * The icon that has to be used for this TreeNode.
+     */
+    protected Icon icon;
+    protected Color textColor;
 
-	/**
-	 * Constructs an IconTreeNode.
-	 * @param	icon	the filename of the icon to use for this node.
-	 */
-	public IconTreeNode(String icon) {
-		super();
-		this.icon = IconFetcher.getIcon(icon);
-	}
-	
-	/**
-	 * Constructs an IconTreeNode.
-	 * @param	icon	the filename of the icon to use for this node.
-	 * @param	userobject	the userobject for this node
-	 */
-	public IconTreeNode(String icon, Object userobject) {
-		super(userobject);
-		this.icon = IconFetcher.getIcon(icon);
-	}
-	
-	/** Getter for the icon. */
-	public Icon getIcon() {
-		return icon;
-	}
+    /**
+     * Constructs an IconTreeNode.
+     *
+     * @param icon the filename of the icon to use for this node.
+     */
+    public IconTreeNode(String icon) {
+        super();
+        this.icon = IconFetcher.getIcon(icon);
+    }
 
-	public void setCustomTextColor(Color color) {
-		textColor = color;
-	}
+    /**
+     * Constructs an IconTreeNode.
+     *
+     * @param icon       the filename of the icon to use for this node.
+     * @param userobject the userobject for this node
+     */
+    public IconTreeNode(String icon, Object userobject) {
+        super(userobject);
+        this.icon = IconFetcher.getIcon(icon);
+    }
 
-	public void restoreDefaultTextColor() {
-		textColor = null;
-	}
+    /**
+     * Getter for the icon.
+     *
+     * @return the icon
+     */
+    public Icon getIcon() {
+        return icon;
+    }
 
-	public Color getTextColor() {
-		return textColor;
-	}
+    public void setCustomTextColor(Color color) {
+        textColor = color;
+    }
 
-	/** A Serial Version UID. */
-	private static final long serialVersionUID = -5900308991182960842L;
+    public void restoreDefaultTextColor() {
+        textColor = null;
+    }
+
+    public Color getTextColor() {
+        return textColor;
+    }
+
+    /**
+     * A Serial Version UID.
+     */
+    private static final long serialVersionUID = -5900308991182960842L;
 }

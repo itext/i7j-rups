@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,7 @@ public class ConsoleContextMenu {
         copyToClipboard.setText("Copy to Clipboard");
         copyToClipboard.setAction(new CopyToClipboardAction("Copy to Clipboard", invoker));
         popup.add(copyToClipboard);
-        
+
         JMenuItem clear = new JMenuItem();
         clear.setText("Clear");
         clear.setAction(new ClearConsoleAction("Clear", invoker));

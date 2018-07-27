@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,15 +48,17 @@ package com.itextpdf.rups.view;
  * Interface that has to be implemented by every class that listens
  * to page navigation features; keys that are pressed, buttons that
  * are pushed,...
- * @since	iText 5.0.0 (renamed from PageNavigationListener)
+ *
+ * @since iText 5.0.0 (renamed from PageNavigationListener)
  */
 public interface PageSelectionListener {
 
-	/**
-	 * Goes to a specific page number in a document.
-	 * @param	pageNumber
-	 * @return	the resulting page number.
-	 * 		Can be different from pageNumber if pageNumber doesn't exist.
-	 */
-	public int gotoPage(int pageNumber);
+    /**
+     * Goes to a specific page number in a document.
+     *
+     * @param pageNumber the requested page number
+     * @return the resulting page number.
+     * Can be different from pageNumber if pageNumber doesn't exist.
+     */
+    public int gotoPage(int pageNumber);
 }

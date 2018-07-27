@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,7 +65,7 @@ public class ContextMenuMouseListener extends MouseAdapter {
     }
 
     private void showMenuIfPopupTrigger(MouseEvent e) {
-        if (e.isPopupTrigger() && showPopupHook(e) ) {
+        if (e.isPopupTrigger() && showPopupHook(e)) {
             popup.show(component, e.getX() + 3, e.getY() + 3);
         }
     }
@@ -82,7 +82,8 @@ public class ContextMenuMouseListener extends MouseAdapter {
 
     /**
      * This method should be implemented appropriately by subclasses
-     * @param event
+     *
+     * @param event the MouseEvent
      * @return boolean
      */
     public boolean showPopupHook(MouseEvent event) {

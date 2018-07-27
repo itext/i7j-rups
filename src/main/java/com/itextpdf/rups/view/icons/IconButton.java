@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,15 +51,19 @@ import javax.swing.JButton;
  */
 public class IconButton extends JButton {
 
-	/**
-	 * Creates a button with an Icon that performs an
-	 * action when you push it.
-	 */
-	public IconButton(IconActionListener listener) {
-		super(listener.getIcon());
-		addActionListener(listener);
-	}
-	
-	/** A Serial Version UID. */
-	private static final long serialVersionUID = 3523016393512117003L;
+    /**
+     * Creates a button with an Icon that performs an
+     * action when you push it.
+     *
+     * @param listener the icon actionlistener
+     */
+    public IconButton(IconActionListener listener) {
+        super(listener.getIcon());
+        addActionListener(listener);
+    }
+
+    /**
+     * A Serial Version UID.
+     */
+    private static final long serialVersionUID = 3523016393512117003L;
 }

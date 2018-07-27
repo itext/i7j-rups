@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,13 +44,12 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
-import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.kernel.pdf.PdfObject;
-//import com.itextpdf.text.pdf.PdfReader;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -60,8 +59,7 @@ import java.awt.event.ActionEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import com.itextpdf.text.pdf.PdfReader;
 
 /**
  * Custom action to save raw bytes of a stream to a file from the PdfTree view.
@@ -70,10 +68,12 @@ import org.slf4j.LoggerFactory;
  */
 public class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
-    /** Serial version uid */
-	private static final long serialVersionUID = -4071226227368629514L;
-	
-	private boolean saveRawBytes;
+    /**
+     * Serial version uid
+     */
+    private static final long serialVersionUID = -4071226227368629514L;
+
+    private boolean saveRawBytes;
 
     public SaveToFilePdfTreeAction(String name) {
         super(name);
@@ -98,7 +98,7 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
         }
 
         int choice = fileChooser.showSaveDialog(null);
-        String path = null;
+        String path;
 
         if (choice == JFileChooser.APPROVE_OPTION) {
             path = fileChooser.getSelectedFile().getPath();
@@ -113,7 +113,7 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
             // get the bytes and write away
             try {
-                byte[] array = null;
+                byte[] array;
 
                 if (saveRawBytes) {
                     array = stream.getBytes(false);

@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,12 +48,7 @@ import com.itextpdf.rups.event.ConsoleWriteEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.SwingHelper;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Observable;
-import java.util.Observer;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -61,9 +56,14 @@ import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
+import java.awt.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
- * A Class that is used for displaying logger messages to a JTextPane.
+ * A Class that is used for displaying logger messages to a {@link JTextPane}.
  */
 public class Console extends Observable implements Observer {
 
@@ -96,6 +96,8 @@ public class Console extends Observable implements Observer {
 
     /**
      * Console is a Singleton class: you can only get one Console.
+     *
+     * @return an instance of the Console
      */
     public static synchronized Console getInstance() {
         if (console == null) {
@@ -122,7 +124,7 @@ public class Console extends Observable implements Observer {
     }
 
     private void updateTextPane(final String msg, final String type) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             public void run() {
                 try {
                     Document doc = textArea.getDocument();
@@ -137,11 +139,11 @@ public class Console extends Observable implements Observer {
                 } catch (BadLocationException ignored) {
                 }
             }
-        }, true);
+        });
     }
 
     private void clearWithBuffer(final String message) {
-        SwingHelper.invokeSync(new Runnable() {
+        SwingHelper.invoke(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -152,18 +154,20 @@ public class Console extends Observable implements Observer {
                     Document doc = textArea.getDocument();
                     doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
                     doc.insertString(doc.getLength(), message == null ? "" : message, styleContext.getStyle(ConsoleStyleContext.INFO));
-                } catch (Exception any) {
+                } catch (BadLocationException any) {
                     textArea.setText(message == null ? "" : message);
                 }
                 textArea.setCaretPosition(textArea.getDocument().getLength());
                 setChanged();
                 notifyObservers(new ConsoleWriteEvent());
             }
-        }, true);
+        });
     }
 
     /**
      * Get the JTextArea to which everything is written.
+     *
+     * @return the {@link JTextArea} to which everything is written
      */
     public JTextPane getTextArea() {
         return textArea;

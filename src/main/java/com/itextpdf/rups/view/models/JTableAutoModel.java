@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,52 +51,57 @@ import javax.swing.table.AbstractTableModel;
  * JTableAutoModelInterface.
  */
 public class JTableAutoModel extends AbstractTableModel {
-	
-	/** The serial version uid. */
-	private static final long serialVersionUID = -2229431581745521537L;
-	/** The table that knows how to model itself. */
-	protected JTableAutoModelInterface table;
 
-	/**
-	 * Constructs an auto model for a JTable.
-	 * @param	table	a JTable that knows information about its model.
-	 */
-	public JTableAutoModel(JTableAutoModelInterface table) {
-		this.table = table;
-	}
-	
     /**
-     * @see javax.swing.table.TableModel#getColumnCount()
+     * The serial version uid.
+     */
+    private static final long serialVersionUID = -2229431581745521537L;
+    /**
+     * The table that knows how to model itself.
+     */
+    protected JTableAutoModelInterface table;
+
+    /**
+     * Constructs an auto model for a JTable.
+     *
+     * @param    table    a JTable that knows information about its model.
+     */
+    public JTableAutoModel(JTableAutoModelInterface table) {
+        this.table = table;
+    }
+
+    /**
      * @return int the number of columns
+     * @see javax.swing.table.TableModel#getColumnCount()
      */
     public int getColumnCount() {
-		return table.getColumnCount();
-	}
+        return table.getColumnCount();
+    }
 
     /**
-     * @see javax.swing.table.TableModel#getRowCount()
      * @return int the number of rows
+     * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-		return table.getRowCount();
-	}
-
-	/**
-	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-	 * @param columnIndex a column number.
-	 * @return the name of the column
-	 */
-	public String getColumnName(int columnIndex) {
-		return table.getColumnName(columnIndex);
-	}
+        return table.getRowCount();
+    }
 
     /**
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     * @param rowIndex int		a row number
+     * @param columnIndex a column number.
+     * @return the name of the column
+     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+     */
+    public String getColumnName(int columnIndex) {
+        return table.getColumnName(columnIndex);
+    }
+
+    /**
+     * @param rowIndex    int		a row number
      * @param columnIndex int	a column number
-     * @return Object	an object corresponding with a cell in the table
+     * @return Object    an object corresponding with a cell in the table
+     * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
     public Object getValueAt(int rowIndex, int columnIndex) {
-    	return table.getValueAt(rowIndex, columnIndex);
-	}
+        return table.getValueAt(rowIndex, columnIndex);
+    }
 }

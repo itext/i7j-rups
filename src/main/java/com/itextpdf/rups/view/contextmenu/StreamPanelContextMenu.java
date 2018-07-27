@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,11 +71,12 @@ public class StreamPanelContextMenu extends JPopupMenu {
      * Creates a context menu (right click menu) with two actions:
      * - copy
      * - select all
-     *
+     * <p>
      * Copy copies the selected text or when no text is selected, it copies the entire text.
      *
-     * @param textPane
-     * @return
+     * @param textPane   the text pane
+     * @param controller the controller
+     * @param pluginMode the plugin mode
      */
     public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller, boolean pluginMode) {
         super();

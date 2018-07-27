@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,9 +54,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Custom action to save raw bytes of a stream to a file from the stream panel.
  * This allows selections to be saved as well.
@@ -65,10 +62,12 @@ import org.slf4j.LoggerFactory;
  */
 public class SaveToFileJTextPaneAction extends AbstractRupsAction {
 
-    /** Serial version uid. */
-	private static final long serialVersionUID = -5984892284970574660L;
+    /**
+     * Serial version uid.
+     */
+    private static final long serialVersionUID = -5984892284970574660L;
 
-	public SaveToFileJTextPaneAction(String name) {
+    public SaveToFileJTextPaneAction(String name) {
         super(name);
     }
 
@@ -82,7 +81,7 @@ public class SaveToFileJTextPaneAction extends AbstractRupsAction {
         JFileChooser fileChooser = new JFileChooser();
 
         int choice = fileChooser.showSaveDialog(null);
-        String path = null;
+        String path;
 
         if (choice == JFileChooser.APPROVE_OPTION) {
             path = fileChooser.getSelectedFile().getPath();

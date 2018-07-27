@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -63,17 +63,14 @@ import com.itextpdf.rups.view.models.DictionaryTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
 
-import java.awt.CardLayout;
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Observable;
 import java.util.Observer;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 
 public class PdfObjectPanel extends Observable implements Observer {
 
@@ -110,6 +107,9 @@ public class PdfObjectPanel extends Observable implements Observer {
 
     /**
      * Creates a PDF object panel.
+     *
+     * @param pluginMode the plugin mode
+     * @param parser     the pdf syntax parser
      */
     public PdfObjectPanel(boolean pluginMode, PdfSyntaxParser parser) {
 
@@ -163,7 +163,8 @@ public class PdfObjectPanel extends Observable implements Observer {
     /**
      * Shows a PdfObject as text or in a table.
      *
-     * @param node the node's content that needs to be shown.
+     * @param node   the node's content that needs to be shown.
+     * @param parser the pdf syntax parser
      */
     public void render(PdfObjectTreeNode node, PdfSyntaxParser parser) {
         target = node;

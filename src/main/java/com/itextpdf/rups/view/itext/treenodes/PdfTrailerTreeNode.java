@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,19 +56,22 @@ public class PdfTrailerTreeNode extends PdfObjectTreeNode {
      * Constructs a simple text tree node.
      */
     public PdfTrailerTreeNode() {
-		super("pdf.png", null);
-		setUserObject("Open a PDF file");
-	}
+        super("pdf.png", null);
+        setUserObject("Open a PDF file");
+    }
 
-	/**
-	 * Sets the object for this node.
-	 * @param trailer	the trailer dictionary of a PDF file.
-	 */
-	public void setTrailer(PdfDictionary trailer) {
-		object = trailer;
-	}
+    /**
+     * Sets the object for this node.
+     *
+     * @param trailer the trailer dictionary of a PDF file.
+     */
+    public void setTrailer(PdfDictionary trailer) {
+        object = trailer;
+    }
 
-	/** A serial version id. */
-	private static final long serialVersionUID = -3607980103983635182L;
+    /**
+     * A serial version id.
+     */
+    private static final long serialVersionUID = -3607980103983635182L;
 
 }

@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,26 +51,29 @@ package com.itextpdf.rups.view.models;
  */
 public interface JTableAutoModelInterface {
     /**
-     * @see javax.swing.table.TableModel#getColumnCount()
      * @return int the number of columns
+     * @see javax.swing.table.TableModel#getColumnCount()
      */
-	public int getColumnCount();
-	 /**
-     * @see javax.swing.table.TableModel#getRowCount()
+    public int getColumnCount();
+
+    /**
      * @return int the number of rows
+     * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount();
-	/**
-	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-	 * @param columnIndex a column number.
-	 * @return the name of the column
-	 */
-	public String getColumnName(int columnIndex);
+
     /**
+     * @param columnIndex a column number.
+     * @return the name of the column
+     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+     */
+    public String getColumnName(int columnIndex);
+
+    /**
+     * @param rowIndex    int   a row number
+     * @param columnIndex int   a column number
+     * @return Object    an object corresponding with a cell in the table
      * @see javax.swing.table.TableModel#getValueAt(int, int)
-     * @param rowIndex int		a row number
-     * @param columnIndex int	a column number
-     * @return Object	an object corresponding with a cell in the table
      */
     public Object getValueAt(int rowIndex, int columnIndex);
 }

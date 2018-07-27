@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,10 +52,11 @@ import java.io.OutputStream;
  * can be written to an OutputStream.
  */
 public interface OutputStreamResource {
-	/**
-	 * Writes a resource to an OutputStream.
-	 * @param os	the OutputStream to which the XML is written.
-	 * @throws IOException	usual exception when there's a problem writing to an OutputStream
-	 */
-	public void writeTo(OutputStream os) throws IOException;
+    /**
+     * Writes a resource to an OutputStream.
+     *
+     * @param os the OutputStream to which the XML is written.
+     * @throws IOException usual exception when there's a problem writing to an OutputStream
+     */
+    public void writeTo(OutputStream os) throws IOException;
 }

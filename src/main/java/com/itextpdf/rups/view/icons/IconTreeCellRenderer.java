@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,35 +44,34 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import java.awt.Component;
-
-import javax.swing.JLabel;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
+import java.awt.*;
 
 /**
  * Renders the tree cells with the correct icon.
  */
 public class IconTreeCellRenderer extends DefaultTreeCellRenderer {
 
-	/** a serial version UID. */
-	private static final long serialVersionUID = 6513462839504342074L;
+    /**
+     * a serial version UID.
+     */
+    private static final long serialVersionUID = 6513462839504342074L;
 
-	/**
-	 * @see javax.swing.tree.DefaultTreeCellRenderer#getTreeCellRendererComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int, boolean)
-	 */
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean selected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
-		JLabel displayedLabel = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-		if (value instanceof IconTreeNode) {
-			IconTreeNode node = (IconTreeNode) value;
-			displayedLabel.setIcon(node.getIcon());
-			if (node.getTextColor() != null) {
-				displayedLabel.setForeground(node.getTextColor());
-			}
-		}
-		return displayedLabel;
-	}
+    /**
+     * @see javax.swing.tree.DefaultTreeCellRenderer#getTreeCellRendererComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int, boolean)
+     */
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+                                                  boolean selected, boolean expanded, boolean leaf, int row,
+                                                  boolean hasFocus) {
+        JLabel displayedLabel = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        if (value instanceof IconTreeNode) {
+            IconTreeNode node = (IconTreeNode) value;
+            displayedLabel.setIcon(node.getIcon());
+            if (node.getTextColor() != null) {
+                displayedLabel.setForeground(node.getTextColor());
+            }
+        }
+        return displayedLabel;
+    }
 }

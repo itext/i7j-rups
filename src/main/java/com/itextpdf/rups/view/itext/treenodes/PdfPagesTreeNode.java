@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,14 +50,17 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
  * A tree node corresponding with a Pages dictionary in a PDF file.
  */
 public class PdfPagesTreeNode extends PdfObjectTreeNode {
-	/**
-	 * Creates a tree node for a Pages dictionary.
-	 * @param	object	a PdfDictionary of type pages.
-	 */
-	public PdfPagesTreeNode(PdfDictionary object) {
-		super("pages.png", object);
-	}
+    /**
+     * Creates a tree node for a Pages dictionary.
+     *
+     * @param    object    a PdfDictionary of type pages.
+     */
+    public PdfPagesTreeNode(PdfDictionary object) {
+        super("pages.png", object);
+    }
 
-	/** a serial version uid */
-	private static final long serialVersionUID = 4527774449030791503L;
+    /**
+     * a serial version uid
+     */
+    private static final long serialVersionUID = 4527774449030791503L;
 }

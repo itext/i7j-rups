@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,49 +50,56 @@ import com.itextpdf.rups.view.icons.IconTreeNode;
 
 public class StructureTreeNode extends IconTreeNode {
 
-	/** The corresponding tree node in the PdfTree. */
-	protected PdfObjectTreeNode object_node;
+    /**
+     * The corresponding tree node in the PdfTree.
+     */
+    protected PdfObjectTreeNode object_node;
 
-	/**
-	 * Creates the root node for the structure tree.
-	 */
-	public StructureTreeNode() {
-		super("chart_organisation.png", "Structure Tree");
-	}
-	
-	/**
-	 */
-	public StructureTreeNode(PdfObjectTreeNode node, String icon) {
-		super(icon);
-		this.object_node = node;
-		if (node.isDictionary()) {
-			PdfDictionary dict = (PdfDictionary)node.getPdfObject();
-			//if (dict.get(PdfName.TYPE) == null || dict.checkType(PdfName.STRUCTELEM)) {
-			if ( dict.get(PdfName.Type, false) == null || dict.get(PdfName.Type, false).equals(PdfName.StructElem) ) {
-				StringBuffer buf = new StringBuffer();
-				if (dict.get(PdfName.S, false) != null)
-					buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
-				if (dict.get(PdfName.T, false) != null) {
-					buf.append(" -> ");
-					buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));
-				}
-				this.setUserObject(buf.toString());
-				return;
-			}
-		}
-		this.setUserObject(node);
-	}
+    /**
+     * Creates the root node for the structure tree.
+     */
+    public StructureTreeNode() {
+        super("chart_organisation.png", "Structure Tree");
+    }
+
+    /**
+     * @param node the pdfobject treenode
+     * @param icon the icon name
+     */
+    public StructureTreeNode(PdfObjectTreeNode node, String icon) {
+        super(icon);
+        this.object_node = node;
+        if (node.isDictionary()) {
+            PdfDictionary dict = (PdfDictionary) node.getPdfObject();
+            //if (dict.get(PdfName.TYPE) == null || dict.checkType(PdfName.STRUCTELEM)) {
+            if (dict.get(PdfName.Type, false) == null || dict.get(PdfName.Type, false).equals(PdfName.StructElem)) {
+                StringBuilder buf = new StringBuilder();
+                if (dict.get(PdfName.S, false) != null)
+                    buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
+                if (dict.get(PdfName.T, false) != null) {
+                    buf.append(" -> ");
+                    buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));
+                }
+                this.setUserObject(buf.toString());
+                return;
+            }
+        }
+        this.setUserObject(node);
+    }
 
     /**
      * Gets the node in the PdfTree that corresponds with this
      * OutlineTreeNode.
-     * @return	a PdfObjectTreeNode in the PdfTree
+     *
+     * @return a PdfObjectTreeNode in the PdfTree
      */
-	public PdfObjectTreeNode getCorrespondingPdfObjectNode() {
-		return object_node;
-	}
+    public PdfObjectTreeNode getCorrespondingPdfObjectNode() {
+        return object_node;
+    }
 
-	/** Serial version UID */
-	private static final long serialVersionUID = 6822664148126160723L;
+    /**
+     * Serial version UID
+     */
+    private static final long serialVersionUID = 6822664148126160723L;
 
 }

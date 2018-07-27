@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,6 @@ import com.itextpdf.rups.event.CloseDocumentEvent;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Observable;
 import java.util.Observer;
 
 /**
@@ -56,23 +55,26 @@ import java.util.Observer;
  * resources relevant for the file that is being closed.
  */
 public class FileCloseAction implements ActionListener {
-	
-	/** An object that allows you to close a file. */
-	protected Observer observer;
-	
-	/**
-	 * Creates the close action.
-	 * @param	observer	the object that expects you to close a file.
-	 */
-	public FileCloseAction(Observer observer) {
-		this.observer = observer;
-	}
-	
-	/**
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent evt) {
-		observer.update(null, new CloseDocumentEvent());
-	}
+
+    /**
+     * An object that allows you to close a file.
+     */
+    protected Observer observer;
+
+    /**
+     * Creates the close action.
+     *
+     * @param    observer    the object that expects you to close a file.
+     */
+    public FileCloseAction(Observer observer) {
+        this.observer = observer;
+    }
+
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    public void actionPerformed(ActionEvent evt) {
+        observer.update(null, new CloseDocumentEvent());
+    }
 
 }

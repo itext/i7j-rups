@@ -2,7 +2,7 @@
  * $Id$
  *
  * This file is part of the iText (R) project.
- * Copyright (c) 2007-2015 iText Group NV
+    Copyright (c) 2007-2018 iText Group NV
  * Authors: Bruno Lowagie et al.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,10 +55,12 @@ import java.awt.event.ActionEvent;
  */
 public class ClearConsoleAction extends AbstractRupsAction {
 
-   /** Serial version uid. */
-	private static final long serialVersionUID = -7021881171745264584L;
+    /**
+     * Serial version uid.
+     */
+    private static final long serialVersionUID = -7021881171745264584L;
 
-	public ClearConsoleAction(String name) {
+    public ClearConsoleAction(String name) {
         super(name);
     }
 
@@ -68,6 +70,6 @@ public class ClearConsoleAction extends AbstractRupsAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ((JTextPane)this.invoker).setText("");
+        ((JTextPane) this.invoker).setText("");
     }
 }
