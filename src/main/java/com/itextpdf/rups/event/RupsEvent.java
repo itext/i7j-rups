@@ -64,6 +64,7 @@ public abstract class RupsEvent {
     public static final byte NODE_DELETE_ARRAY_CHILD_EVENT = 14;
     public static final byte NEW_INDIRECT_OBJECT_EVENT = 15;
     public static final byte POST_NEW_INDIRECT_OBJECT_EVENT = 16;
+    public static final byte OPEN_DOCUMENT_FINISHED_EVENT = 17;
 
     public abstract int getType();
 
