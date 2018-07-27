@@ -138,9 +138,6 @@ public class RupsController extends Observable
 
     // constructor
 
-    public PdfReaderController getReaderController() {
-        return readerController;
-    }
     /**
      * Constructs the GUI components of the RUPS application.
      *
