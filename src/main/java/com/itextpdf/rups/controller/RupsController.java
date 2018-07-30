@@ -281,10 +281,6 @@ public class RupsController extends Observable
                 case RupsEvent.NEW_INDIRECT_OBJECT_EVENT:
                     showNewIndirectDialog();
                     break;
-                case RupsEvent.OPEN_DOCUMENT_FINISHED_EVENT:
-                    setChanged();
-                    super.notifyObservers(arg);
-                    break;
             }
         }
         //Events from observable classes

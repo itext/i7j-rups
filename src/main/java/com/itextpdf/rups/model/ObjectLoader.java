@@ -45,7 +45,6 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.rups.event.PostOpenDocumentEvent;
-import com.itextpdf.rups.event.OpenDocumentFinishedEvent;
 
 import java.util.Observer;
 
@@ -172,6 +171,5 @@ public class ObjectLoader extends BackgroundTask {
             ex.printStackTrace();
         }
         progress.setVisible(false);
-        observer.update(null, new OpenDocumentFinishedEvent());
     }
 }
