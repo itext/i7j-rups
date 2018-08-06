@@ -46,7 +46,6 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.event.ConsoleWriteEvent;
 import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.model.SwingHelper;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -124,7 +123,7 @@ public class Console extends Observable implements Observer {
     }
 
     private void updateTextPane(final String msg, final String type) {
-        SwingHelper.invoke(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 try {
                     Document doc = textArea.getDocument();
@@ -143,7 +142,7 @@ public class Console extends Observable implements Observer {
     }
 
     private void clearWithBuffer(final String message) {
-        SwingHelper.invoke(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {

@@ -485,16 +485,6 @@ public class RupsController extends Observable
         }
     }
 
-    public void waitForLoader() {
-        if (loader != null) {
-            try {
-                loader.join();
-            } catch (InterruptedException e) {
-                LoggerHelper.error(LoggerMessages.WAITING_FOR_LOADER_ERROR, e, getClass());
-            }
-        }
-    }
-
     /**
      * Clear all previous highlights and highlights the changes from the compare result.
      * If compare result is null will just clear all previous highlights.
