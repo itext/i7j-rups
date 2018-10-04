@@ -42,8 +42,6 @@
  */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.rups.model.SwingHelper;
-
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -91,7 +89,7 @@ public class DebugView {
     }
 
     private void updateTextPane(final String msg) {
-        SwingHelper.invoke(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Document doc = textArea.getDocument();
                 if (textArea.getLineCount() >= MAX_LINES) {

@@ -46,6 +46,7 @@ package com.itextpdf.rups.model;
 
 import com.itextpdf.rups.event.PostOpenDocumentEvent;
 
+import javax.swing.*;
 import java.util.Observer;
 
 /**
@@ -135,26 +136,26 @@ public class ObjectLoader extends BackgroundTask {
     public void doTask() {
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
-        SwingHelper.invoke(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 progress.setMessage("Reading the Cross-Reference table");
                 progress.setTotal(n);
             }
         });
         while (objects.storeNextObject()) {
-            SwingHelper.invoke(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     progress.setValue(objects.getCurrent());
                 }
             });
         }
-        SwingHelper.invoke(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 progress.setTotal(0);
             }
         });
         nodes = new TreeNodeFactory(objects);
-        SwingHelper.invoke(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 progress.setMessage("Updating GUI");
             }
