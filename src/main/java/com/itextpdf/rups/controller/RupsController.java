@@ -44,8 +44,13 @@ package com.itextpdf.rups.controller;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.kernel.exceptions.PdfException;
+import com.itextpdf.kernel.pdf.CompressionConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNumber;
+import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.event.*;
 import com.itextpdf.rups.model.*;
@@ -304,7 +309,7 @@ public class RupsController extends Observable
             startObjectLoader();
             if (!pluginMode) {
                 String directoryPath = directory == null ? "" : directory.getCanonicalPath() + File.separator;
-                ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + ITextCoreProductData.getInstance().getVersion());
+                ownedFrame.setTitle("☠️ iText RUPS - " + directoryPath + fileName + " - " + ITextCoreProductData.getInstance().getVersion());
             }
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
@@ -406,12 +411,25 @@ public class RupsController extends Observable
         setChanged();
         super.notifyObservers(new CloseDocumentEvent());
         if (docToClose != null) {
+            docToClose.getWriter().setCompressionLevel(0);
+            uncompressStreams(docToClose);
             docToClose.close();
         }
         if (!pluginMode) {
-            ownedFrame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
+            ownedFrame.setTitle("☠️ iText RUPS " + ITextCoreProductData.getInstance().getVersion());
         }
         readerController.getParser().setDocument(null);
+    }
+
+    private static void uncompressStreams(PdfDocument document) {
+        PdfNumber num = document.getTrailer().getAsNumber(PdfName.Size);
+        int xrefSize = num != null ? num.intValue() : 64000;
+        for (int i = 1; i < xrefSize; i++) {
+            PdfObject object = document.getPdfObject(i);
+            if (object != null && object.isStream()) {
+                ((PdfStream) object).setCompressionLevel(CompressionConstants.NO_COMPRESSION);
+            }
+        }
     }
 
     public CompareTool.CompareResult compareWithDocument(PdfDocument document) {
@@ -429,7 +447,7 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithFile(File file) {
-        try (PdfReader readerPdf = new PdfReader(file.getAbsolutePath());
+        try (PdfReader readerPdf = new PdfReader(file.getAbsolutePath()).setUnethicalReading(true);
                 PdfDocument cmpDocument = new PdfDocument(readerPdf)) {
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
@@ -439,7 +457,7 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithStream(InputStream is) {
-        try (PdfReader reader = new PdfReader(is);
+        try (PdfReader reader = new PdfReader(is).setUnethicalReading(true);
                 PdfDocument cmpDocument = new PdfDocument(reader)) {
             reader.setCloseStream(false);
             return compareWithDocument(cmpDocument);

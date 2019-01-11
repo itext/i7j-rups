@@ -46,6 +46,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.ReaderProperties;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.model.IndirectObjectFactory;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -68,7 +69,7 @@ public class FormTreeTest extends ExtendedITextTest {
     public void testLoadXfa() throws IOException {
         File inPdf = new File(sourceFolder + "cmp_purchase_order_filled.pdf");
 
-        PdfDocument pdfDocument = new PdfDocument(new PdfReader(inPdf));
+        PdfDocument pdfDocument = new PdfDocument(new PdfReader(inPdf).setUnethicalReading(true));
 
         IndirectObjectFactory indirectObjectFactory = new IndirectObjectFactory(pdfDocument);
         while (indirectObjectFactory.storeNextObject());

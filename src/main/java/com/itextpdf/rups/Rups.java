@@ -101,7 +101,7 @@ public class Rups {
 
     static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
-        frame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
+        frame.setTitle("☠️ iText RUPS " + ITextCoreProductData.getInstance().getVersion());
         frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content

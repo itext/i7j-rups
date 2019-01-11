@@ -44,16 +44,25 @@ package com.itextpdf.rups.model;
 
 import com.itextpdf.kernel.exceptions.BadPasswordException;
 import com.itextpdf.kernel.exceptions.PdfException;
+import com.itextpdf.kernel.pdf.CompressionConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+import com.itextpdf.kernel.pdf.WriterProperties;
 
-import com.ibm.icu.text.StringPrepParseException;
 import com.ibm.icu.text.StringPrep;
-import javax.swing.*;
-import java.io.*;
+import com.ibm.icu.text.StringPrepParseException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 
 /**
  * Wrapper for both iText's PdfReader (referring to a PDF file to read)
@@ -186,12 +195,15 @@ public class PdfFile {
         } else {
             password = null;
         }
-        reader = new PdfReader(fis, readerProps);
+        reader = new PdfReader(fis, readerProps).setUnethicalReading(true);
         baos = new ByteArrayOutputStream();
         if (readOnly) {
             document = new PdfDocument(reader);
         } else {
-            writer = new PdfWriter(baos);
+            //TODO: change writer mechanism
+            writer = new PdfWriter(baos,
+                    new WriterProperties().setCompressionLevel(CompressionConstants.NO_COMPRESSION)
+                            .setFullCompressionMode(false));
             document = new PdfDocument(reader, writer);
         }
         // we have some extra work to do if the document was encrypted
