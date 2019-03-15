@@ -115,12 +115,11 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
     public Object getValueAt(int rowIndex, int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return rowIndex == array.size() ? tempValue : PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
-            default:
-                return null;
+        if (columnIndex == 0) {
+            if (rowIndex == array.size()) return tempValue;
+            return PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
         }
+        return null;
     }
 
     @Override
@@ -178,10 +177,6 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
         PdfObject value = parser.parseString(tempValue, parent);
 
         if (value != null) {
-            int[] options = new int[array.size() + 1];
-            for (int i = 0; i < options.length; ++i) {
-                options[i] = i;
-            }
             int index;
             while (true) {
                 String result = JOptionPane.showInputDialog(parent, "Choose array index", array.size());
@@ -190,7 +185,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                     return;
                 }
                 try {
-                    index = new Integer(result);
+                    index = Integer.valueOf(result);
                 } catch (NumberFormatException any) {
                     LoggerHelper.warn(LoggerMessages.NOT_AN_INTEGER_INDEX, any, getClass());
                     continue;
@@ -218,8 +213,5 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
         fireTableRowsInserted(index, index);
     }
 
-    private void addRow(PdfObject value) {
-        addRow(array.size(), value);
-    }
 }
 

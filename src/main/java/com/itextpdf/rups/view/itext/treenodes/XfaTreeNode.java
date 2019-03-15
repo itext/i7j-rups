@@ -63,15 +63,15 @@ public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
     /**
      * Start sequence of an artificial boundary between XFA fragments added by RUPS
      */
-    public static final byte[] BOUNDARY_START = "<!--\nRUPS XFA individual packet: end of [".getBytes();
+    protected static final byte[] BOUNDARY_START = "<!--\nRUPS XFA individual packet: end of [".getBytes();
     /**
      * Middle sequence of an artificial boundary between XFA fragments added by RUPS
      */
-    public static final byte[] BOUNDARY_MIDDLE = "]; start of [".getBytes();
+    protected static final byte[] BOUNDARY_MIDDLE = "]; start of [".getBytes();
     /**
      * End sequence of an artificial boundary between XFA fragments added by RUPS
      */
-    public static final byte[] BOUNDARY_END = "]\n-->".getBytes();
+    protected static final byte[] BOUNDARY_END = "]\n-->".getBytes();
 
     /**
      * Creates the root node of the XFA tree.

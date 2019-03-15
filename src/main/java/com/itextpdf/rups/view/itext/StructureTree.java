@@ -122,7 +122,7 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
                     setModel(new DefaultTreeModel(new DefaultMutableTreeNode("Loading...")));
                     worker = new SwingWorker<TreeModel, Integer>() {
                         @Override
-                        protected TreeModel doInBackground() throws Exception {
+                        protected TreeModel doInBackground() {
                             TreeNodeFactory factory = loader.getNodes();
                             PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
                             PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
@@ -143,7 +143,10 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
                                     TreeModel model = this.get();
                                     StructureTree.this.setModel(model);
                                 }
-                            } catch (InterruptedException | ExecutionException any) {
+                            } catch (InterruptedException any) {
+                                StructureTree.this.setModel(new DefaultTreeModel(new StructureTreeNode()));
+                                Thread.currentThread().interrupt();
+                            } catch (ExecutionException any) {
                                 StructureTree.this.setModel(new DefaultTreeModel(new StructureTreeNode()));
                             }
                             super.done();

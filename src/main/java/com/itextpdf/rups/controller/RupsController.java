@@ -176,7 +176,7 @@ public class RupsController extends Observable
                 public synchronized void drop(DropTargetDropEvent dtde) {
                     dtde.acceptDrop(DnDConstants.ACTION_COPY);
                     Transferable t = dtde.getTransferable();
-                    java.util.List<File> files = null;
+                    List<File> files = null;
 
                     try {
                         if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -185,7 +185,7 @@ public class RupsController extends Observable
                         if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
 
                             String urls = (String) t.getTransferData(DataFlavor.stringFlavor);
-                            files = new LinkedList();
+                            files = new LinkedList<>();
                             StringTokenizer tokens = new StringTokenizer(urls);
                             while (tokens.hasMoreTokens()) {
                                 String urlString = tokens.nextToken();
@@ -269,10 +269,8 @@ public class RupsController extends Observable
         //Events from observable classes
         if (o != null && arg instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.CONSOLE_WRITE_EVENT:
-                    readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
-                    break;
+            if (RupsEvent.CONSOLE_WRITE_EVENT == event.getType()) {
+                readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
             }
         }
     }
@@ -437,17 +435,11 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithFile(File file) {
-        PdfDocument cmpDocument = null;
-        try {
-            cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
+        try (PdfDocument cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()))) {
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
             return null;
-        } finally {
-            if (cmpDocument != null) {
-                cmpDocument.close();
-            }
         }
     }
 
@@ -486,7 +478,7 @@ public class RupsController extends Observable
     }
 
     private void startObjectLoader() {
-        final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, pluginMode);
+        final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF document...", ownedFrame, pluginMode);
         if (!pluginMode) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {

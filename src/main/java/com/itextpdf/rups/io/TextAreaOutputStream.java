@@ -48,6 +48,7 @@ import javax.swing.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Everything writing to this OutputStream will be shown in a JTextArea.
@@ -90,7 +91,7 @@ public class TextAreaOutputStream extends OutputStream {
      */
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        String snippet = new String(b, off, len, "UTF-8");
+        String snippet = new String(b, off, len, StandardCharsets.UTF_8);
         text.append(snippet);
     }
 

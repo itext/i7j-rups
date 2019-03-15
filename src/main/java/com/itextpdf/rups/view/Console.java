@@ -107,8 +107,6 @@ public class Console extends Observable implements Observer {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    clearWithBuffer("");
-                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     clearWithBuffer("");
                     break;

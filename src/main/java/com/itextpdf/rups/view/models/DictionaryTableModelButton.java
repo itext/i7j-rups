@@ -79,7 +79,7 @@ public class DictionaryTableModelButton extends JButton implements TableCellRend
         JLabel label = new JLabel();
         label.setHorizontalAlignment(JLabel.CENTER);
 
-        if (table.getRowCount() - 1 == row) {
+        if (row == (table.getRowCount() - 1)) {
             label.setIcon(addIcon);
         } else {
             label.setIcon(deleteIcon);

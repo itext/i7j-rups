@@ -168,9 +168,11 @@ public class PdfSyntaxParser {
                     default:
                         if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.Null)) {
                             return PdfNull.PDF_NULL;
-                        } else if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.True)) {
+                        }
+                        if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.True)) {
                             return PdfBoolean.TRUE;
-                        } else if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.False)) {
+                        }
+                        if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.False)) {
                             return new PdfBoolean(false);
                         }
                         addUnknownValue((PdfLiteral) tempObject);

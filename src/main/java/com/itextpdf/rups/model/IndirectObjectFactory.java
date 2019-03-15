@@ -73,7 +73,7 @@ public class IndirectObjectFactory {
     /**
      * A list of all the indirect objects in a PDF file.
      */
-    protected ArrayList<PdfObject> objects = new ArrayList<PdfObject>();
+    protected ArrayList<PdfObject> objects = new ArrayList<>();
     /**
      * Mapping between the index in the objects list and the reference number in the xref table.
      */
@@ -85,7 +85,7 @@ public class IndirectObjectFactory {
     /**
      * Array to indicate if object is already loaded
      */
-    protected ArrayList<Boolean> isLoaded = new ArrayList<Boolean>();
+    protected ArrayList<Boolean> isLoaded = new ArrayList<>();
 
     private static final String METHOD_NAME = "checkState";
     private static final String FIELD_NAME = "FORBID_RELEASE";
@@ -149,7 +149,8 @@ public class IndirectObjectFactory {
             // attempt to read the object, if this fails keep object at 'null' (compatible with iText 5)
             try {
                 object = document.getPdfObject(current);
-            } catch (PdfException ex) {
+            } catch (PdfException ignored) {
+                LoggerHelper.info("Attempt to read the object failed. The object number is: " + current, getClass());
             }
 
             if (object != null) {
@@ -180,11 +181,7 @@ public class IndirectObjectFactory {
                 return;
             }
         }
-        if (object.isNull()) {
-            isLoaded.add(true);
-        } else {
-            isLoaded.add(false);
-        }
+        isLoaded.add(object.isNull());
         if (canRelease(object)) {
             object.release();
             objects.add(PdfNull.PDF_NULL);

@@ -264,9 +264,8 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         PdfObject result = parser.parseString(value);
         if (result instanceof PdfName) {
             return (PdfName) result;
-        } else {
-            LoggerHelper.error(LoggerMessages.KEY_ISNT_PDFNAME, getClass());
-            return null;
         }
+        LoggerHelper.error(LoggerMessages.KEY_ISNT_PDFNAME, getClass());
+        return null;
     }
 }

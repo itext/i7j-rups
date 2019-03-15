@@ -144,18 +144,18 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         file.addSeparator();
         addItem(file, OPENINVIEWER, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (Desktop.isDesktopSupported()) {
-                    try {
-                        PdfFile pdfFile = RupsMenuBar.this.controller.getPdfFile();
-                        if (pdfFile != null) {
-                            if (pdfFile.getDirectory() != null) {
-                                File myFile = new File(pdfFile.getDirectory(), pdfFile.getFilename());
-                                Desktop.getDesktop().open(myFile);
-                            }
-                        }
-                    } catch (IOException ex) {
-                        // no application registered for PDFs
+                if (!Desktop.isDesktopSupported()) {
+                    return;
+                }
+                try {
+                    PdfFile pdfFile = RupsMenuBar.this.controller.getPdfFile();
+                    if (pdfFile == null || pdfFile.getDirectory() == null) {
+                        return;
                     }
+                    File myFile = new File(pdfFile.getDirectory(), pdfFile.getFilename());
+                    Desktop.getDesktop().open(myFile);
+                } catch (IOException ex) {
+                    // no application registered for PDFs
                 }
             }
         }, KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));

@@ -111,21 +111,12 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
             // get the bytes and write away
             try {
-                byte[] array;
-
-                if (saveRawBytes) {
-                    array = stream.getBytes(false);
-                } else {
-                    array = stream.getBytes();
+                byte[] array = stream.getBytes(!saveRawBytes);
+                try (FileOutputStream fos = new FileOutputStream(path)) {
+                    fos.write(array);
                 }
-
-                FileOutputStream fos = new FileOutputStream(path);
-                fos.write(array);
-                fos.close();
             } catch (IOException e) { // TODO : Catch this exception properly
                 LoggerHelper.error(LoggerMessages.WRITING_FILE_ERROR, e, getClass());
-            } catch (com.itextpdf.io.IOException e) { // TODO : Catch this exception properly
-                LoggerHelper.error(LoggerMessages.GETTING_PDF_STREAM_BYTES_ERROR, e, getClass());
             }
         }
     }

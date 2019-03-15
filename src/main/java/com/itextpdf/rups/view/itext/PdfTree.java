@@ -103,10 +103,8 @@ public class PdfTree extends JTree implements Observer {
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    root = new PdfTrailerTreeNode();
-                    break;
+            if (RupsEvent.CLOSE_DOCUMENT_EVENT == event.getType()) {
+                root = new PdfTrailerTreeNode();
             }
         }
         setModel(new DefaultTreeModel(root));

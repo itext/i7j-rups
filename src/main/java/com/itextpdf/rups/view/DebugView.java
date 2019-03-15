@@ -93,7 +93,7 @@ public class DebugView {
     private void updateTextPane(final String msg) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Document doc = textArea.getDocument();
+                textArea.getDocument();
                 if (textArea.getLineCount() >= MAX_LINES) {
                     String backupString = "";
                     try {

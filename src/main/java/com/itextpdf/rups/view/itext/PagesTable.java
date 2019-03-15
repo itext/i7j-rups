@@ -100,7 +100,7 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    list = new ArrayList<PdfPageTreeNode>();
+                    list = new ArrayList<>();
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     ObjectLoader loader = (ObjectLoader) event.getContent();
@@ -158,8 +158,9 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
                 return "Object " + list.get(rowIndex).getNumber();
             case 1:
                 return list.get(rowIndex);
+            default:
+                return null;
         }
-        return null;
     }
 
     /**

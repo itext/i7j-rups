@@ -169,8 +169,8 @@ public class Permissions {
      * @return true if printing is allowed
      */
     public boolean isAllowPrinting() {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_PRINTING & permissions) == EncryptionConstants.ALLOW_PRINTING;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_PRINTING & permissions) == EncryptionConstants.ALLOW_PRINTING;
     }
 
     /**
@@ -180,8 +180,8 @@ public class Permissions {
      * @return true if modifying contents is allowed
      */
     public boolean isAllowModifyContents(boolean decrypted) {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_MODIFY_CONTENTS & permissions) == EncryptionConstants.ALLOW_MODIFY_CONTENTS;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_MODIFY_CONTENTS & permissions) == EncryptionConstants.ALLOW_MODIFY_CONTENTS;
     }
 
     /**
@@ -191,8 +191,8 @@ public class Permissions {
      * @return true if copying is allowed
      */
     public boolean isAllowCopy(boolean decrypted) {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_COPY & permissions) == EncryptionConstants.ALLOW_COPY;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_COPY & permissions) == EncryptionConstants.ALLOW_COPY;
     }
 
     /**
@@ -201,8 +201,8 @@ public class Permissions {
      * @return true if modifying annotations is allowed
      */
     public boolean isAllowModifyAnnotations() {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS & permissions) == EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS & permissions) == EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS;
     }
 
     /**
@@ -211,8 +211,8 @@ public class Permissions {
      * @return true if filling in forms is allowed
      */
     public boolean isAllowFillIn() {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_FILL_IN & permissions) == EncryptionConstants.ALLOW_FILL_IN;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_FILL_IN & permissions) == EncryptionConstants.ALLOW_FILL_IN;
     }
 
     /**
@@ -221,8 +221,8 @@ public class Permissions {
      * @return true if modifying the layout for screenreaders is allowed
      */
     public boolean isAllowScreenReaders() {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_SCREENREADERS & permissions) == EncryptionConstants.ALLOW_SCREENREADERS;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_SCREENREADERS & permissions) == EncryptionConstants.ALLOW_SCREENREADERS;
     }
 
     /**
@@ -231,8 +231,8 @@ public class Permissions {
      * @return true if document assembly is allowed
      */
     public boolean isAllowAssembly() {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_ASSEMBLY & permissions) == EncryptionConstants.ALLOW_ASSEMBLY;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_ASSEMBLY & permissions) == EncryptionConstants.ALLOW_ASSEMBLY;
     }
 
     /**
@@ -241,7 +241,7 @@ public class Permissions {
      * @return true if degraded printing is allowed
      */
     public boolean isAllowDegradedPrinting() {
-        return !encrypted
-                || (EncryptionConstants.ALLOW_DEGRADED_PRINTING & permissions) == EncryptionConstants.ALLOW_DEGRADED_PRINTING;
+        if (!encrypted) return true;
+        return (EncryptionConstants.ALLOW_DEGRADED_PRINTING & permissions) == EncryptionConstants.ALLOW_DEGRADED_PRINTING;
     }
 }

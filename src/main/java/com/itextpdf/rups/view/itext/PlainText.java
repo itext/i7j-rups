@@ -91,7 +91,7 @@ public class PlainText extends JTextArea implements Observer {
                     setText("Loading...");
                     worker = new SwingWorker<String, Object>() {
                         @Override
-                        protected String doInBackground() throws Exception {
+                        protected String doInBackground() {
                             return file.getRawContent();
                         }
 
@@ -101,7 +101,10 @@ public class PlainText extends JTextArea implements Observer {
                                 String text;
                                 try {
                                     text = get();
-                                } catch (InterruptedException | ExecutionException any) {
+                                } catch (InterruptedException any) {
+                                    text = "Error while loading text";
+                                    Thread.currentThread().interrupt();
+                                } catch (ExecutionException any) {
                                     text = "Error while loading text";
                                 }
                                 setText(text);

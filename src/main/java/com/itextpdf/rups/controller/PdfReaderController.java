@@ -125,7 +125,7 @@ public class PdfReaderController extends Observable implements Observer {
 
     protected PlainText text;
 
-    private Stack<IconTreeNode> highlights = new Stack<IconTreeNode>();
+    private Stack<IconTreeNode> highlights = new Stack<>();
 
     private PdfSyntaxParser parser = new PdfSyntaxParser();
 
@@ -136,7 +136,7 @@ public class PdfReaderController extends Observable implements Observer {
      *
      * @param treeSelectionListener when somebody selects a tree node, this listener listens to the event
      * @param pageSelectionListener when somebody changes a page, this listener changes accordingly
-     * @param pluginMode the plugin mode
+     * @param pluginMode            the plugin mode
      */
     public PdfReaderController(TreeSelectionListener treeSelectionListener,
                                PageSelectionListener pageSelectionListener, boolean pluginMode) {
@@ -385,7 +385,7 @@ public class PdfReaderController extends Observable implements Observer {
             return;
         }
         for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
-            PdfObjectTreeNode currentNode = null;
+            PdfObjectTreeNode currentNode;
             Stack<CompareTool.ObjectPath.IndirectPathItem> indirectPath = (Stack<CompareTool.ObjectPath.IndirectPathItem>) path.getIndirectPath().clone();
             while (!indirectPath.empty()) {
                 CompareTool.ObjectPath.IndirectPathItem indirectPathItem = indirectPath.pop();

@@ -72,9 +72,6 @@ public class PdfFile {
      */
     protected String filename = null;
 
-    /** The PdfReader object. */
-    //protected PdfReader reader = null;
-
     /**
      * The PdfDocument object.
      */

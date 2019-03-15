@@ -56,7 +56,7 @@ public class RupsLauncher {
     /**
      * Allows people to plug in RUPS into their projects without RUPS shutting down the JVM.
      */
-    public static int CLOSE_OPERATION = WindowConstants.EXIT_ON_CLOSE;
+    public static final int CLOSE_OPERATION = WindowConstants.EXIT_ON_CLOSE;
 
     /**
      * Main method. Starts the RUPS application.

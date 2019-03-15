@@ -53,11 +53,16 @@ import java.awt.event.ActionListener;
 public class MessageAction implements ActionListener {
 
     public void actionPerformed(ActionEvent evt) {
-        String message = "Unspecified message";
-        if (RupsMenuBar.ABOUT.equals(evt.getActionCommand())) {
-            message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
-        } else if (RupsMenuBar.VERSION.equals(evt.getActionCommand())) {
-            message = Version.getInstance().getVersion();
+        String message;
+        switch (evt.getActionCommand()) {
+            case RupsMenuBar.ABOUT:
+                message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
+                break;
+            case RupsMenuBar.VERSION:
+                message = Version.getInstance().getVersion();
+                break;
+            default:
+                message = "Unspecified message";
         }
         JOptionPane.showMessageDialog(null, message);
     }

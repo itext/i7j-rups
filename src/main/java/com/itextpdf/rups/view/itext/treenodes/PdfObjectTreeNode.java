@@ -140,7 +140,8 @@ public class PdfObjectTreeNode extends IconTreeNode {
         if (object.isDictionary()) {
             if (PdfName.Page.equals(((PdfDictionary) object).get(PdfName.Type, false))) {
                 return new PdfPageTreeNode((PdfDictionary) object);
-            } else if (PdfName.Pages.equals(((PdfDictionary) object).get(PdfName.Type, false))) {
+            }
+            if (PdfName.Pages.equals(((PdfDictionary) object).get(PdfName.Type, false))) {
                 return new PdfPagesTreeNode((PdfDictionary) object);
             }
         }
@@ -318,8 +319,9 @@ public class PdfObjectTreeNode extends IconTreeNode {
                 if (type == null)
                     return "Dictionary";
                 return "Dictionary of type: " + type;
+            default:
+                return object.toString();
         }
-        return object.toString();
     }
 
     /**
@@ -330,7 +332,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * @return a caption for the object corresponding with the key in the dictionary.
      */
     public static String getDictionaryEntryCaption(PdfDictionary dict, PdfName key) {
-        StringBuffer buf = new StringBuffer(key.toString());
+        StringBuilder buf = new StringBuilder(key.toString());
         buf.append(": ");
         PdfObject valObj = dict.get(key, false);
         buf.append(getCaption(valObj));

@@ -94,10 +94,9 @@ public class XdpTreeNode extends IconTreeNode {
 
     private void addChildNodes(List<Node> list) {
         for (Node node : list) {
-            Node n = node;
-            if (n instanceof Namespace) continue;
-            if (n instanceof Comment) continue;
-            this.add(new XdpTreeNode(n));
+            if (!(node instanceof Namespace || node instanceof Comment)) {
+                this.add(new XdpTreeNode(node));
+            }
         }
     }
 

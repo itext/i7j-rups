@@ -144,11 +144,7 @@ public class PdfObjectPanel extends Observable implements Observer {
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                default:
-                    clear();
-                    break;
-            }
+            clear();
         }
     }
 
