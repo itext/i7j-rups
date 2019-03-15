@@ -1,6 +1,8 @@
 /*
+    * $Id$
+
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
+    Copyright (c) 2007-2019 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -131,7 +133,6 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
                 textArea.requestFocusInWindow();
             }
         });
-
 
         //Register an event handler that reacts to option pane state changes.
         optionPane.addPropertyChangeListener(this);
