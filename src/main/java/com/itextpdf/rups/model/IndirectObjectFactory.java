@@ -46,11 +46,7 @@ package com.itextpdf.rups.model;
 
 import com.itextpdf.io.util.IntHashtable;
 import com.itextpdf.kernel.PdfException;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfNull;
-import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

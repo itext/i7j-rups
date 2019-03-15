@@ -48,13 +48,7 @@ import com.itextpdf.rups.event.ConsoleWriteEvent;
 import com.itextpdf.rups.event.RupsEvent;
 
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Document;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.swing.text.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;

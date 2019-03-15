@@ -59,8 +59,6 @@ import java.awt.event.ActionEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-//import com.itextpdf.text.pdf.PdfReader;
-
 /**
  * Custom action to save raw bytes of a stream to a file from the PdfTree view.
  *

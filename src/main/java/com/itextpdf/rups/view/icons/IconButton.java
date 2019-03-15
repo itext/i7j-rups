@@ -44,7 +44,7 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import javax.swing.JButton;
+import javax.swing.*;
 
 /**
  * JButton with an Icon that performs an Action if you push it.

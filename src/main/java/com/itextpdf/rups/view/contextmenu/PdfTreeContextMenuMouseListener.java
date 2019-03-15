@@ -44,10 +44,10 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
-import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.kernel.pdf.PdfName;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;

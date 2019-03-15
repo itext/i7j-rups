@@ -44,17 +44,9 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.kernel.pdf.PdfArray;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.NodeAddArrayChildEvent;
-import com.itextpdf.rups.event.NodeAddDictChildEvent;
-import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
-import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
-import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.event.*;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;

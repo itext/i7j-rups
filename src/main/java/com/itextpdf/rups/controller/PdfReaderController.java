@@ -44,19 +44,9 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.kernel.pdf.PdfArray;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.utils.CompareTool;
-import com.itextpdf.rups.event.NodeAddArrayChildEvent;
-import com.itextpdf.rups.event.NodeAddDictChildEvent;
-import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
-import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
-import com.itextpdf.rups.event.OpenPlainTextEvent;
-import com.itextpdf.rups.event.OpenStructureEvent;
-import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.event.*;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
@@ -66,15 +56,7 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-import com.itextpdf.rups.view.itext.FormTree;
-import com.itextpdf.rups.view.itext.OutlineTree;
-import com.itextpdf.rups.view.itext.PagesTable;
-import com.itextpdf.rups.view.itext.PdfObjectPanel;
-import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.PlainText;
-import com.itextpdf.rups.view.itext.StructureTree;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
-import com.itextpdf.rups.view.itext.XRefTable;
+import com.itextpdf.rups.view.itext.*;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 

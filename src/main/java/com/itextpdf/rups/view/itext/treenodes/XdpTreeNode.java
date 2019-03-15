@@ -46,15 +46,7 @@ package com.itextpdf.rups.view.itext.treenodes;
 
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-import org.dom4j.Attribute;
-import org.dom4j.Branch;
-import org.dom4j.Comment;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.Namespace;
-import org.dom4j.Node;
-import org.dom4j.ProcessingInstruction;
-import org.dom4j.Text;
+import org.dom4j.*;
 
 import java.util.List;
 
