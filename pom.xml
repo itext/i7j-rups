@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>com.itextpdf</groupId>
     <artifactId>root</artifactId>
     <version>7.1.6-SNAPSHOT</version>
-    <relativePath/>
+    <relativePath />
   </parent>
+
   <artifactId>itext-rups</artifactId>
+
   <name>itext-rups</name>
   <description>RUPS, a tool to view PDF structure in a Swing GUI.</description>
-  <url>http://www.itextpdf.com/</url>
+  <url>https://itextpdf.com/products/rups</url>
   <licenses>
     <license>
       <name>GNU Affero General Public License v3</name>
       <url>http://www.fsf.org/licensing/licenses/agpl-3.0.html</url>
     </license>
   </licenses>
+
   <developers>
     <developer>
       <id>itext</id>
       <name>iText Software</name>
       <email>info@itextpdf.com</email>
-      <url>http://www.itextpdf.com</url>
+      <url>https://www.itextpdf.com</url>
     </developer>
   </developers>
+
   <mailingLists>
     <mailingList>
       <name>iText on StackOverflow</name>
@@ -39,10 +44,12 @@
       </otherArchives>
     </mailingList>
   </mailingLists>
+
   <scm>
     <connection>ssh://git@git.itextsupport.com:7999/i7j/rups.git</connection>
     <url>https://git.itextsupport.com/projects/I7J/repos/rups</url>
   </scm>
+
   <properties>
     <bouncycastle.version>1.49</bouncycastle.version>
     <dom4j.version>1.6.1</dom4j.version>
@@ -52,6 +59,7 @@
     <productversion>7.1.3.0</productversion>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
   <repositories>
     <repository>
       <releases>
@@ -76,6 +84,7 @@
       <url>https://repo.itextsupport.com/releases</url>
     </repository>
   </repositories>
+
   <dependencies>
     <dependency>
       <groupId>dom4j</groupId>
@@ -121,13 +130,14 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
       <plugin>
         <groupId>com.github.ekryd.sortpom</groupId>
         <artifactId>sortpom-maven-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>2.9.0</version>
         <executions>
           <execution>
             <phase>verify</phase>
@@ -159,7 +169,7 @@
             <featureBranchPrefix>feature/</featureBranchPrefix>
             <releaseBranchPrefix>release/</releaseBranchPrefix>
             <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
-            <versionTagPrefix/>
+            <versionTagPrefix />
           </flowInitContext>
           <allowUntracked>true</allowUntracked>
           <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -169,7 +179,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>make-assembly</id>
@@ -206,7 +216,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -240,7 +250,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -272,13 +282,13 @@
       </plugin>
     </plugins>
   </build>
+
   <profiles>
     <profile>
       <id>exe</id>
       <build>
         <plugins>
-          <plugin>
-            <!-- see http://alakai.org/reference/plugins/launch4j-plugin-usage.html -->
+          <plugin><!-- see http://alakai.org/reference/plugins/launch4j-plugin-usage.html -->
             <!-- see http://launch4j.sourceforge.net/docs.html for more config options -->
             <groupId>com.akathist.maven.plugins.launch4j</groupId>
             <artifactId>launch4j-maven-plugin</artifactId>
@@ -329,7 +339,6 @@
     <profile>
       <id>mac</id>
       <build>
-        <finalName>RUPS-${project.version}</finalName>
         <resources>
           <resource>
             <directory>src/main/resources</directory>
@@ -338,10 +347,11 @@
             <directory>config</directory>
           </resource>
         </resources>
+        <finalName>RUPS-${project.version}</finalName>
         <plugins>
           <plugin>
-            <artifactId>exec-maven-plugin</artifactId>
             <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
             <version>1.6.0</version>
             <executions>
               <execution>
@@ -365,12 +375,6 @@
             <groupId>sh.tak.appbundler</groupId>
             <artifactId>appbundle-maven-plugin</artifactId>
             <version>1.2.0</version>
-            <configuration>
-              <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
-              <dictionaryFile>Info.plist</dictionaryFile>
-              <generateDiskImageFile>false</generateDiskImageFile>
-              <iconFile>logo.icns</iconFile>
-            </configuration>
             <executions>
               <execution>
                 <phase>package</phase>
@@ -379,6 +383,12 @@
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
+              <dictionaryFile>Info.plist</dictionaryFile>
+              <generateDiskImageFile>false</generateDiskImageFile>
+              <iconFile>logo.icns</iconFile>
+            </configuration>
           </plugin>
         </plugins>
       </build>
