@@ -1,6 +1,8 @@
 /*
+    * $Id$
+
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
+    Copyright (c) 2007-2019 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -44,7 +46,6 @@ package com.itextpdf.rups.view;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
-
 
 public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
 

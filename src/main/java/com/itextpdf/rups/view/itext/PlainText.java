@@ -1,6 +1,8 @@
 /*
+    * $Id$
+
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
+    Copyright (c) 2007-2019 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -89,7 +91,7 @@ public class PlainText extends JTextArea implements Observer {
                     setText("Loading...");
                     worker = new SwingWorker<String, Object>() {
                         @Override
-                        protected String doInBackground() throws Exception {
+                        protected String doInBackground() {
                             return file.getRawContent();
                         }
 
@@ -99,7 +101,10 @@ public class PlainText extends JTextArea implements Observer {
                                 String text;
                                 try {
                                     text = get();
-                                } catch (InterruptedException | ExecutionException any) {
+                                } catch (InterruptedException any) {
+                                    text = "Error while loading text";
+                                    Thread.currentThread().interrupt();
+                                } catch (ExecutionException any) {
                                     text = "Error while loading text";
                                 }
                                 setText(text);

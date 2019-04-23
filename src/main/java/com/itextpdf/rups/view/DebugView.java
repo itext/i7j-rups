@@ -1,6 +1,8 @@
 /*
+    * $Id$
+
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
+    Copyright (c) 2007-2019 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -91,7 +93,7 @@ public class DebugView {
     private void updateTextPane(final String msg) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Document doc = textArea.getDocument();
+                textArea.getDocument();
                 if (textArea.getLineCount() >= MAX_LINES) {
                     String backupString = "";
                     try {

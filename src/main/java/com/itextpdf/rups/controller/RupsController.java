@@ -1,46 +1,46 @@
 /*
- * $Id$
- *
- * This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
- * Authors: Bruno Lowagie et al.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License version 3
- * as published by the Free Software Foundation with the addition of the
- * following permission added to Section 15 as permitted in Section 7(a):
- * FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
- * ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
- * OF THIRD PARTY RIGHTS
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, see http://www.gnu.org/licenses or write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA, 02110-1301 USA, or download the license from the following URL:
- * http://itextpdf.com/terms-of-use/
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License,
- * a covered work must retain the producer line in every PDF that is created
- * or manipulated using iText.
- *
- * You can be released from the requirements of the license by purchasing
- * a commercial license. Buying such a license is mandatory as soon as you
- * develop commercial activities involving the iText software without
- * disclosing the source code of your own applications.
- * These activities include: offering paid services to customers as an ASP,
- * serving PDFs on the fly in a web application, shipping iText with a closed
- * source product.
- *
- * For more information, please contact iText Software Corp. at this
- * address: sales@itextpdf.com
+    * $Id$
+
+    This file is part of the iText (R) project.
+    Copyright (c) 2007-2019 iText Group NV
+    Authors: iText Software.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation with the addition of the
+    following permission added to Section 15 as permitted in Section 7(a):
+    FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
+    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    OF THIRD PARTY RIGHTS
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program; if not, see http://www.gnu.org/licenses or write to
+    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+    Boston, MA, 02110-1301 USA, or download the license from the following URL:
+    http://itextpdf.com/terms-of-use/
+
+    The interactive user interfaces in modified source and object code versions
+    of this program must display Appropriate Legal Notices, as required under
+    Section 5 of the GNU Affero General Public License.
+
+    In accordance with Section 7(b) of the GNU Affero General Public License,
+    a covered work must retain the producer line in every PDF that is created
+    or manipulated using iText.
+
+    You can be released from the requirements of the license by purchasing
+    a commercial license. Buying such a license is mandatory as soon as you
+    develop commercial activities involving the iText software without
+    disclosing the source code of your own applications.
+    These activities include: offering paid services to customers as an ASP,
+    serving PDFs on the fly in a web application, shipping iText with a closed
+    source product.
+
+    For more information, please contact iText Software Corp. at this
+    address: sales@itextpdf.com
  */
 package com.itextpdf.rups.controller;
 
@@ -49,17 +49,8 @@ import com.itextpdf.kernel.Version;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
-import com.itextpdf.rups.event.CloseDocumentEvent;
-import com.itextpdf.rups.event.PostCompareEvent;
-import com.itextpdf.rups.event.PostNewIndirectObjectEvent;
-import com.itextpdf.rups.event.RootNodeClickedEvent;
-import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.event.TreeNodeClickedEvent;
-import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
-import com.itextpdf.rups.model.ObjectLoader;
-import com.itextpdf.rups.model.PdfFile;
-import com.itextpdf.rups.model.ProgressDialog;
+import com.itextpdf.rups.event.*;
+import com.itextpdf.rups.model.*;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.NewIndirectPdfObjectDialog;
 import com.itextpdf.rups.view.PageSelectionListener;
@@ -79,19 +70,11 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -193,7 +176,7 @@ public class RupsController extends Observable
                 public synchronized void drop(DropTargetDropEvent dtde) {
                     dtde.acceptDrop(DnDConstants.ACTION_COPY);
                     Transferable t = dtde.getTransferable();
-                    java.util.List<File> files = null;
+                    List<File> files = null;
 
                     try {
                         if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -202,7 +185,7 @@ public class RupsController extends Observable
                         if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) { // fix for Linux
 
                             String urls = (String) t.getTransferData(DataFlavor.stringFlavor);
-                            files = new LinkedList();
+                            files = new LinkedList<>();
                             StringTokenizer tokens = new StringTokenizer(urls);
                             while (tokens.hasMoreTokens()) {
                                 String urlString = tokens.nextToken();
@@ -286,10 +269,8 @@ public class RupsController extends Observable
         //Events from observable classes
         if (o != null && arg instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.CONSOLE_WRITE_EVENT:
-                    readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
-                    break;
+            if (RupsEvent.CONSOLE_WRITE_EVENT == event.getType()) {
+                readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
             }
         }
     }
@@ -454,17 +435,11 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithFile(File file) {
-        PdfDocument cmpDocument = null;
-        try {
-            cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()));
+        try (PdfDocument cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()))) {
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
             return null;
-        } finally {
-            if (cmpDocument != null) {
-                cmpDocument.close();
-            }
         }
     }
 
@@ -503,7 +478,7 @@ public class RupsController extends Observable
     }
 
     private void startObjectLoader() {
-        final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF docoment...", ownedFrame, pluginMode);
+        final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF document...", ownedFrame, pluginMode);
         if (!pluginMode) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {

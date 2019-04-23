@@ -1,6 +1,8 @@
 /*
+    * $Id$
+
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
+    Copyright (c) 2007-2019 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -49,18 +51,13 @@ import com.itextpdf.rups.model.PdfSyntaxParser;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
 
     private PdfObject result;
-    private JComboBox type;
     private JTextArea textArea;
     private JOptionPane optionPane;
 
@@ -84,12 +81,11 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         this.parser = parser;
         textArea = new JTextArea();
         textArea.setMinimumSize(new Dimension(100, 200));
-        type = new JComboBox<String>(new String[]{"Stream", "Other"});
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setMinimumSize(new Dimension(100, 200));
         //Create an array of the text and components to be displayed.
-        Object[] array = {/*"Type", type,*/ "Value", scrollPane};
+        Object[] array = {"Value", scrollPane};
 
         //Create an array specifying the number of dialog buttons
         //and their text.
@@ -120,8 +116,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
                  * we're going to change the JOptionPane's
                  * value property.
                  */
-                optionPane.setValue(new Integer(
-                        JOptionPane.CLOSED_OPTION));
+                optionPane.setValue(JOptionPane.CLOSED_OPTION);
             }
         });
 
@@ -131,7 +126,6 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
                 textArea.requestFocusInWindow();
             }
         });
-
 
         //Register an event handler that reacts to option pane state changes.
         optionPane.addPropertyChangeListener(this);

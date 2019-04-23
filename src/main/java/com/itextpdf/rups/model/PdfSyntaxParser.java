@@ -1,6 +1,8 @@
 /*
+    * $Id$
+
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
+    Copyright (c) 2007-2019 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -45,11 +47,7 @@ package com.itextpdf.rups.model;
 import com.itextpdf.io.source.PdfTokenizer;
 import com.itextpdf.io.source.RandomAccessFileOrArray;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
-import com.itextpdf.kernel.pdf.PdfBoolean;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfLiteral;
-import com.itextpdf.kernel.pdf.PdfNull;
-import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 
 import javax.swing.*;
@@ -170,9 +168,11 @@ public class PdfSyntaxParser {
                     default:
                         if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.Null)) {
                             return PdfNull.PDF_NULL;
-                        } else if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.True)) {
+                        }
+                        if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.True)) {
                             return PdfBoolean.TRUE;
-                        } else if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.False)) {
+                        }
+                        if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.False)) {
                             return new PdfBoolean(false);
                         }
                         addUnknownValue((PdfLiteral) tempObject);

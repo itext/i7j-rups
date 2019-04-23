@@ -1,46 +1,46 @@
 /*
- * $Id$
- *
- * This file is part of the iText (R) project.
-    Copyright (c) 2007-2018 iText Group NV
- * Authors: Bruno Lowagie et al.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License version 3
- * as published by the Free Software Foundation with the addition of the
- * following permission added to Section 15 as permitted in Section 7(a):
- * FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
- * ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
- * OF THIRD PARTY RIGHTS
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, see http://www.gnu.org/licenses or write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA, 02110-1301 USA, or download the license from the following URL:
- * http://itextpdf.com/terms-of-use/
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License,
- * a covered work must retain the producer line in every PDF that is created
- * or manipulated using iText.
- *
- * You can be released from the requirements of the license by purchasing
- * a commercial license. Buying such a license is mandatory as soon as you
- * develop commercial activities involving the iText software without
- * disclosing the source code of your own applications.
- * These activities include: offering paid services to customers as an ASP,
- * serving PDFs on the fly in a web application, shipping iText with a closed
- * source product.
- *
- * For more information, please contact iText Software Corp. at this
- * address: sales@itextpdf.com
+    * $Id$
+
+    This file is part of the iText (R) project.
+    Copyright (c) 2007-2019 iText Group NV
+    Authors: iText Software.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation with the addition of the
+    following permission added to Section 15 as permitted in Section 7(a):
+    FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
+    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    OF THIRD PARTY RIGHTS
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program; if not, see http://www.gnu.org/licenses or write to
+    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+    Boston, MA, 02110-1301 USA, or download the license from the following URL:
+    http://itextpdf.com/terms-of-use/
+
+    The interactive user interfaces in modified source and object code versions
+    of this program must display Appropriate Legal Notices, as required under
+    Section 5 of the GNU Affero General Public License.
+
+    In accordance with Section 7(b) of the GNU Affero General Public License,
+    a covered work must retain the producer line in every PDF that is created
+    or manipulated using iText.
+
+    You can be released from the requirements of the license by purchasing
+    a commercial license. Buying such a license is mandatory as soon as you
+    develop commercial activities involving the iText software without
+    disclosing the source code of your own applications.
+    These activities include: offering paid services to customers as an ASP,
+    serving PDFs on the fly in a web application, shipping iText with a closed
+    source product.
+
+    For more information, please contact iText Software Corp. at this
+    address: sales@itextpdf.com
  */
 package com.itextpdf.rups.view.itext;
 
@@ -48,11 +48,7 @@ import com.itextpdf.io.source.PdfTokenizer;
 import com.itextpdf.io.source.RandomAccessFileOrArray;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.PdfException;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
@@ -65,13 +61,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -85,11 +75,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
@@ -165,12 +151,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                default:
-                    clearPane();
-                    break;
-            }
+            clearPane();
         }
     }
 
@@ -183,110 +164,107 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         manager.discardAllEdits();
         manager.setLimit(0);
         this.target = target;
-        if (target.getPdfObject() instanceof PdfStream) {
-            PdfStream stream = (PdfStream) target.getPdfObject();
-            text.setText("");
-            //Check if stream is image
-            if (PdfName.Image.equals(stream.getAsName(PdfName.Subtype))) {
-                try {
-                    //Convert byte array back to Image
-                    if (!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber())
-                        return;
-                    PdfImageXObject pimg = new PdfImageXObject(stream);
-                    BufferedImage img = pimg.getBufferedImage();
-                    if (img != null) {
-                        //Show image in textpane
-                        StyledDocument doc = (StyledDocument) text.getDocument();
-                        Style style = doc.addStyle("Image", null);
-                        StyleConstants.setIcon(style, new ImageIcon(img));
-
-                        try {
-                            doc.insertString(doc.getLength(), "ignored text", style);
-                            JButton saveImage = new JButton("Save Image");
-                            final BufferedImage saveImg = img;
-                            saveImage.addActionListener(new ActionListener() {
-
-                                public void actionPerformed(ActionEvent event) {
-                                    try {
-                                        FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-                                        fileDialog.setFilenameFilter(new FilenameFilter() {
-                                            public boolean accept(File dir, String name) {
-                                                return name.endsWith(".jpg");
-                                            }
-                                        });
-                                        fileDialog.setFile("Untitled.jpg");
-                                        fileDialog.setVisible(true);
-                                        ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
-                                    } catch (HeadlessException | IOException e) {
-                                        LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
-                                    }
-                                }
-                            });
-                            text.append("\n", null);
-                            text.insertComponent(saveImage);
-                        } catch (BadLocationException e) {
-                            LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
-                        }
-                    } else {
-                        text.setText("Image can't be loaded.");
-                    }
-                } catch (IOException e) {
-                    LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
-                }
-                setTextEditableRoutine(false);
-            } else if (stream.get(PdfName.Length1) != null) {
-                try {
-                    setTextEditableRoutine(true);
-                    byte[] bytes = stream.getBytes(false);
-                    text.setText(new String(bytes));
-                    text.setCaretPosition(0);
-                } catch (com.itextpdf.io.IOException e) {
-                    text.setText("");
-                    setTextEditableRoutine(false);
-                }
-            } else if (stream.get(PdfName.Length1) == null) {
-                setTextEditableRoutine(true);
-                String newline = "\n";
-                byte[] bb = null;
-                try {
-                    bb = stream.getBytes();
-
-                    PdfTokenizer tokeniser = new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
-
-                    PdfCanvasParser ps = new PdfCanvasParser(tokeniser);
-                    ArrayList<PdfObject> tokens = new ArrayList<PdfObject>();
-                    while (ps.parse(tokens).size() > 0) {
-                        // operator is at the end
-                        //System.out.println((tokens.get(tokens.size()-1)).toString());
-                        String operator = (tokens.get(tokens.size() - 1)).toString();
-                        // operands are in front of their operator
-                        StringBuilder operandssb = new StringBuilder();
-                        for (int i = 0; i < tokens.size() - 1; i++) {
-                            append(operandssb, tokens.get(i));
-                        }
-                        String operands = operandssb.toString();
-
-                        Map<Object, Object> attributes = attributemap.get(operator);
-                        Map<Object, Object> attributesOperands = null;
-                        if (matchingOperands)
-                            attributesOperands = attributes;
-
-
-                        text.append(operands, attributesOperands);
-                        text.append(operator + newline, attributes);
-                    }
-                } catch (PdfException | com.itextpdf.io.IOException e) {
-                    LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
-                    if (bb != null) {
-                        text.setText(new String(bb));
-                    }
-                } catch (IOException ignored) {
-                }
-                text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
-            }
-        } else {
+        if (!(target.getPdfObject() instanceof PdfStream)) {
             clearPane();
             return;
+        }
+        PdfStream stream = (PdfStream) target.getPdfObject();
+        text.setText("");
+        //Check if stream is image
+        if (PdfName.Image.equals(stream.getAsName(PdfName.Subtype))) {
+            try {
+                //Convert byte array back to Image
+                if (!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber())
+                    return;
+                PdfImageXObject pimg = new PdfImageXObject(stream);
+                BufferedImage img = pimg.getBufferedImage();
+                if (img == null) {
+                    text.setText("Image can't be loaded.");
+                } else {
+                    //Show image in textpane
+                    StyledDocument doc = (StyledDocument) text.getDocument();
+                    Style style = doc.addStyle("Image", null);
+                    StyleConstants.setIcon(style, new ImageIcon(img));
+
+                    try {
+                        doc.insertString(doc.getLength(), "ignored text", style);
+                        JButton saveImage = new JButton("Save Image");
+                        final BufferedImage saveImg = img;
+                        saveImage.addActionListener(new ActionListener() {
+
+                            public void actionPerformed(ActionEvent event) {
+                                try {
+                                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
+                                    fileDialog.setFilenameFilter(new FilenameFilter() {
+                                        public boolean accept(File dir, String name) {
+                                            return name.endsWith(".jpg");
+                                        }
+                                    });
+                                    fileDialog.setFile("Untitled.jpg");
+                                    fileDialog.setVisible(true);
+                                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
+                                } catch (HeadlessException | IOException e) {
+                                    LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
+                                }
+                            }
+                        });
+                        text.append("\n", null);
+                        text.insertComponent(saveImage);
+                    } catch (BadLocationException e) {
+                        LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+                    }
+                }
+            } catch (IOException e) {
+                LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+            }
+            setTextEditableRoutine(false);
+        } else if (stream.get(PdfName.Length1) != null) {
+            try {
+                setTextEditableRoutine(true);
+                byte[] bytes = stream.getBytes(false);
+                text.setText(new String(bytes));
+                text.setCaretPosition(0);
+            } catch (com.itextpdf.io.IOException e) {
+                text.setText("");
+                setTextEditableRoutine(false);
+            }
+        } else if (stream.get(PdfName.Length1) == null) {
+            setTextEditableRoutine(true);
+            String newline = "\n";
+            byte[] bb = null;
+            try {
+                bb = stream.getBytes();
+
+                PdfTokenizer tokeniser = new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
+
+                PdfCanvasParser ps = new PdfCanvasParser(tokeniser);
+                ArrayList<PdfObject> tokens = new ArrayList<>();
+                while (ps.parse(tokens).size() > 0) {
+                    // operator is at the end
+                    String operator = (tokens.get(tokens.size() - 1)).toString();
+                    // operands are in front of their operator
+                    StringBuilder operandssb = new StringBuilder();
+                    for (int i = 0; i < tokens.size() - 1; i++) {
+                        append(operandssb, tokens.get(i));
+                    }
+                    String operands = operandssb.toString();
+
+                    Map<Object, Object> attributes = attributemap.get(operator);
+                    Map<Object, Object> attributesOperands = null;
+                    if (matchingOperands)
+                        attributesOperands = attributes;
+
+                    text.append(operands, attributesOperands);
+                    text.append(operator + newline, attributes);
+                }
+            } catch (PdfException | com.itextpdf.io.IOException e) {
+                LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
+                if (bb != null) {
+                    text.setText(new String(bb));
+                }
+            } catch (IOException ignored) {
+            }
+            text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
         }
         text.repaint();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
@@ -296,10 +274,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     public void saveToTarget() {
         manager.discardAllEdits();
         manager.setLimit(0);
-        if (controller != null) {
-            if (((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
-                controller.deleteTreeNodeDictChild(target, PdfName.Filter);
-            }
+        if (controller != null && ((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
+            controller.deleteTreeNodeDictChild(target, PdfName.Filter);
         }
         ((PdfStream) target.getPdfObject()).setData(text.getText().getBytes());
         if (controller != null) {
@@ -314,8 +290,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 PdfString str = (PdfString) obj;
                 if (str.isHexWriting()) {
                     sb.append("<");
-                    byte b[] = str.getValueBytes();
-                    int len = b.length;
+                    byte[] b = str.getValueBytes();
                     String hex;
                     for (byte aB : b) {
                         hex = Integer.toHexString((aB & 0xFF));
@@ -325,24 +300,27 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     }
                     sb.append("> ");
                 } else {
-                    sb.append("(");
-                    sb.append(obj);
-                    sb.append(") ");
+                    sb
+                            .append("(")
+                            .append(obj)
+                            .append(") ");
                 }
                 break;
             case PdfObject.DICTIONARY:
                 PdfDictionary dict = (PdfDictionary) obj;
                 sb.append("<<");
                 for (PdfName key : dict.keySet()) {
-                    sb.append(key);
-                    sb.append(" ");
+                    sb
+                            .append(key)
+                            .append(" ");
                     append(sb, dict.get(key, false));
                 }
                 sb.append(">> ");
                 break;
             default:
-                sb.append(obj);
-                sb.append(" ");
+                sb
+                        .append(obj)
+                        .append(" ");
         }
     }
 
@@ -353,7 +331,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     protected void initAttributes() {
         attributemap = new HashMap<>();
 
-        Map<Object, Object> opConstructionPainting = new HashMap<Object, Object>();
+        Map<Object, Object> opConstructionPainting = new HashMap<>();
         Color darkorange = new Color(255, 140, 0);
         opConstructionPainting.put(StyleConstants.Foreground, darkorange);
         opConstructionPainting.put(StyleConstants.Background, Color.WHITE);
@@ -377,14 +355,14 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         attributemap.put("W", opConstructionPainting);
         attributemap.put("W*", opConstructionPainting);
 
-        Map<Object, Object> graphicsdelim = new HashMap<Object, Object>();
+        Map<Object, Object> graphicsdelim = new HashMap<>();
         graphicsdelim.put(StyleConstants.Foreground, Color.WHITE);
         graphicsdelim.put(StyleConstants.Background, Color.RED);
         graphicsdelim.put(StyleConstants.Bold, true);
         attributemap.put("q", graphicsdelim);
         attributemap.put("Q", graphicsdelim);
 
-        Map<Object, Object> graphics = new HashMap<Object, Object>();
+        Map<Object, Object> graphics = new HashMap<>();
         graphics.put(StyleConstants.Foreground, Color.RED);
         graphics.put(StyleConstants.Background, Color.WHITE);
         attributemap.put("w", graphics);
@@ -410,26 +388,26 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         attributemap.put("SCN", graphics);
         attributemap.put("sh", graphics);
 
-        Map<Object, Object> xObject = new HashMap<Object, Object>();
+        Map<Object, Object> xObject = new HashMap<>();
         xObject.put(StyleConstants.Foreground, Color.BLACK);
         xObject.put(StyleConstants.Background, Color.YELLOW);
         attributemap.put("Do", xObject);
 
-        Map<Object, Object> inlineImage = new HashMap<Object, Object>();
+        Map<Object, Object> inlineImage = new HashMap<>();
         inlineImage.put(StyleConstants.Foreground, Color.BLACK);
         inlineImage.put(StyleConstants.Background, Color.YELLOW);
         inlineImage.put(StyleConstants.Italic, true);
         attributemap.put("BI", inlineImage);
         attributemap.put("EI", inlineImage);
 
-        Map<Object, Object> textdelim = new HashMap<Object, Object>();
+        Map<Object, Object> textdelim = new HashMap<>();
         textdelim.put(StyleConstants.Foreground, Color.WHITE);
         textdelim.put(StyleConstants.Background, Color.BLUE);
         textdelim.put(StyleConstants.Bold, true);
         attributemap.put("BT", textdelim);
         attributemap.put("ET", textdelim);
 
-        Map<Object, Object> text = new HashMap<Object, Object>();
+        Map<Object, Object> text = new HashMap<>();
         text.put(StyleConstants.Foreground, Color.BLUE);
         text.put(StyleConstants.Background, Color.WHITE);
         attributemap.put("ID", text);
@@ -449,7 +427,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         attributemap.put("\"", text);
         attributemap.put("TJ", text);
 
-        Map<Object, Object> markedContent = new HashMap<Object, Object>();
+        Map<Object, Object> markedContent = new HashMap<>();
         markedContent.put(StyleConstants.Foreground, Color.MAGENTA);
         markedContent.put(StyleConstants.Background, Color.WHITE);
         attributemap.put("BMC", markedContent);
@@ -459,7 +437,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
     private void setTextEditableRoutine(boolean editable) {
         text.setEditable(editable);
-        if (pdfStreamGetInputStreamMethod != null && editable && target != null && target.getPdfObject() instanceof PdfStream) {
+        if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) && (target.getPdfObject() instanceof PdfStream)) {
             try {
                 popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target.getPdfObject()) == null);
                 return;
