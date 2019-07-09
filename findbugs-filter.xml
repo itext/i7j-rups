@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Class name="com.itextpdf.rups.RupsLauncher"/>
+        <Method name="main" params="java.lang.String[]" returns="void"/>
+        <Bug pattern="PATH_TRAVERSAL_IN"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.model.PdfFile"/>
+        <Method name="readFile"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.model.PdfSyntaxParser"/>
+        <Method name="parseString" params="java.lang.String, java.awt.Component, boolean"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Or>
+            <Class name="com.itextpdf.rups.view.DebugView$DebugOutputStream"/>
+            <Class name="com.itextpdf.rups.view.Console$ConsoleOutputStream"/>
+        </Or>
+        <Method name="write" params="byte[], int, int" returns="void"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Method name="write" params="byte[], int, int" returns="void"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.StyleAppender"/>
+        <Method name="setStyleType"/>
+        <Bug pattern="LSC_LITERAL_STRING_COMPARISON"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.contextmenu.SaveToFileJTextPaneAction"/>
+        <Method name="actionPerformed"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.icons.IconFetcher"/>
+        <Field name="cache"/>
+        <Bug pattern="MS_SHOULD_BE_FINAL"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.itext.PagesTable"/>
+        <Method name="update"/>
+        <Bug pattern="LSYC_LOCAL_SYNCHRONIZED_COLLECTION"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane"/>
+        <Or>
+            <Method name="render"/>
+            <Method name="saveToTarget"/>
+        </Or>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.itext.treenodes.XfaTreeNode"/>
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
+    <Match>
+        <Class name="com.itextpdf.rups.view.models.PdfArrayTableModel"/>
+        <Method name="validateTempRow"/>
+        <Bug pattern="DM_BOXED_PRIMITIVE_FOR_PARSING"/>
+    </Match>
+</FindBugsFilter>
