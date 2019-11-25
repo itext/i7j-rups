@@ -44,7 +44,7 @@
     <url>https://git.itextsupport.com/projects/I7J/repos/rups</url>
   </scm>
   <properties>
-    <bouncycastle.version>1.49</bouncycastle.version>
+    <bouncycastle.version>1.64</bouncycastle.version>
     <dom4j.version>1.6.1</dom4j.version>
     <itext.version>${project.parent.version}</itext.version>
     <launch4j.version>1.7.25</launch4j.version>
