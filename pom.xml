@@ -172,10 +172,10 @@
         <version>3.1.0</version>
         <executions>
           <execution>
-            <id>make-assembly</id>
             <!-- this is used for inheritance merges -->
-            <phase>package</phase>
+            <id>make-assembly</id>
             <!-- append to the packaging phase. -->
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
               <!-- goals == mojos -->
@@ -186,6 +186,7 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+          <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifest>
               <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
@@ -292,7 +293,7 @@
                   <dontWrapJar>false</dontWrapJar>
                   <headerType>gui</headerType>
                   <outfile>target/Rups.exe</outfile>
-                  <jar>target/itext-rups-${project.version}-jar-with-dependencies.jar</jar>
+                  <jar>target/${project.artifactId}-${project.version}.jar</jar>
                   <errTitle>Rups</errTitle>
                   <icon>config/logo.ico</icon>
                   <classPath>
@@ -335,7 +336,6 @@
             <directory>config</directory>
           </resource>
         </resources>
-        <finalName>RUPS-${project.version}</finalName>
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
