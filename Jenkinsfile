@@ -84,6 +84,13 @@ pipeline {
                 }
             }
         }
+        stage("Wrap to exe") {
+            steps {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: '.repository') {
+                    sh 'mvn --activate-profiles exe build-helper:parse-version@parse-version com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:launch4j@l4j-gui assembly:single@exe-archive'
+                }
+            }
+        }
         stage('Artifactory Deploy') {
             options {
                 timeout(time: 5, unit: 'MINUTES')
@@ -111,7 +118,7 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES')
             }
             steps {
-                archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/*.jar, **/target/*.pom', excludes: '**/fb-contrib-*.jar, **/findsecbugs-plugin-*.jar'
+                archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/*.jar, **/target/*.pom, **/target/*.zip', excludes: '**/fb-contrib-*.jar, **/findsecbugs-plugin-*.jar'
             }
         }
     }
