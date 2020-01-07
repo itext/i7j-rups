@@ -53,7 +53,7 @@
   <properties>
     <assembly-plugin.version>3.2.0</assembly-plugin.version>
     <bouncycastle.version>1.64</bouncycastle.version>
-    <dom4j.version>1.6.1</dom4j.version>
+    <dom4j.version>2.1.1</dom4j.version>
     <itext.version>${project.parent.version}</itext.version>
     <launch4j.version>1.7.25</launch4j.version>
     <logback.version>1.2.3</logback.version>
@@ -82,7 +82,7 @@
       <version>${itext.version}</version>
     </dependency>
     <dependency>
-      <groupId>dom4j</groupId>
+      <groupId>org.dom4j</groupId>
       <artifactId>dom4j</artifactId>
       <version>${dom4j.version}</version>
     </dependency>

@@ -90,7 +90,7 @@ public class XdpTreeNode extends IconTreeNode {
         icon = IconFetcher.getIcon("tag.png");
     }
 
-    private void addChildNodes(List<Node> list) {
+    private void addChildNodes(List<? extends Node> list) {
         for (Node node : list) {
             if (!(node instanceof Namespace || node instanceof Comment)) {
                 this.add(new XdpTreeNode(node));
