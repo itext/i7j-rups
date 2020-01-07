@@ -51,6 +51,7 @@
   </scm>
 
   <properties>
+    <assembly-plugin.version>3.2.0</assembly-plugin.version>
     <bouncycastle.version>1.64</bouncycastle.version>
     <dom4j.version>1.6.1</dom4j.version>
     <itext.version>${project.parent.version}</itext.version>
@@ -144,30 +145,35 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>${assembly-plugin.version}</version>
         <executions>
           <execution>
-            <!-- this is used for inheritance merges -->
             <id>make-assembly</id>
-            <!-- append to the packaging phase. -->
             <phase>package</phase>
             <goals>
               <goal>single</goal>
-              <!-- goals == mojos -->
             </goals>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+              <appendAssemblyId>false</appendAssemblyId>
+              <archive>
+                <manifest>
+                  <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </execution>
+          <execution>
+            <id>exe-archive</id>
+            <configuration>
+              <descriptors>
+                <descriptor>src/assembly/exe-archive.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <appendAssemblyId>false</appendAssemblyId>
-          <archive>
-            <manifest>
-              <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
