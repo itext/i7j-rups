@@ -263,6 +263,18 @@
                   <goal>parse-version</goal>
                 </goals>
               </execution>
+              <execution>
+                <id>attach-exe-artifact</id>
+                <configuration>
+                  <artifacts>
+                    <artifact>
+                      <file>${project.build.directory}/${project.artifactId}-${project.version}-exe-archive.zip</file>
+                      <type>zip</type>
+                      <classifier>exe-archive</classifier>
+                    </artifact>
+                  </artifacts>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
         </plugins>
