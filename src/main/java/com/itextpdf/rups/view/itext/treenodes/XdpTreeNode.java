@@ -1,8 +1,6 @@
 /*
-    * $Id$
-
     This file is part of the iText (R) project.
-    Copyright (c) 2007-2019 iText Group NV
+    Copyright (c) 1998-2020 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -92,7 +90,7 @@ public class XdpTreeNode extends IconTreeNode {
         icon = IconFetcher.getIcon("tag.png");
     }
 
-    private void addChildNodes(List<Node> list) {
+    private void addChildNodes(List<? extends Node> list) {
         for (Node node : list) {
             if (!(node instanceof Namespace || node instanceof Comment)) {
                 this.add(new XdpTreeNode(node));

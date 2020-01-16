@@ -84,6 +84,13 @@ pipeline {
                 }
             }
         }
+        stage("Wrap to exe") {
+            steps {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: '.repository') {
+                    sh 'mvn --activate-profiles exe build-helper:parse-version@parse-version com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:launch4j@l4j-gui assembly:single@exe-archive'
+                }
+            }
+        }
         stage('Artifactory Deploy') {
             options {
                 timeout(time: 5, unit: 'MINUTES')
@@ -101,7 +108,7 @@ pipeline {
                     def rtMaven = Artifactory.newMavenBuild()
                     rtMaven.deployer server: server, releaseRepo: 'releases', snapshotRepo: 'snapshot'
                     rtMaven.tool = 'M3'
-                    def buildInfo = rtMaven.run pom: 'pom.xml', goals: 'install -Dmaven.test.skip=true -Dspotbugs.skip=true -Dmaven.javadoc.failOnError=false'
+                    def buildInfo = rtMaven.run pom: 'pom.xml', goals: '--activate-profiles exe build-helper:attach-artifact@attach-exe-artifact install -Dmaven.test.skip=true -Dspotbugs.skip=true -Dmaven.javadoc.failOnError=false'
                     server.publishBuildInfo buildInfo
                 }
             }
@@ -111,7 +118,7 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES')
             }
             steps {
-                archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/*.jar, **/target/*.pom', excludes: '**/fb-contrib-*.jar, **/findsecbugs-plugin-*.jar'
+                archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/*.jar, **/target/*.pom, **/target/*.zip', excludes: '**/fb-contrib-*.jar, **/findsecbugs-plugin-*.jar'
             }
         }
     }
