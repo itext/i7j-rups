@@ -60,8 +60,8 @@ pipeline {
                         timeout(time: 5, unit: 'MINUTES')
                     }
                     steps {
-                        withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: "${WORKSPACE.replace('\\','/')}/.repository") {
-                            sh 'mvn --threads 2C --no-transfer-progress clean dependency:purge-local-repository -Dinclude=com.itextpdf -DresolutionFuzziness=groupId -DreResolve=false'
+                        withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                            sh "mvn --threads 2C --no-transfer-progress clean dependency:purge-local-repository -Dinclude=com.itextpdf -DresolutionFuzziness=groupId -DreResolve=false -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
                         }
                         script {
                             if(fileExists(DOWNLOADDIR)) {
@@ -115,8 +115,8 @@ pipeline {
                         timeout(time: 10, unit: 'MINUTES')
                     }
                     steps {
-                        withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: "${WORKSPACE.replace('\\','/')}/.repository") {
-                            sh 'mvn --threads 2C --no-transfer-progress package -Dmaven.test.skip=true'
+                        withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                            sh "mvn --threads 2C --no-transfer-progress package -Dmaven.test.skip=true -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
                         }
                     }
                 }
@@ -135,8 +135,8 @@ pipeline {
                 timeout(time: 1, unit: 'HOURS')
             }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: "${WORKSPACE.replace('\\','/')}/.repository") {
-                    sh 'mvn --no-transfer-progress verify --activate-profiles qa -Dpmd.analysisCache=true'
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                    sh "mvn --no-transfer-progress verify --activate-profiles qa -Dpmd.analysisCache=true -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
                 }
                 recordIssues(tools: [
                         checkStyle(),
@@ -151,9 +151,9 @@ pipeline {
                 timeout(time: 30, unit: 'MINUTES')
             }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: "${WORKSPACE.replace('\\','/')}/.repository") {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
                     withSonarQubeEnv('Sonar') {
-                        sh 'mvn --no-transfer-progress --activate-profiles test -DgsExec="${gsExec}" -DcompareExec="${compareExec}" -Dmaven.main.skip=true -Dmaven.test.failure.ignore=false org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report -Dsonar.java.spotbugs.reportPaths="target/spotbugs.xml" sonar:sonar ' + sonarBranchName + ' ' + sonarBranchTarget
+                        sh "mvn --no-transfer-progress --activate-profiles test -DgsExec=\"${gsExec}\" -DcompareExec=\"${compareExec}\" -Dmaven.main.skip=true -Dmaven.test.failure.ignore=false -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report -Dsonar.java.spotbugs.reportPaths=\"target/spotbugs.xml\" sonar:sonar " + sonarBranchName + " " + sonarBranchTarget
                     }
                 }
             }
@@ -167,8 +167,8 @@ pipeline {
         }
         stage("Wrap to exe") {
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: "${WORKSPACE.replace('\\','/')}/.repository") {
-                    sh 'mvn --activate-profiles exe build-helper:parse-version@parse-version com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:launch4j@l4j-gui assembly:single@exe-archive'
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
+                    sh "mvn --activate-profiles exe build-helper:parse-version@parse-version com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:launch4j@l4j-gui assembly:single@exe-archive -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
                 }
             }
         }
@@ -183,13 +183,13 @@ pipeline {
                 }
             }
             steps {
-                withMaven(jdk: "${JDK_VERSION}", maven: 'M3', mavenLocalRepo: "${WORKSPACE.replace('\\','/')}/.repository") {
+                withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
                     script {
                         def server = Artifactory.server('itext-artifactory')
                         def rtMaven = Artifactory.newMavenBuild()
                         rtMaven.deployer server: server, releaseRepo: 'releases', snapshotRepo: 'snapshot'
                         rtMaven.tool = 'M3'
-                        def buildInfo = rtMaven.run pom: 'pom.xml', goals: '--threads 2C --no-transfer-progress install --activate-profiles artifactory,exe build-helper:attach-artifact@attach-exe-artifact'
+                        def buildInfo = rtMaven.run pom: 'pom.xml', goals: "--threads 2C --no-transfer-progress install --activate-profiles artifactory,exe build-helper:attach-artifact@attach-exe-artifact -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
                         server.publishBuildInfo buildInfo
                     }
                 }
