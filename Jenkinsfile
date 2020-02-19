@@ -168,7 +168,11 @@ pipeline {
         stage("Wrap to exe") {
             steps {
                 withMaven(jdk: "${JDK_VERSION}", maven: 'M3') {
-                    sh "mvn --activate-profiles exe build-helper:parse-version@parse-version com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:launch4j@l4j-gui assembly:single@exe-archive -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
+                    sh "mvn --threads 2C --no-transfer-progress --activate-profiles exe " +
+                            "build-helper:parse-version@parse-version " +
+                            "com.akathist.maven.plugins.launch4j:launch4j-maven-plugin:launch4j@l4j-gui " +
+                            "assembly:single@exe-archive " +
+                            "-Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
                 }
             }
         }
@@ -189,7 +193,11 @@ pipeline {
                         def rtMaven = Artifactory.newMavenBuild()
                         rtMaven.deployer server: server, releaseRepo: 'releases', snapshotRepo: 'snapshot'
                         rtMaven.tool = 'M3'
-                        def buildInfo = rtMaven.run pom: 'pom.xml', goals: "--threads 2C --no-transfer-progress install --activate-profiles artifactory,exe build-helper:attach-artifact@attach-exe-artifact -Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository"
+                        def buildInfo = rtMaven.run pom: 'pom.xml',
+                                goals: "--threads 2C --no-transfer-progress " +
+                                        "install --activate-profiles artifactory,exe " +
+                                        "build-helper:attach-artifact@attach-exe-artifact " +
+                                        "-Dmaven.repo.local=${env.WORKSPACE.replace('\\','/')}/.repository".toString()
                         server.publishBuildInfo buildInfo
                     }
                 }
