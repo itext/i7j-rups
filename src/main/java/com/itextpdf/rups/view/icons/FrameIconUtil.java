@@ -40,64 +40,26 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.icons;
 
-import com.itextpdf.rups.view.icons.FrameIconUtil;
-import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
-import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import com.itextpdf.rups.Rups;
 
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.KeyStroke;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author Michael Demey
- */
-public class InspectObjectAction extends AbstractRupsAction {
-
-    private Component invoker;
-
-    public InspectObjectAction(String name, Component invoker) {
-        super(name);
-        this.invoker = invoker;
+public class FrameIconUtil {
+    private FrameIconUtil() {
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        final JFrame frame = new JFrame("Rups Object Inspection Window");
-
-        // defines the size and location
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setSize((int) (screen.getWidth() * .70), (int) (screen.getHeight() * .70));
-        frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
-        frame.setIconImages(FrameIconUtil.loadFrameIcons());
-        frame.setResizable(true);
-
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        PdfObjectTreeNode node = (PdfObjectTreeNode) ((PdfTree) invoker).getSelectionPath().getLastPathComponent();
-        final SyntaxHighlightedStreamPane syntaxHighlightedStreamPane = new SyntaxHighlightedStreamPane(null, true);
-
-        frame.add(syntaxHighlightedStreamPane);
-        syntaxHighlightedStreamPane.render(node);
-
-        frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Cancel");
-        frame.getRootPane().getActionMap().put("Cancel", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-            }
-        });
-
-        if (e.getSource() instanceof Component) {
-            frame.setLocationRelativeTo((Component) e.getSource());
+    public static List<Image> loadFrameIcons() {
+        List<Image> images = new ArrayList<>();
+        Image image = Toolkit.getDefaultToolkit().getImage(Rups.class.getResource("logo.png"));
+        // Add several scaled instances of the image to let the platform decide which ones to use
+        for (int i = 16; i <= 1024; i *= 2) {
+            images.add(image.getScaledInstance(i, i, Image.SCALE_SMOOTH));
         }
+        return images;
     }
 }

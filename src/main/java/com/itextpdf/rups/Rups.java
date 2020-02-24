@@ -47,12 +47,17 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.view.icons.FrameIconUtil;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Observer;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Rups {
 
@@ -219,7 +224,7 @@ public class Rups {
     static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
         frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
-        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(Rups.class.getResource("logo.png")));
+        frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content
         frame.setJMenuBar(controller.getMenuBar());
