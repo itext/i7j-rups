@@ -46,22 +46,20 @@ import com.itextpdf.kernel.pdf.*;
 
 public class PdfSyntaxUtils {
 
-    private static volatile StringBuilder stringBuilder;
-
     public static synchronized String getSyntaxString(PdfObject object) {
-        stringBuilder = new StringBuilder();
-        safeAppendSyntaxString(object);
+        StringBuilder stringBuilder = new StringBuilder();
+        safeAppendSyntaxString(object, stringBuilder);
         return stringBuilder.toString();
     }
 
-    private static void appendSyntaxString(PdfString string) {
+    private static void appendSyntaxString(PdfString string, StringBuilder stringBuilder) {
         stringBuilder
                 .append("(")
                 .append(string.toUnicodeString())
                 .append(")");
     }
 
-    private static void appendSyntaxString(PdfIndirectReference reference) {
+    private static void appendSyntaxString(PdfIndirectReference reference, StringBuilder stringBuilder) {
         stringBuilder
                 .append(reference.getObjNumber())
                 .append(" ")
@@ -70,48 +68,48 @@ public class PdfSyntaxUtils {
     }
 
 
-    private static void appendSyntaxString(PdfArray array) {
+    private static void appendSyntaxString(PdfArray array, StringBuilder stringBuilder) {
         stringBuilder.append("[ ");
         for (int i = 0; i < array.size(); ++i) {
-            safeAppendSyntaxString(array.get(i, false));
+            safeAppendSyntaxString(array.get(i, false), stringBuilder);
             stringBuilder.append(" ");
         }
         stringBuilder.append("]");
     }
 
-    private static void appendSyntaxString(PdfDictionary dictionary) {
+    private static void appendSyntaxString(PdfDictionary dictionary, StringBuilder stringBuilder) {
         stringBuilder.append("<< ");
         for (PdfName key : dictionary.keySet()) {
-            safeAppendSyntaxString(key);
+            safeAppendSyntaxString(key, stringBuilder);
             stringBuilder.append(" ");
-            safeAppendSyntaxString(dictionary.get(key, false));
+            safeAppendSyntaxString(dictionary.get(key, false), stringBuilder);
             stringBuilder.append(" ");
         }
         stringBuilder.append(">>");
     }
 
-    private static void appendSyntaxString(PdfObject object) {
+    private static void appendSyntaxString(PdfObject object, StringBuilder stringBuilder) {
         stringBuilder.append(object.toString());
     }
 
-    private static void safeAppendSyntaxString(PdfObject object) {
+    private static void safeAppendSyntaxString(PdfObject object, StringBuilder stringBuilder) {
         if (object != null) {
             switch (object.getType()) {
                 case PdfObject.STREAM:
                 case PdfObject.DICTIONARY:
-                    appendSyntaxString((PdfDictionary) object);
+                    appendSyntaxString((PdfDictionary) object, stringBuilder);
                     break;
                 case PdfObject.ARRAY:
-                    appendSyntaxString((PdfArray) object);
+                    appendSyntaxString((PdfArray) object, stringBuilder);
                     break;
                 case PdfObject.STRING:
-                    appendSyntaxString((PdfString) object);
+                    appendSyntaxString((PdfString) object, stringBuilder);
                     break;
                 case PdfObject.INDIRECT_REFERENCE:
-                    appendSyntaxString((PdfIndirectReference) object);
+                    appendSyntaxString((PdfIndirectReference) object, stringBuilder);
                     break;
                 default:
-                    appendSyntaxString(object);
+                    appendSyntaxString(object, stringBuilder);
                     break;
             }
         }
