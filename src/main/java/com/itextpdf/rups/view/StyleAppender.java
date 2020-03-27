@@ -57,17 +57,4 @@ public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
         super.start();
     }
 
-    public String getStyleType() {
-        return styleType;
-    }
-
-    public void setStyleType(String styleType) {
-        if (!styleType.equals(Console.ConsoleStyleContext.INFO) &&
-                !styleType.equals(Console.ConsoleStyleContext.ERROR) &&
-                !styleType.equals(Console.ConsoleStyleContext.BACKUP)) {
-            addError("Wrong style is set for appender named [" + name + "]. Using default style");
-            styleType = DEFAULT_STYLE_TYPE;
-        }
-        this.styleType = styleType;
-    }
 }
