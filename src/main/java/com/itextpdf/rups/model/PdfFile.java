@@ -58,8 +58,6 @@ import java.io.*;
  */
 public class PdfFile {
 
-    // member variables
-
     /**
      * The directory where the file can be found (if the PDF was passed as a file).
      */
@@ -88,8 +86,6 @@ public class PdfFile {
     protected ByteArrayOutputStream baos = null;
 
     protected boolean readOnly = false;
-
-    // constructors
 
     /**
      * Constructs a PdfFile object.

@@ -40,21 +40,41 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view;
+package com.itextpdf.rups.model;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.OutputStreamAppender;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfBoolean;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNumber;
+import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.test.ExtendedITextTest;
+import com.itextpdf.test.annotations.type.UnitTest;
 
-public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
+import java.util.Arrays;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-    private static final String DEFAULT_STYLE_TYPE = Console.ConsoleStyleContext.BACKUP;
+@Category(UnitTest.class)
+public class PdfSyntaxUtilsTest extends ExtendedITextTest {
 
-    String styleType = DEFAULT_STYLE_TYPE;
+    @Test
+    public void testSimpleString() {
+        Assert.assertEquals("(hello world)", PdfSyntaxUtils.getSyntaxString(new PdfString("hello world")));
+    }
 
-    @Override
-    public void start() {
-        setOutputStream(new Console.ConsoleOutputStream(styleType));
-        super.start();
+    @Test
+    public void testSimpleDictionary() {
+        PdfDictionary pdfDictionary = new PdfDictionary();
+        pdfDictionary.put(PdfName.ON, PdfBoolean.TRUE);
+        Assert.assertEquals("<< /ON true >>", PdfSyntaxUtils.getSyntaxString(pdfDictionary));
+    }
+
+    @Test
+    public void testSimpleArray() {
+        PdfArray array = new PdfArray(Arrays.asList(new PdfNumber(1), new PdfString("hello")));
+        Assert.assertEquals("[ 1 (hello) ]", PdfSyntaxUtils.getSyntaxString(array));
     }
 
 }

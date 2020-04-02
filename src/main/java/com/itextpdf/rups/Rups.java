@@ -43,16 +43,15 @@
 package com.itextpdf.rups;
 
 import com.itextpdf.kernel.Version;
-import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.view.icons.FrameIconUtil;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
-import java.io.InputStream;
-import java.util.Observer;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Rups {
 
@@ -62,10 +61,6 @@ public class Rups {
 
     protected Rups() {
         this.controller = null;
-    }
-
-    protected RupsController getController() {
-        return controller;
     }
 
     protected void setController(RupsController controller) {
@@ -95,14 +90,6 @@ public class Rups {
         });
     }
 
-    public static Rups startNewPlugin(final JComponent comp, final Dimension size, final Frame frame) {
-        final Rups rups = new Rups();
-        RupsController controller = new RupsController(size, frame, true);
-        comp.add(controller.getMasterComponent());
-        rups.setController(controller);
-        return rups;
-    }
-
     public void loadDocumentFromFile(final File f, final boolean readOnly) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -112,114 +99,10 @@ public class Rups {
         });
     }
 
-    public void loadDocumentFromStream(final InputStream inputStream, final String name, final File directory, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.loadFileFromStream(inputStream, name, directory, readOnly);
-            }
-        });
-    }
-
-    public void loadDocumentFromRawContent(final byte[] bytes, final String name, final File directory, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.loadRawContent(bytes, name, directory, readOnly);
-            }
-        });
-    }
-
-    public void closeDocument() {
-        controller.closeRoutine();
-    }
-
-    public void saveDocumentAs(final File f) {
-        controller.saveFile(f);
-    }
-
-    public boolean compareWithDocument(final PdfDocument document) {
-        return compareWithDocument(document, false);
-    }
-
-    public boolean compareWithDocument(final PdfDocument document, final boolean showResults) {
-        lastCompareResult = controller.compareWithDocument(document);
-        if (!showResults) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    controller.highlightChanges(lastCompareResult);
-                }
-            });
-        }
-        return isEqual();
-    }
-
-    public boolean compareWithFile(final File file) {
-        return compareWithFile(file, false);
-    }
-
-    public boolean compareWithFile(final File file, final boolean showResults) {
-        lastCompareResult = controller.compareWithFile(file);
-        if (!showResults) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    controller.highlightChanges(lastCompareResult);
-                }
-            });
-        }
-        return isEqual();
-    }
-
-    public boolean compareWithStream(final InputStream is) {
-        return compareWithStream(is, false);
-    }
-
-    public boolean compareWithStream(final InputStream is, final boolean showResults) {
-        lastCompareResult = controller.compareWithStream(is);
-        if (!showResults) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    controller.highlightChanges(lastCompareResult);
-                }
-            });
-        }
-        return isEqual();
-    }
-
-    public void highlightLastSavedChanges() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.highlightChanges(lastCompareResult);
-            }
-        });
-    }
-
-    public void clearHighlights() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.highlightChanges(null);
-            }
-        });
-    }
-
-    public void requestLogToConsole(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                LoggerHelper.info(message, getClass());
-            }
-        });
-    }
-
     static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
         frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
-        frame.setIconImage(Toolkit.getDefaultToolkit().getImage(Rups.class.getResource("logo.png")));
+        frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content
         frame.setJMenuBar(controller.getMenuBar());
@@ -232,17 +115,6 @@ public class Rups {
         frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
         frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
         frame.setResizable(true);
-    }
-
-    private boolean isEqual() {
-        return lastCompareResult != null && lastCompareResult.isOk();
-    }
-
-    public void registerEventObserver(Observer observer) {
-        getController().addObserver(observer);
-    }
-    public void unregisterEventObserver(Observer observer) {
-        getController().deleteObserver(observer);
     }
 
 }

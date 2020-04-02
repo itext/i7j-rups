@@ -40,21 +40,24 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view;
+package com.itextpdf.rups.view.icons;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.OutputStreamAppender;
+import com.itextpdf.test.ExtendedITextTest;
+import com.itextpdf.test.annotations.type.UnitTest;
 
-public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
+import java.awt.Image;
+import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-    private static final String DEFAULT_STYLE_TYPE = Console.ConsoleStyleContext.BACKUP;
+@Category(UnitTest.class)
+public class FrameIconUtilTest extends ExtendedITextTest {
 
-    String styleType = DEFAULT_STYLE_TYPE;
-
-    @Override
-    public void start() {
-        setOutputStream(new Console.ConsoleOutputStream(styleType));
-        super.start();
+    @Test
+    public void testThatIconsAreLoadedFromResources() {
+        List<Image> icons = FrameIconUtil.loadFrameIcons();
+        Assert.assertTrue(icons.size() > 1);
     }
 
 }
