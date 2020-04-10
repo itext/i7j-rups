@@ -5,8 +5,8 @@
   <parent>
     <groupId>com.itextpdf</groupId>
     <artifactId>root</artifactId>
-    <version>7.1.11-SNAPSHOT</version>
-    <relativePath />
+    <version>7.1.12-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
   <artifactId>itext-rups</artifactId>
