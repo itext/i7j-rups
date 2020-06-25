@@ -567,7 +567,6 @@ class SaveAction extends AbstractAction {
                 PdfStream stream = (PdfStream) targetPdfObject;
                 stream.setData(contentStreamContent.getBytes());
             }
-            System.out.println();
         } catch (CannotRedoException e) {
             Toolkit.getDefaultToolkit().beep();
         }
