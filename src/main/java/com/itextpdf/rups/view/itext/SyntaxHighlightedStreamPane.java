@@ -560,15 +560,11 @@ class SaveAction extends AbstractAction {
     }
 
     public void actionPerformed(ActionEvent evt) {
-        try {
-            String contentStreamContent = this.text.getText();
-            PdfObject targetPdfObject = this.target.getPdfObject();
-            if ( targetPdfObject instanceof PdfStream ) {
-                PdfStream stream = (PdfStream) targetPdfObject;
-                stream.setData(contentStreamContent.getBytes());
-            }
-        } catch (CannotRedoException e) {
-            Toolkit.getDefaultToolkit().beep();
+        String contentStreamContent = this.text.getText();
+        PdfObject targetPdfObject = this.target.getPdfObject();
+        if ( targetPdfObject instanceof PdfStream ) {
+            PdfStream stream = (PdfStream) targetPdfObject;
+            stream.setData(contentStreamContent.getBytes());
         }
     }
 }
