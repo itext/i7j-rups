@@ -105,6 +105,11 @@
       <version>${itext.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>pdfCop</artifactId>
+      <version>1.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <repositories>
