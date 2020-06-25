@@ -46,7 +46,11 @@ import com.itextpdf.io.source.PdfTokenizer;
 import com.itextpdf.io.source.RandomAccessFileOrArray;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.PdfException;
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
@@ -58,12 +62,29 @@ import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.*;
+
+import java.awt.Color;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -73,7 +94,11 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
@@ -123,7 +148,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     /**
      * Constructs a SyntaxHighlightedStreamPane.
      *
-     * @param controller the pdf reader controller
+     * @param controller the pdf reader text
      * @param pluginMode the plugin mode
      */
     public SyntaxHighlightedStreamPane(PdfReaderController controller, boolean pluginMode) {
@@ -227,6 +252,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 setTextEditableRoutine(false);
             }
         } else if (stream.get(PdfName.Length1) == null) {
+            text.registerKeyboardAction(new SaveAction(text, this.target), KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
             setTextEditableRoutine(true);
             String newline = "\n";
             byte[] bb = null;
@@ -517,6 +543,31 @@ class RedoAction extends AbstractAction {
     public void actionPerformed(ActionEvent evt) {
         try {
             manager.redo();
+        } catch (CannotRedoException e) {
+            Toolkit.getDefaultToolkit().beep();
+        }
+    }
+}
+
+class SaveAction extends AbstractAction {
+
+    private final ColorTextPane text;
+    private final PdfObjectTreeNode target;
+
+    public SaveAction(ColorTextPane text, PdfObjectTreeNode target) {
+        this.text = text;
+        this.target = target;
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+        try {
+            String contentStreamContent = this.text.getText();
+            PdfObject targetPdfObject = this.target.getPdfObject();
+            if ( targetPdfObject instanceof PdfStream ) {
+                PdfStream stream = (PdfStream) targetPdfObject;
+                stream.setData(contentStreamContent.getBytes());
+            }
+            System.out.println();
         } catch (CannotRedoException e) {
             Toolkit.getDefaultToolkit().beep();
         }
