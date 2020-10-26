@@ -142,10 +142,4 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
         if (node != null)
             controller.selectNode(node);
     }
-
-    /**
-     * A serial version uid.
-     */
-    private static final long serialVersionUID = 5646572654823301007L;
-
 }

@@ -192,10 +192,6 @@ public class Console extends Observable implements Observer {
     static class ConsoleStyleContext extends StyleContext {
 
         /**
-         * A Serial Version UID.
-         */
-        private static final long serialVersionUID = 7253870053566811171L;
-        /**
          * The name of the Style used for Info messages
          */
         public static final String INFO = "Info";

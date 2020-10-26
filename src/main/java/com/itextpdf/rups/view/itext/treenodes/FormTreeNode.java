@@ -92,9 +92,4 @@ public class FormTreeNode extends IconTreeNode {
     public PdfObjectTreeNode getCorrespondingPdfObjectNode() {
         return object_node;
     }
-
-    /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = 7800080437550790989L;
 }

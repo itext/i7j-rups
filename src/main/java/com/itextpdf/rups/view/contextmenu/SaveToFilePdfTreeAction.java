@@ -64,11 +64,6 @@ import java.io.IOException;
  */
 public class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
-    /**
-     * Serial version uid
-     */
-    private static final long serialVersionUID = -4071226227368629514L;
-
     private boolean saveRawBytes;
 
     public SaveToFilePdfTreeAction(String name) {

@@ -51,11 +51,6 @@ import java.util.List;
 public class XdpTreeNode extends IconTreeNode {
 
     /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = -6431790925424045933L;
-
-    /**
      * Constructs an XdpTreeNode
      *
      * @param node the XML node

@@ -52,11 +52,6 @@ import java.awt.*;
 public class IconTreeCellRenderer extends DefaultTreeCellRenderer {
 
     /**
-     * a serial version UID.
-     */
-    private static final long serialVersionUID = 6513462839504342074L;
-
-    /**
      * @see javax.swing.tree.DefaultTreeCellRenderer#getTreeCellRendererComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int, boolean)
      */
     public Component getTreeCellRendererComponent(JTree tree, Object value,

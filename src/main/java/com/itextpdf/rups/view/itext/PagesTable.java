@@ -194,10 +194,4 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
             }
         }
     }
-
-    /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = -6523261089453886508L;
-
 }

@@ -359,9 +359,4 @@ public class PdfObjectTreeNode extends IconTreeNode {
         }
         return null;
     }
-
-    /**
-     * a serial version UID.
-     */
-    private static final long serialVersionUID = -5617844659397445879L;
 }

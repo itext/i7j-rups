@@ -98,9 +98,4 @@ public class IconTreeNode extends DefaultMutableTreeNode {
     public Color getTextColor() {
         return textColor;
     }
-
-    /**
-     * A Serial Version UID.
-     */
-    private static final long serialVersionUID = -5900308991182960842L;
 }

@@ -60,11 +60,6 @@ import java.io.IOException;
  */
 public class SaveToFileJTextPaneAction extends AbstractRupsAction {
 
-    /**
-     * Serial version uid.
-     */
-    private static final long serialVersionUID = -5984892284970574660L;
-
     public SaveToFileJTextPaneAction(String name) {
         super(name);
     }

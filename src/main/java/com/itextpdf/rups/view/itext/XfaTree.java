@@ -71,10 +71,4 @@ public class XfaTree extends JTree {
         setCellRenderer(new IconTreeCellRenderer());
         setModel(new DefaultTreeModel(new XdpTreeNode(file.getXfaDocument())));
     }
-
-    /**
-     * A Serial Version UID.
-     */
-    private static final long serialVersionUID = -5072971223015095193L;
-
 }

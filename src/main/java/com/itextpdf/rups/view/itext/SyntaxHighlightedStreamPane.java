@@ -453,12 +453,6 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         text.setText("");
         setTextEditableRoutine(false);
     }
-
-    /**
-     * a serial version id.
-     */
-    private static final long serialVersionUID = -3699893393067753664L;
-
 }
 
 class ColorTextPane extends JTextPane {
@@ -487,8 +481,6 @@ class ColorTextPane extends JTextPane {
         setCharacterAttributes(aset, true);
         replaceSelection(s);
     }
-
-    private static final long serialVersionUID = 1302283071087762495L;
 }
 
 class UndoAction extends AbstractAction {

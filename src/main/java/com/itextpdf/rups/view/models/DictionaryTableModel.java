@@ -65,10 +65,6 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      */
     private Component parent;
     /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = -8835275996639701776L;
-    /**
      * The PDF dictionary.
      */
     protected PdfDictionary dictionary;

@@ -58,10 +58,6 @@ import java.awt.*;
 public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = 4665485782853993708L;
-    /**
      * The PDF array.
      */
     protected PdfArray array;

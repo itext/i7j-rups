@@ -195,11 +195,6 @@ public class PdfObjectPanel extends Observable implements Observer {
         }
     }
 
-    /**
-     * a serial version id.
-     */
-    private static final long serialVersionUID = 1302283071087762494L;
-
     private class JTableButtonMouseListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
             int selectedColumn = table.getSelectedColumn();

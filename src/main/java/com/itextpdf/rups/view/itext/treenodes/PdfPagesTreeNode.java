@@ -56,9 +56,4 @@ public class PdfPagesTreeNode extends PdfObjectTreeNode {
     public PdfPagesTreeNode(PdfDictionary object) {
         super("pages.png", object);
     }
-
-    /**
-     * a serial version uid
-     */
-    private static final long serialVersionUID = 4527774449030791503L;
 }

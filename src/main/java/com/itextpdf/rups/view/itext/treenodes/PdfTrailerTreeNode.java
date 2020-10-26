@@ -66,10 +66,4 @@ public class PdfTrailerTreeNode extends PdfObjectTreeNode {
     public void setTrailer(PdfDictionary trailer) {
         object = trailer;
     }
-
-    /**
-     * A serial version id.
-     */
-    private static final long serialVersionUID = -3607980103983635182L;
-
 }

@@ -77,9 +77,4 @@ public class CopyToClipboardAction extends AbstractRupsAction {
             textPane.select(0, 0);
         }
     }
-
-    /**
-     * A serial version UID
-     */
-    private static final long serialVersionUID = 1301101461853323920L;
 }

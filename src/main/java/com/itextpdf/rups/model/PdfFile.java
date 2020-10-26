@@ -129,8 +129,6 @@ public class PdfFile {
         final JPasswordField passwordField = new JPasswordField(32);
 
         JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-            private static final long serialVersionUID = 3695604506510737289L;
-
             @Override
             public void selectInitialValue() {
                 passwordField.requestFocusInWindow();

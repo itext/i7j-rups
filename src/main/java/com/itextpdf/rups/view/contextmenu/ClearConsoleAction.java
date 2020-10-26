@@ -53,11 +53,6 @@ import java.awt.event.ActionEvent;
  */
 public class ClearConsoleAction extends AbstractRupsAction {
 
-    /**
-     * Serial version uid.
-     */
-    private static final long serialVersionUID = -7021881171745264584L;
-
     public ClearConsoleAction(String name) {
         super(name);
     }

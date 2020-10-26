@@ -51,10 +51,6 @@ import javax.swing.table.AbstractTableModel;
 public class JTableAutoModel extends AbstractTableModel {
 
     /**
-     * The serial version uid.
-     */
-    private static final long serialVersionUID = -2229431581745521537L;
-    /**
      * The table that knows how to model itself.
      */
     protected JTableAutoModelInterface table;

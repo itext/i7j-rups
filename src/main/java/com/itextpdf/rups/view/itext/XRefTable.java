@@ -210,10 +210,4 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
             controller.selectNode(getObjectReferenceByRow(this.getSelectedRow()));
         }
     }
-
-    /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = -382184619041375537L;
-
 }

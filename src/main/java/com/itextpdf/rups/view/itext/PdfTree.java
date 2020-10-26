@@ -123,10 +123,4 @@ public class PdfTree extends JTree implements Observer {
             scrollPathToVisible(path);
         }
     }
-
-    /**
-     * a serial version UID
-     */
-    private static final long serialVersionUID = 7545804447512085734L;
-
 }
