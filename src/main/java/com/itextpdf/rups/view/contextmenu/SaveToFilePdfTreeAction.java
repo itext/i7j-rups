@@ -44,6 +44,7 @@ package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.itext.PdfTree;
@@ -105,11 +106,17 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
             TreePath[] paths = selectionModel.getSelectionPaths();
             PdfObjectTreeNode lastPath = (PdfObjectTreeNode) paths[0].getLastPathComponent();
             PdfObject object = lastPath.getPdfObject();
-            PdfStream stream = (PdfStream) object;
+            
+            byte array[] = null;
+            if (object instanceof PdfStream) {
+                array = ((PdfStream) object).getBytes(!saveRawBytes);
+            }
+            else if (object instanceof PdfString) {
+            	array = ((PdfString) object).getValueBytes();
+            }
 
             // get the bytes and write away
             try {
-                byte[] array = stream.getBytes(!saveRawBytes);
                 try (FileOutputStream fos = new FileOutputStream(path)) {
                     fos.write(array);
                 }
