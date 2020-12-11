@@ -133,9 +133,9 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
+              <descriptors>
+                <descriptor>src/assembly/jar-with-dependencies-excluded-poms.xml</descriptor>
+              </descriptors>
               <appendAssemblyId>false</appendAssemblyId>
               <archive>
                 <manifest>
