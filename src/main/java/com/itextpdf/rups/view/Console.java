@@ -171,17 +171,17 @@ public class Console extends Observable implements Observer {
         }
 
         @Override
-        public void write(final int b) throws IOException {
+        public void write(final int b) {
             Console.getInstance().updateTextPane(String.valueOf((char) b), type);
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte[] b, int off, int len) {
             Console.getInstance().updateTextPane(new String(b, off, len), type);
         }
 
         @Override
-        public void write(byte[] b) throws IOException {
+        public void write(byte[] b) {
             write(b, 0, b.length);
         }
     }

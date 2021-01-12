@@ -110,17 +110,17 @@ public class DebugView {
 
     static class DebugOutputStream extends OutputStream {
         @Override
-        public void write(final int b) throws IOException {
+        public void write(final int b) {
             DebugView.getInstance().updateTextPane(String.valueOf((char) b));
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte[] b, int off, int len) {
             DebugView.getInstance().updateTextPane(new String(b, off, len));
         }
 
         @Override
-        public void write(byte[] b) throws IOException {
+        public void write(byte[] b) {
             write(b, 0, b.length);
         }
     }
