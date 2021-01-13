@@ -423,11 +423,7 @@ public class RupsController extends Observable
             LoggerHelper.warn(LoggerMessages.COMPARED_DOCUMENT_IS_CLOSED, getClass());
         } else {
             CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
-            try {
-                return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-            } catch (IOException e) {
-                LoggerHelper.warn(LoggerMessages.COMPARING_ERROR, e, getClass());
-            }
+            return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
         }
         return null;
     }
