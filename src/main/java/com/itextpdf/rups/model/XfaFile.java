@@ -78,6 +78,7 @@ public class XfaFile implements OutputStreamResource {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         resource.writeTo(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        // TODO DEVSIX-5299 refactor logic to use XML processing from com.itextpdf.kernel.utils.XmlUtils
         SAXReader reader = new SAXReader();
         reader.setEntityResolver(new SafeEmptyEntityResolver());
         xfaDocument = reader.read(bais);

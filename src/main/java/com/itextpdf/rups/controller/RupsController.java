@@ -433,7 +433,8 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithFile(File file) {
-        try (PdfDocument cmpDocument = new PdfDocument(new PdfReader(file.getAbsolutePath()))) {
+        try (PdfReader readerPdf = new PdfReader(file.getAbsolutePath());
+                PdfDocument cmpDocument = new PdfDocument(readerPdf)) {
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
@@ -442,19 +443,13 @@ public class RupsController extends Observable
     }
 
     public CompareTool.CompareResult compareWithStream(InputStream is) {
-        PdfDocument cmpDocument = null;
-        try {
-            PdfReader reader = new PdfReader(is);
+        try (PdfReader reader = new PdfReader(is);
+                PdfDocument cmpDocument = new PdfDocument(reader)) {
             reader.setCloseStream(false);
-            cmpDocument = new PdfDocument(reader);
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
             LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
             return null;
-        } finally {
-            if (cmpDocument != null) {
-                cmpDocument.close();
-            }
         }
     }
 
