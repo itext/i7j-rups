@@ -51,6 +51,7 @@ import com.itextpdf.kernel.pdf.ReaderProperties;
 
 import javax.swing.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Wrapper for both iText's PdfReader (referring to a PDF file to read)
@@ -124,6 +125,24 @@ public class PdfFile {
         }
     }
 
+    private static byte[] requestPassword() {
+        final JPasswordField passwordField = new JPasswordField(32);
+
+        JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
+            private static final long serialVersionUID = 3695604506510737289L;
+
+            @Override
+            public void selectInitialValue() {
+                passwordField.requestFocusInWindow();
+            }
+        };
+
+        pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
+
+        // TODO RES-427: SASLprep & truncate this
+        return new String(passwordField.getPassword()).getBytes(StandardCharsets.UTF_8);
+    }
+
     /**
      * Does the actual reading of the file into PdfReader and PDFFile.
      *
@@ -138,42 +157,41 @@ public class PdfFile {
         PdfReader reader;
         PdfWriter writer;
         permissions = new Permissions();
+        ReaderProperties readerProps = new ReaderProperties();
+        final byte[] password;
         if (checkPass) {
-            final JPasswordField passwordField = new JPasswordField(32);
-
-            JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-                private static final long serialVersionUID = 3695604506510737289L;
-
-                @Override
-                public void selectInitialValue() {
-                    passwordField.requestFocusInWindow();
-                }
-            };
-
-            pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
-
-            byte[] password = new String(passwordField.getPassword()).getBytes();
-            reader = new PdfReader(fis, new ReaderProperties().setPassword(password));
-            permissions.setEncrypted(true);
-            permissions.setCryptoMode(reader.getCryptoMode());
-            permissions.setPermissions((int) reader.getPermissions());
-            if (reader.isOpenedWithFullPermission()) {
-                permissions.setOwnerPassword(password);
-                permissions.setUserPassword(reader.computeUserPassword());
-            } else {
-                JOptionPane.showMessageDialog(null, "You opened the document using the user password instead of the owner password.");
-            }
+            password = requestPassword();
+            readerProps.setPassword(password);
         } else {
-            reader = new PdfReader(fis);
-            permissions.setEncrypted(false);
+            password = null;
         }
+        reader = new PdfReader(fis, readerProps);
         baos = new ByteArrayOutputStream();
         if (readOnly) {
             document = new PdfDocument(reader);
         } else {
-            writer = new PdfWriter(baos); //TODO: change writer mechanism
+            writer = new PdfWriter(baos);
             document = new PdfDocument(reader, writer);
         }
+        // we have some extra work to do if the document was encrypted
+        if(reader.isEncrypted()) {
+            permissions.setEncrypted(true);
+            permissions.setCryptoMode(reader.getCryptoMode());
+            permissions.setPermissions((int) reader.getPermissions());
+            if(password != null) {
+                if (reader.isOpenedWithFullPermission()) {
+                    permissions.setOwnerPassword(password);
+                    permissions.setUserPassword(reader.computeUserPassword());
+                } else {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "You opened the document using the user password instead of the owner password.");
+                }
+            }
+        } else {
+            permissions.setEncrypted(false);
+        }
+
     }
 
     /**
