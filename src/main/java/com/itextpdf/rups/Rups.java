@@ -84,7 +84,7 @@ public class Rups {
                 initApplication(frame, controller, onCloseOperation);
                 rups.setController(controller);
                 if (null != f && f.canRead()) {
-                    rups.loadDocumentFromFile(f, false);
+                    rups.loadDocumentFromFile(f, true);
                 }
             }
         });

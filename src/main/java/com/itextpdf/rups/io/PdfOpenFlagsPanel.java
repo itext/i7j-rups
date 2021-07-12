@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2022 iText Group NV
+    Copyright (c) 1998-2021 iText Group NV
     Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -42,34 +42,59 @@
  */
 package com.itextpdf.rups.io;
 
-import com.itextpdf.rups.event.OpenFileEvent;
-import com.itextpdf.rups.event.RupsEvent;
+import javax.swing.*;
 
-import javax.swing.filechooser.FileFilter;
-import java.awt.*;
-import java.util.Observer;
+public final class PdfOpenFlagsPanel extends JPanel {
 
-public class FileOpenAction extends FileChooserAction {
     /**
-     * Creates a new file chooser action.
-     *
-     * @param observer the object waiting for you to select file
-     * @param filter   a filter to apply when browsing
-     * @param parent   a parent Component for chooser dialog
+     * Panel title
      */
-    public FileOpenAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, "Open", filter, parent);
+    public static final String PANEL_LABEL = "Advanced options";
+
+    /**
+     * Label for read-only checkbox
+     */
+    public static final String OPEN_READ_ONLY = "Open read-only";
+
+    /**
+     * Tooltip for read-only checkbox.
+     */
+    public static final String OPEN_READ_ONLY_TOOLTIP = "If checked, the document will be opened read-only." +
+            "This disables modification and re-saving. If unchecked, the document will be opened in update mode. ";
+
+    /**
+     * Open PDF documents in read-only mode.
+     */
+    private final JCheckBox openReadOnly;
+
+    /**
+     * Construct a flags panel with default initial states of 'true' for both checkboxes.
+     */
+    public PdfOpenFlagsPanel() {
+        this(true);
     }
 
-    @Override
-    protected int showDialog() {
-        fileChooser.setAccessory(new PdfOpenFlagsPanel());
-        return fileChooser.showOpenDialog(parent);
+    /**
+     * Construct a flags panel for use as an accessory pane in a file chooser component.
+     *
+     * @param initReadOnly
+     *  Initial flag state.
+     */
+    public PdfOpenFlagsPanel(boolean initReadOnly) {
+        super();
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.add(new JLabel(PANEL_LABEL));
+        this.openReadOnly = new JCheckBox(OPEN_READ_ONLY, initReadOnly);
+        this.openReadOnly.setToolTipText(OPEN_READ_ONLY_TOOLTIP);
+        this.add(this.openReadOnly);
     }
 
-    @Override
-    protected RupsEvent getEvent() {
-        PdfOpenFlagsPanel pofp = (PdfOpenFlagsPanel) fileChooser.getAccessory();
-        return new OpenFileEvent(getFile(), pofp.getOpenReadOnly());
+    /**
+     * @return the state of the "Read-only" checkbox.
+     */
+    public boolean getOpenReadOnly() {
+        return this.openReadOnly.isSelected();
     }
+
+
 }

@@ -195,7 +195,8 @@ public class RupsController extends Observable
                         if (files == null || files.size() != 1) {
                             JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
                         } else {
-                            loadFile(files.get(0), false);
+                            // open drag & dropped files in read-only mode
+                            loadFile(files.get(0), true);
                         }
                     } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
                         JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -245,7 +246,7 @@ public class RupsController extends Observable
                     closeRoutine();
                     break;
                 case RupsEvent.OPEN_FILE_EVENT:
-                    loadFile((File) event.getContent(), false);
+                    loadFile((File) event.getContent(), ((OpenFileEvent) event).getOpenReadOnly());
                     break;
                 case RupsEvent.SAVE_TO_FILE_EVENT:
                     saveFile((File) event.getContent());
@@ -277,7 +278,7 @@ public class RupsController extends Observable
      * @param file the file to load
      * @param readOnly open the file read only or not
      */
-    public void loadFile(File file, boolean readOnly) {
+    public final void loadFile(File file, boolean readOnly) {
         try {
             byte[] contents = readFileToByteArray(file);
             loadRawContent(contents, file.getName(), file.getParentFile(), readOnly);

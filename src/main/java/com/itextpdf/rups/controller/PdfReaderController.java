@@ -52,6 +52,7 @@ import com.itextpdf.kernel.utils.objectpathitems.ObjectPath;
 import com.itextpdf.rups.event.*;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
@@ -273,8 +274,16 @@ public class PdfReaderController extends Observable implements Observer {
                     ObjectLoader loader = (ObjectLoader) event.getContent();
                     nodes = loader.getNodes();
                     PdfTrailerTreeNode root = pdfTree.getRoot();
-                    root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
-                    root.setUserObject("PDF Object Tree (" + loader.getLoaderName() + ")");
+                    PdfFile pdfFile = loader.getFile();
+                    boolean readOnly = pdfFile.isReadOnly();
+                    root.setTrailer(pdfFile.getPdfDocument().getTrailer());
+                    String loaderName = loader.getLoaderName();
+                    if (readOnly) {
+                        loaderName += "; read-only";
+                    }
+                    root.setUserObject("PDF Object Tree (" + loaderName + ")");
+                    // put the object panel into plugin mode to disable the editing UI as necessary
+                    objectPanel.setPluginMode(readOnly);
                     nodes.expandNode(root);
                     navigationTabs.setSelectedIndex(0);
                     setChanged();

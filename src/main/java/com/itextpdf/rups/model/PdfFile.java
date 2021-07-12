@@ -51,6 +51,8 @@ import com.itextpdf.kernel.pdf.ReaderProperties;
 
 import com.ibm.icu.text.StringPrepParseException;
 import com.ibm.icu.text.StringPrep;
+import com.itextpdf.kernel.pdf.StampingProperties;
+
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -75,11 +77,6 @@ public class PdfFile {
      * The PdfDocument object.
      */
     protected PdfDocument document = null;
-
-    /**
-     * The file permissions
-     */
-    protected Permissions permissions = null;
 
     /**
      * Raw content
@@ -121,6 +118,7 @@ public class PdfFile {
      */
     public PdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
         rawContent = file;
+        this.readOnly = readOnly;
 
         try {
             readFile(new ByteArrayInputStream(file), false, readOnly);
@@ -173,46 +171,26 @@ public class PdfFile {
      * @throws IOException  an I/O exception
      * @throws PdfException a PDF exception
      */
-    protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
+    protected final void readFile(InputStream fis, boolean checkPass, boolean readOnly)
+            throws IOException, PdfException {
         // reading the file into PdfReader
-        PdfReader reader;
-        PdfWriter writer;
-        permissions = new Permissions();
-        ReaderProperties readerProps = new ReaderProperties();
-        final byte[] password;
+        final ReaderProperties readerProps = new ReaderProperties();
         if (checkPass) {
-            password = requestPassword();
-            readerProps.setPassword(password);
-        } else {
-            password = null;
+            readerProps.setPassword(requestPassword());
         }
-        reader = new PdfReader(fis, readerProps);
+        final PdfReader reader = new PdfReader(fis, readerProps);
         baos = new ByteArrayOutputStream();
         if (readOnly) {
             document = new PdfDocument(reader);
         } else {
-            writer = new PdfWriter(baos);
-            document = new PdfDocument(reader, writer);
+            document = new PdfDocument(reader, new PdfWriter(baos), new StampingProperties().preserveEncryption());
         }
         // we have some extra work to do if the document was encrypted
-        if(reader.isEncrypted()) {
-            permissions.setEncrypted(true);
-            permissions.setCryptoMode(reader.getCryptoMode());
-            permissions.setPermissions((int) reader.getPermissions());
-            if(password != null) {
-                if (reader.isOpenedWithFullPermission()) {
-                    permissions.setOwnerPassword(password);
-                    permissions.setUserPassword(reader.computeUserPassword());
-                } else {
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "You opened the document using the user password instead of the owner password.");
-                }
-            }
-        } else {
-            permissions.setEncrypted(false);
+        if(reader.isEncrypted() && !reader.isOpenedWithFullPermission()) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "You opened the document using the user password instead of the owner password.");
         }
-
     }
 
     /**
@@ -252,6 +230,10 @@ public class PdfFile {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     public ByteArrayOutputStream getByteArrayOutputStream() {

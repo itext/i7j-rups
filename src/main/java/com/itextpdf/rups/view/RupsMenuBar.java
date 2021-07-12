@@ -43,12 +43,14 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.event.PostOpenDocumentEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileCompareAction;
 import com.itextpdf.rups.io.FileOpenAction;
 import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 
 import javax.swing.*;
@@ -178,7 +180,12 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                     enableItems(false);
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    enableItems(true);
+                    ObjectLoader ol = (ObjectLoader) event.getContent();
+                    if(ol.getFile().isReadOnly()) {
+                        enableReadOnlyItems();
+                    } else {
+                        enableItems(true);
+                    }
                     break;
                 case RupsEvent.ROOT_NODE_CLICKED_EVENT:
                     fileOpenAction.actionPerformed(null);
@@ -219,6 +226,14 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         enableItem(OPENINVIEWER, enabled);
         enableItem(COMPARE_WITH, enabled);
         enableItem(NEW_INDIRECT, enabled);
+    }
+
+    protected void enableReadOnlyItems() {
+        enableItem(CLOSE, true);
+        enableItem(SAVE_AS, false);
+        enableItem(OPENINVIEWER, true);
+        enableItem(COMPARE_WITH, true);
+        enableItem(NEW_INDIRECT, false);
     }
 
     /**

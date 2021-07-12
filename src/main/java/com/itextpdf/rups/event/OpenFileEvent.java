@@ -47,10 +47,12 @@ import java.io.File;
 
 public class OpenFileEvent extends RupsEvent {
 
-    private File file;
+    private final boolean readOnly;
+    private final File file;
 
-    public OpenFileEvent(File file) {
+    public OpenFileEvent(File file, boolean readOnly) {
         this.file = file;
+        this.readOnly = readOnly;
     }
 
     @Override
@@ -59,7 +61,12 @@ public class OpenFileEvent extends RupsEvent {
     }
 
     @Override
-    public Object getContent() {
+    public File getContent() {
         return file;
     }
+
+    public boolean getOpenReadOnly() {
+        return readOnly;
+    }
+
 }

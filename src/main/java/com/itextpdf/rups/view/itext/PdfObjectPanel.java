@@ -271,4 +271,8 @@ public class PdfObjectPanel extends Observable implements Observer {
             }
         }
     }
+
+    public void setPluginMode(boolean pluginMode) {
+        this.pluginMode = pluginMode;
+    }
 }
