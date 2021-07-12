@@ -63,6 +63,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class PdfFile {
 
+    public static final String IGNORE_PERMS_ENV_VAR = "RUPS_IGNORE_PERMS";
     /**
      * The directory where the file can be found (if the PDF was passed as a file).
      */
@@ -162,6 +163,17 @@ public class PdfFile {
         return preparePasswordForOpen(passwordString);
     }
 
+    private static boolean checkIgnorePermissions() {
+        // set unethical reading based on environment variable
+        final String ignorePermsEnv;
+        try {
+            ignorePermsEnv = System.getenv(IGNORE_PERMS_ENV_VAR);
+        } catch (SecurityException ex) {
+            return false;
+        }
+        return ignorePermsEnv != null && "1".equals(ignorePermsEnv.trim());
+    }
+
     /**
      * Does the actual reading of the file into PdfReader and PDFFile.
      *
@@ -178,7 +190,8 @@ public class PdfFile {
         if (checkPass) {
             readerProps.setPassword(requestPassword());
         }
-        final PdfReader reader = new PdfReader(fis, readerProps);
+        final PdfReader reader = new PdfReader(fis, readerProps)
+                .setUnethicalReading(checkIgnorePermissions());
         baos = new ByteArrayOutputStream();
         if (readOnly) {
             document = new PdfDocument(reader);
