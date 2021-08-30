@@ -48,6 +48,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+import com.itextpdf.passwordprep.PdfPasswordUtil;
 
 import javax.swing.*;
 import java.io.*;
@@ -137,8 +138,8 @@ public class PdfFile {
 
         pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
 
-        // TODO RES-427: SASLprep & truncate this
-        return new String(passwordField.getPassword()).getBytes(StandardCharsets.UTF_8);
+        String passwordString = new String(passwordField.getPassword());
+        return PdfPasswordUtil.preparePasswordForOpen(passwordString);
     }
 
     /**
