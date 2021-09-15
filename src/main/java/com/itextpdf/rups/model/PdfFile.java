@@ -49,6 +49,8 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
 
+import com.ibm.icu.text.StringPrepParseException;
+import com.ibm.icu.text.StringPrep;
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -88,6 +90,8 @@ public class PdfFile {
 
     protected boolean readOnly = false;
 
+    public static final int MAX_PASSWORD_BYTE_LENGTH = 127;
+
     /**
      * Constructs a PdfFile object.
      *
@@ -125,6 +129,25 @@ public class PdfFile {
         }
     }
 
+    private static byte[] preparePasswordForOpen(String inputPassword) {
+        StringPrep prep = StringPrep.getInstance(StringPrep.RFC4013_SASLPREP);
+        String prepped;
+        try {
+            // we're invoking StringPrep to open a document -> pass ALLOW_UNASSIGNED
+            prepped = prep.prepare(inputPassword, StringPrep.ALLOW_UNASSIGNED);
+        } catch (StringPrepParseException e) {
+            throw new PdfException("Failed to process password", e);
+        }
+        byte[] resultingBytes = prepped.getBytes(StandardCharsets.UTF_8);
+        if (resultingBytes.length <= MAX_PASSWORD_BYTE_LENGTH) {
+            return resultingBytes;
+        } else {
+            byte[] trimmed = new byte[MAX_PASSWORD_BYTE_LENGTH];
+            System.arraycopy(resultingBytes, 0, trimmed, 0, trimmed.length);
+            return trimmed;
+        }
+    }
+
     private static byte[] requestPassword() {
         final JPasswordField passwordField = new JPasswordField(32);
 
@@ -137,8 +160,8 @@ public class PdfFile {
 
         pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
 
-        // TODO RES-427: SASLprep & truncate this
-        return new String(passwordField.getPassword()).getBytes(StandardCharsets.UTF_8);
+        String passwordString = new String(passwordField.getPassword());
+        return preparePasswordForOpen(passwordString);
     }
 
     /**
