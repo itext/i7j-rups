@@ -45,7 +45,7 @@ package com.itextpdf.rups.view.itext;
 import com.itextpdf.io.source.PdfTokenizer;
 import com.itextpdf.io.source.RandomAccessFileOrArray;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
-import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
@@ -222,7 +222,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 byte[] bytes = stream.getBytes(false);
                 text.setText(new String(bytes));
                 text.setCaretPosition(0);
-            } catch (com.itextpdf.io.IOException e) {
+            } catch (com.itextpdf.io.exceptions.IOException e) {
                 text.setText("");
                 setTextEditableRoutine(false);
             }
@@ -255,7 +255,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     text.append(operands, attributesOperands);
                     text.append(operator + newline, attributes);
                 }
-            } catch (PdfException | com.itextpdf.io.IOException e) {
+            } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
                 LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
                 if (bb != null) {
                     text.setText(new String(bb));

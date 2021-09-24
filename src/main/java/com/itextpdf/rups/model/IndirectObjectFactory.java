@@ -43,7 +43,7 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.io.util.IntHashtable;
-import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.*;
 
 import java.lang.reflect.Field;

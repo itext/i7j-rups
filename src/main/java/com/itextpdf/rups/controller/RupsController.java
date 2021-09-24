@@ -42,8 +42,8 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.kernel.PdfException;
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
@@ -307,7 +307,7 @@ public class RupsController extends Observable
                 ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + ITextCoreProductData.getInstance().getVersion());
             }
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
-        } catch (IOException | PdfException | com.itextpdf.io.IOException ioe) {
+        } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -384,7 +384,7 @@ public class RupsController extends Observable
 
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
             loadFile(file, false);
-        } catch (PdfException | IOException | com.itextpdf.io.IOException de) {
+        } catch (PdfException | IOException | com.itextpdf.io.exceptions.IOException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
