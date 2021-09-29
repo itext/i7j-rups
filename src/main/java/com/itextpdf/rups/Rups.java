@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups;
 
-import com.itextpdf.kernel.Version;
+import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
@@ -101,7 +101,7 @@ public class Rups {
 
     static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
-        frame.setTitle("iText RUPS " + Version.getInstance().getVersion());
+        frame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
         frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content

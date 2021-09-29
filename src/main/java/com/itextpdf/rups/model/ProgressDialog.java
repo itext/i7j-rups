@@ -50,11 +50,6 @@ import java.awt.event.WindowEvent;
  * An informational dialog window showing the progress of a certain action.
  */
 public class ProgressDialog extends JDialog {
-
-    /**
-     * a serial version uid.
-     */
-    private static final long serialVersionUID = -8286949678008659120L;
     /**
      * label showing the message describing what's in progress.
      */

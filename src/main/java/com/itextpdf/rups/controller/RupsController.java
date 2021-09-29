@@ -42,8 +42,8 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.kernel.PdfException;
-import com.itextpdf.kernel.Version;
+import com.itextpdf.kernel.actions.data.ITextCoreProductData;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
@@ -304,10 +304,10 @@ public class RupsController extends Observable
             startObjectLoader();
             if (!pluginMode) {
                 String directoryPath = directory == null ? "" : directory.getCanonicalPath() + File.separator;
-                ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + Version.getInstance().getVersion());
+                ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + ITextCoreProductData.getInstance().getVersion());
             }
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
-        } catch (IOException | PdfException | com.itextpdf.io.IOException ioe) {
+        } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -384,7 +384,7 @@ public class RupsController extends Observable
 
             JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
             loadFile(file, false);
-        } catch (PdfException | IOException | com.itextpdf.io.IOException de) {
+        } catch (PdfException | IOException | com.itextpdf.io.exceptions.IOException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
@@ -409,7 +409,7 @@ public class RupsController extends Observable
             docToClose.close();
         }
         if (!pluginMode) {
-            ownedFrame.setTitle("iText RUPS " + Version.getInstance().getVersion());
+            ownedFrame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
         }
         readerController.getParser().setDocument(null);
     }
@@ -423,11 +423,7 @@ public class RupsController extends Observable
             LoggerHelper.warn(LoggerMessages.COMPARED_DOCUMENT_IS_CLOSED, getClass());
         } else {
             CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
-            try {
-                return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-            } catch (IOException e) {
-                LoggerHelper.warn(LoggerMessages.COMPARING_ERROR, e, getClass());
-            }
+            return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
         }
         return null;
     }

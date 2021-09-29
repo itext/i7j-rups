@@ -171,17 +171,17 @@ public class Console extends Observable implements Observer {
         }
 
         @Override
-        public void write(final int b) throws IOException {
+        public void write(final int b) {
             Console.getInstance().updateTextPane(String.valueOf((char) b), type);
         }
 
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte[] b, int off, int len) {
             Console.getInstance().updateTextPane(new String(b, off, len), type);
         }
 
         @Override
-        public void write(byte[] b) throws IOException {
+        public void write(byte[] b) {
             write(b, 0, b.length);
         }
     }
@@ -191,10 +191,6 @@ public class Console extends Observable implements Observer {
      */
     static class ConsoleStyleContext extends StyleContext {
 
-        /**
-         * A Serial Version UID.
-         */
-        private static final long serialVersionUID = 7253870053566811171L;
         /**
          * The name of the Style used for Info messages
          */

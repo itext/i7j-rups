@@ -230,9 +230,4 @@ public class RupsMenuBar extends JMenuBar implements Observer {
     protected void enableItem(String caption, boolean enabled) {
         items.get(caption).setEnabled(enabled);
     }
-
-    /**
-     * A Serial Version UID.
-     */
-    private static final long serialVersionUID = 6403040037592308742L;
 }

@@ -124,10 +124,4 @@ public abstract class FileChooserAction extends AbstractAction {
     protected abstract int showDialog();
 
     protected abstract RupsEvent getEvent();
-
-    /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = 2225830878098387118L;
-
 }

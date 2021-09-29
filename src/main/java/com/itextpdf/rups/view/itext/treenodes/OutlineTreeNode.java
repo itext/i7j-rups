@@ -94,9 +94,4 @@ public class OutlineTreeNode extends IconTreeNode {
             return PdfObjectTreeNode.getCaption((PdfObject) userObject);
         return userObject.toString();
     }
-
-    /**
-     * A serial version uid
-     */
-    private static final long serialVersionUID = 5437651809665762952L;
 }

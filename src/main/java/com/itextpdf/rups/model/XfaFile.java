@@ -108,7 +108,7 @@ public class XfaFile implements OutputStreamResource {
 
     // Prevents XXE attacks
     private static class SafeEmptyEntityResolver implements EntityResolver {
-        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        public InputSource resolveEntity(String publicId, String systemId) {
             return new InputSource(new StringReader(""));
         }
     }

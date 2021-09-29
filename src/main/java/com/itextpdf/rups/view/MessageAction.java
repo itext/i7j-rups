@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.kernel.Version;
+import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -57,7 +57,7 @@ public class MessageAction implements ActionListener {
                 message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
                 break;
             case RupsMenuBar.VERSION:
-                message = Version.getInstance().getVersion();
+                message = ITextCoreProductData.getInstance().getVersion();
                 break;
             default:
                 message = "Unspecified message";

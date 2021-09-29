@@ -44,6 +44,11 @@ package com.itextpdf.rups.controller;
 
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.kernel.utils.objectpathitems.ArrayPathItem;
+import com.itextpdf.kernel.utils.objectpathitems.DictPathItem;
+import com.itextpdf.kernel.utils.objectpathitems.IndirectPathItem;
+import com.itextpdf.kernel.utils.objectpathitems.LocalPathItem;
+import com.itextpdf.kernel.utils.objectpathitems.ObjectPath;
 import com.itextpdf.rups.event.*;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -382,25 +387,25 @@ public class PdfReaderController extends Observable implements Observer {
         if (compareResult == null) {
             return;
         }
-        for (CompareTool.ObjectPath path : compareResult.getDifferences().keySet()) {
+        for (ObjectPath path : compareResult.getDifferences().keySet()) {
             PdfObjectTreeNode currentNode;
-            Stack<CompareTool.ObjectPath.IndirectPathItem> indirectPath = (Stack<CompareTool.ObjectPath.IndirectPathItem>) path.getIndirectPath().clone();
+            Stack<IndirectPathItem> indirectPath = (Stack<IndirectPathItem>) path.getIndirectPath();
             while (!indirectPath.empty()) {
-                CompareTool.ObjectPath.IndirectPathItem indirectPathItem = indirectPath.pop();
+                IndirectPathItem indirectPathItem = indirectPath.pop();
                 currentNode = nodes.getNode(indirectPathItem.getOutObject().getObjNumber());
                 if (currentNode != null) {
                     nodes.expandNode(currentNode);
                 }
             }
-            Stack<CompareTool.ObjectPath.LocalPathItem> localPath = (Stack<CompareTool.ObjectPath.LocalPathItem>) path.getLocalPath().clone();
+            Stack<LocalPathItem> localPath = (Stack<LocalPathItem>) path.getLocalPath();
             currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
             while (!localPath.empty() && currentNode != null) {
                 nodes.expandNode(currentNode);
-                CompareTool.ObjectPath.LocalPathItem item = localPath.pop();
-                if (item instanceof CompareTool.ObjectPath.DictPathItem) {
-                    currentNode = nodes.getChildNode(currentNode, ((CompareTool.ObjectPath.DictPathItem) item).getKey());
-                } else if (item instanceof CompareTool.ObjectPath.ArrayPathItem) {
-                    int index = ((CompareTool.ObjectPath.ArrayPathItem) item).getIndex();
+                LocalPathItem item = localPath.pop();
+                if (item instanceof DictPathItem) {
+                    currentNode = nodes.getChildNode(currentNode, ((DictPathItem) item).getKey());
+                } else if (item instanceof ArrayPathItem) {
+                    int index = ((ArrayPathItem) item).getIndex();
                     currentNode = (PdfObjectTreeNode) currentNode.getChildAt(index);
                 }
             }

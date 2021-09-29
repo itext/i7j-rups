@@ -71,11 +71,6 @@ import java.util.Observer;
 public class FormTree extends JTree implements TreeSelectionListener, Observer {
 
     /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = -3584003547303700407L;
-
-    /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
     protected PdfReaderController controller;

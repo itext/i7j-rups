@@ -117,10 +117,4 @@ public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
         node.setUserObject(key);
         this.add(node);
     }
-
-    /**
-     * A serial version UID.
-     */
-    private static final long serialVersionUID = 2463297568233643790L;
-
 }

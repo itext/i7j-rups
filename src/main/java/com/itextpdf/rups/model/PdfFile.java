@@ -42,15 +42,18 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.kernel.PdfException;
-import com.itextpdf.kernel.crypto.BadPasswordException;
+import com.itextpdf.kernel.exceptions.BadPasswordException;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
 
+import com.ibm.icu.text.StringPrepParseException;
+import com.ibm.icu.text.StringPrep;
 import javax.swing.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Wrapper for both iText's PdfReader (referring to a PDF file to read)
@@ -86,6 +89,8 @@ public class PdfFile {
     protected ByteArrayOutputStream baos = null;
 
     protected boolean readOnly = false;
+
+    public static final int MAX_PASSWORD_BYTE_LENGTH = 127;
 
     /**
      * Constructs a PdfFile object.
@@ -124,6 +129,41 @@ public class PdfFile {
         }
     }
 
+    private static byte[] preparePasswordForOpen(String inputPassword) {
+        StringPrep prep = StringPrep.getInstance(StringPrep.RFC4013_SASLPREP);
+        String prepped;
+        try {
+            // we're invoking StringPrep to open a document -> pass ALLOW_UNASSIGNED
+            prepped = prep.prepare(inputPassword, StringPrep.ALLOW_UNASSIGNED);
+        } catch (StringPrepParseException e) {
+            throw new PdfException("Failed to process password", e);
+        }
+        byte[] resultingBytes = prepped.getBytes(StandardCharsets.UTF_8);
+        if (resultingBytes.length <= MAX_PASSWORD_BYTE_LENGTH) {
+            return resultingBytes;
+        } else {
+            byte[] trimmed = new byte[MAX_PASSWORD_BYTE_LENGTH];
+            System.arraycopy(resultingBytes, 0, trimmed, 0, trimmed.length);
+            return trimmed;
+        }
+    }
+
+    private static byte[] requestPassword() {
+        final JPasswordField passwordField = new JPasswordField(32);
+
+        JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
+            @Override
+            public void selectInitialValue() {
+                passwordField.requestFocusInWindow();
+            }
+        };
+
+        pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
+
+        String passwordString = new String(passwordField.getPassword());
+        return preparePasswordForOpen(passwordString);
+    }
+
     /**
      * Does the actual reading of the file into PdfReader and PDFFile.
      *
@@ -138,42 +178,41 @@ public class PdfFile {
         PdfReader reader;
         PdfWriter writer;
         permissions = new Permissions();
+        ReaderProperties readerProps = new ReaderProperties();
+        final byte[] password;
         if (checkPass) {
-            final JPasswordField passwordField = new JPasswordField(32);
-
-            JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-                private static final long serialVersionUID = 3695604506510737289L;
-
-                @Override
-                public void selectInitialValue() {
-                    passwordField.requestFocusInWindow();
-                }
-            };
-
-            pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
-
-            byte[] password = new String(passwordField.getPassword()).getBytes();
-            reader = new PdfReader(fis, new ReaderProperties().setPassword(password));
-            permissions.setEncrypted(true);
-            permissions.setCryptoMode(reader.getCryptoMode());
-            permissions.setPermissions((int) reader.getPermissions());
-            if (reader.isOpenedWithFullPermission()) {
-                permissions.setOwnerPassword(password);
-                permissions.setUserPassword(reader.computeUserPassword());
-            } else {
-                JOptionPane.showMessageDialog(null, "You opened the document using the user password instead of the owner password.");
-            }
+            password = requestPassword();
+            readerProps.setPassword(password);
         } else {
-            reader = new PdfReader(fis);
-            permissions.setEncrypted(false);
+            password = null;
         }
+        reader = new PdfReader(fis, readerProps);
         baos = new ByteArrayOutputStream();
         if (readOnly) {
             document = new PdfDocument(reader);
         } else {
-            writer = new PdfWriter(baos); //TODO: change writer mechanism
+            writer = new PdfWriter(baos);
             document = new PdfDocument(reader, writer);
         }
+        // we have some extra work to do if the document was encrypted
+        if(reader.isEncrypted()) {
+            permissions.setEncrypted(true);
+            permissions.setCryptoMode(reader.getCryptoMode());
+            permissions.setPermissions((int) reader.getPermissions());
+            if(password != null) {
+                if (reader.isOpenedWithFullPermission()) {
+                    permissions.setOwnerPassword(password);
+                    permissions.setUserPassword(reader.computeUserPassword());
+                } else {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "You opened the document using the user password instead of the owner password.");
+                }
+            }
+        } else {
+            permissions.setEncrypted(false);
+        }
+
     }
 
     /**

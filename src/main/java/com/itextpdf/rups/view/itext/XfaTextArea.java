@@ -75,9 +75,4 @@ public class XfaTextArea extends JScrollPane {
         TextAreaOutputStream stream = new TextAreaOutputStream(text);
         xml.writeTo(stream);
     }
-
-    /**
-     * A Serial Version UID.
-     */
-    private static final long serialVersionUID = -8275229961781669457L;
 }

@@ -61,9 +61,8 @@ public class TextAreaOutputStream extends OutputStream {
      * Constructs a TextAreaOutputStream.
      *
      * @param text the text area to which we want to write.
-     * @throws IOException an exception
      */
-    public TextAreaOutputStream(JTextArea text) throws IOException {
+    public TextAreaOutputStream(JTextArea text) {
         this.text = text;
         clear();
     }
@@ -79,7 +78,7 @@ public class TextAreaOutputStream extends OutputStream {
      * @see java.io.OutputStream#write(int)
      */
     @Override
-    public void write(int i) throws IOException {
+    public void write(int i) {
         byte[] b = {(byte) i};
         write(b, 0, 1);
     }
@@ -88,7 +87,7 @@ public class TextAreaOutputStream extends OutputStream {
      * @see java.io.OutputStream#write(byte[], int, int)
      */
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) {
         String snippet = new String(b, off, len, StandardCharsets.UTF_8);
         text.append(snippet);
     }

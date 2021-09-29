@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.itextpdf</groupId>
     <artifactId>root</artifactId>
-    <version>7.1.16</version>
+    <version>7.2.0</version>
     <relativePath />
   </parent>
 
@@ -87,6 +87,11 @@
       <version>${dom4j.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>69.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>pdftest</artifactId>
       <version>${itext.version}</version>
@@ -133,9 +138,9 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
+              <descriptors>
+                <descriptor>src/assembly/jar-with-dependencies-excluded-poms.xml</descriptor>
+              </descriptors>
               <appendAssemblyId>false</appendAssemblyId>
               <archive>
                 <manifest>

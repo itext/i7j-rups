@@ -199,9 +199,4 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
         if (node != null)
             controller.selectNode(node);
     }
-
-    /**
-     * A Serial version UID
-     */
-    private static final long serialVersionUID = 4205940990483252858L;
 }

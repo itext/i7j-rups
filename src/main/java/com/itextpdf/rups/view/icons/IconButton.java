@@ -59,9 +59,4 @@ public class IconButton extends JButton {
         super(listener.getIcon());
         addActionListener(listener);
     }
-
-    /**
-     * A Serial Version UID.
-     */
-    private static final long serialVersionUID = 3523016393512117003L;
 }
