@@ -6,7 +6,7 @@
     <groupId>com.itextpdf</groupId>
     <artifactId>root</artifactId>
     <version>7.2.1-SNAPSHOT</version>
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <artifactId>itext-rups</artifactId>
@@ -55,7 +55,7 @@
     <dom4j.version>2.1.3</dom4j.version>
     <itext.version>${project.parent.version}</itext.version>
     <launch4j.version>1.7.25</launch4j.version>
-    <logback.version>1.2.4</logback.version>
+    <logback.version>1.2.6</logback.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.projectName>RUPS</sonar.projectName>
   </properties>
