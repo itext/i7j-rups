@@ -44,10 +44,7 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.FileCompareAction;
-import com.itextpdf.rups.io.FileOpenAction;
-import com.itextpdf.rups.io.FileSaveAction;
+import com.itextpdf.rups.io.*;
 import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.PdfFile;
 
@@ -69,6 +66,10 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     public static final String FILE_MENU = "File";
     /**
+     * Caption for the Edit Menu.
+     */
+    public static final String EDIT_MENU = "Edit";
+    /**
      * Caption for "Open file".
      */
     public static final String OPEN = "Open";
@@ -84,6 +85,10 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      * Caption for "Save as..."
      */
     public static final String SAVE_AS = "Save as...";
+    /**
+     * Caption for applying an XFDF file.
+     */
+    public static final String MERGEXFDF = "Apply XFDF File";
     /**
      * Caption for the help menu.
      */
@@ -159,6 +164,9 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         }, KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, NEW_INDIRECT, new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller), KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
         add(file);
+        JMenu edit = new JMenu(EDIT_MENU);
+        addItem(edit, MERGEXFDF, new ApplyXfdfFileAction(this.controller));
+        add(edit);
         add(Box.createGlue());
         JMenu help = new JMenu(HELP_MENU);
         addItem(help, ABOUT, message);

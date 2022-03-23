@@ -47,7 +47,10 @@ import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.research.xfdfmerge.XfdfMerge;
 import com.itextpdf.rups.event.*;
+import com.itextpdf.rups.io.FileSaveAction;
+import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.*;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.NewIndirectPdfObjectDialog;
@@ -262,6 +265,9 @@ public class RupsController extends Observable
                 case RupsEvent.NEW_INDIRECT_OBJECT_EVENT:
                     showNewIndirectDialog();
                     break;
+                case RupsEvent.XFDF_MERGE_EVENT:
+                    mergeXfdf((File) event.getContent());
+                    break;
             }
         }
         //Events from observable classes
@@ -270,6 +276,47 @@ public class RupsController extends Observable
             if (RupsEvent.CONSOLE_WRITE_EVENT == event.getType()) {
                 readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
             }
+        }
+    }
+
+    public void mergeXfdf(File xfdfFile) {
+        try {
+            String inputPath = this.pdfFile.getDirectory().getPath();
+            String inputName = this.pdfFile.getFilename();
+
+            String input = inputPath + "/" + inputName;
+
+            String xfdf = xfdfFile.getAbsolutePath();
+
+            Observer inPlaceRecipient = new Observer() {
+                public String path;
+
+                @Override
+                public void update(Observable o, Object arg) {
+                    String path = ((File) ((SaveToFileEvent) arg).getContent()).getAbsolutePath();
+
+                    if ( !path.endsWith(".pdf")) {
+                        path += ".pdf";
+                    }
+
+                    String[] args = new String[] {input, xfdf, this.path};
+
+                    try {
+                        XfdfMerge.main(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                public String getPath() {
+                    return this.path;
+                }
+            };
+
+            FileSaveAction fileSaveAction = new FileSaveAction(inPlaceRecipient, PdfFilter.INSTANCE, this.getMasterComponent());
+            fileSaveAction.actionPerformed(null);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(masterComponent, e.getMessage(), "Error applying XFDF", JOptionPane.ERROR_MESSAGE);
         }
     }
 
