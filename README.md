@@ -1,9 +1,30 @@
-RUPS
+RUPS - Research Edition
 ====
+_"The 'R' in RUPS stands for Research"_ - M. Gandhi
 
 iText RUPS is a tool to view PDF structure in a Swing GUI.
 
+### Research Features!
+
+Of course, no experimental build is complete without any experimental features! Do note, these are experimental, not to be included in the public builds! And as such, they can be rough around the edges. We are always open to pull requests for any kind of feature you want implemented. Or if you want to pitch an idea to us for RUPS; you can find us on the #research channel on slack!
+
+Without further ado, an overview of the features available in this edition:
+
+* Content Stream Syntax Checker
+* XFDF Merging
+
+
 ### Building and running
+
+Before you build this **super** _special_ RUPS Research Edition, there's a few things you need to build and have locally on your machine.
+Luckily the Research Team has you covered:
+
+Follow the build instructions in the following projects (or if absent, just run `mvn clean install`)
+- pdfCop ( https://git.itextsupport.com/projects/RESEARCH/repos/pdfcop/browse )
+- XFDF-Merger ( https://git.itextsupport.com/users/matthias.valvekens/repos/xfdf-merger/browse )
+
+
+These should allow you to continue with the regular build instructions as outlined below:
 
 iText Rups is built into a Jar file which is then run by Java. To build iText Rups with Maven, run the following command:
 ```
