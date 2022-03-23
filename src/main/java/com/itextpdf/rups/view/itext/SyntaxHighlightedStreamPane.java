@@ -49,6 +49,7 @@ import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
+import com.itextpdf.pdfdsl.PdfCop;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
@@ -56,6 +57,7 @@ import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -227,6 +229,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 setTextEditableRoutine(false);
             }
         } else if (stream.get(PdfName.Length1) == null) {
+            text.getInputMap().put(KeyStroke.getKeyStroke("F9"), "compile");
+            text.getActionMap().put("compile", new SaveSyntaxAction(text, this.target));
             setTextEditableRoutine(true);
             String newline = "\n";
             byte[] bb = null;
@@ -512,5 +516,36 @@ class RedoAction extends AbstractAction {
         } catch (CannotRedoException e) {
             Toolkit.getDefaultToolkit().beep();
         }
+    }
+}
+
+class SaveSyntaxAction extends AbstractAction {
+
+    private final ColorTextPane text;
+    private final PdfObjectTreeNode target;
+
+    public SaveSyntaxAction(ColorTextPane text, PdfObjectTreeNode target) {
+        this.text = text;
+        this.target = target;
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+        System.out.println("Hit!");
+        String contentStreamContent = this.text.getText();
+
+        PdfCop pdfCop = new PdfCop();
+
+        try {
+            pdfCop.doesSnippetFollowTheRules(contentStreamContent);
+            JOptionPane.showMessageDialog(null, "Syntax compiled successfully!");
+            PdfObject targetPdfObject = this.target.getPdfObject();
+            if (targetPdfObject instanceof PdfStream) {
+                PdfStream stream = (PdfStream) targetPdfObject;
+                stream.setData(contentStreamContent.getBytes());
+            }
+        } catch (ParseCancellationException pce) {
+            JOptionPane.showMessageDialog(null, "Syntax failed to compile: " + pce.getMessage());
+        }
+        System.out.println("Exit!");
     }
 }
