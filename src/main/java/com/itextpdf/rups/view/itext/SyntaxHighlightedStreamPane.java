@@ -315,6 +315,13 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 }
                 sb.append(">> ");
                 break;
+            case PdfObject.ARRAY:
+                sb.append('[');
+                for (PdfObject item : (PdfArray) obj) {
+                    append(sb, item);
+                }
+                sb.append("] ");
+                break;
             default:
                 sb
                         .append(obj)
