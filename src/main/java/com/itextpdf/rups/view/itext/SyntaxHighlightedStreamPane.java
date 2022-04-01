@@ -70,7 +70,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -103,7 +102,9 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
     protected UndoManager manager;
 
-    private static int MAX_NUMBER_OF_EDITS = 8192;
+    private static final int INLINE_IMAGE_EXPECTED_TOKEN_COUNT = 2;
+
+    private static final int MAX_NUMBER_OF_EDITS = 8192;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private PdfReaderController controller;
@@ -186,28 +187,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
                     try {
                         doc.insertString(doc.getLength(), "ignored text", style);
-                        JButton saveImage = new JButton("Save Image");
-                        final BufferedImage saveImg = img;
-                        saveImage.addActionListener(new ActionListener() {
-
-                            public void actionPerformed(ActionEvent event) {
-                                try {
-                                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-                                    fileDialog.setFilenameFilter(new FilenameFilter() {
-                                        public boolean accept(File dir, String name) {
-                                            return name.endsWith(".jpg");
-                                        }
-                                    });
-                                    fileDialog.setFile("Untitled.jpg");
-                                    fileDialog.setVisible(true);
-                                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
-                                } catch (HeadlessException | IOException e) {
-                                    LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
-                                }
-                            }
-                        });
                         text.append("\n", null);
-                        text.insertComponent(saveImage);
+                        text.insertComponent(createSaveImageButton(img));
                     } catch (BadLocationException e) {
                         LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
                     }
@@ -226,43 +207,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 text.setText("");
                 setTextEditableRoutine(false);
             }
-        } else if (stream.get(PdfName.Length1) == null) {
-            setTextEditableRoutine(true);
-            String newline = "\n";
-            byte[] bb = null;
-            try {
-                bb = stream.getBytes();
-
-                PdfTokenizer tokeniser = new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
-
-                PdfCanvasParser ps = new PdfCanvasParser(tokeniser);
-                ArrayList<PdfObject> tokens = new ArrayList<>();
-                while (ps.parse(tokens).size() > 0) {
-                    // operator is at the end
-                    String operator = (tokens.get(tokens.size() - 1)).toString();
-                    // operands are in front of their operator
-                    StringBuilder operandssb = new StringBuilder();
-                    for (int i = 0; i < tokens.size() - 1; i++) {
-                        append(operandssb, tokens.get(i));
-                    }
-                    String operands = operandssb.toString();
-
-                    Map<Object, Object> attributes = attributemap.get(operator);
-                    Map<Object, Object> attributesOperands = null;
-                    if (matchingOperands)
-                        attributesOperands = attributes;
-
-                    text.append(operands, attributesOperands);
-                    text.append(operator + newline, attributes);
-                }
-            } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
-                LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
-                if (bb != null) {
-                    text.setText(new String(bb));
-                }
-            } catch (IOException ignored) {
-            }
-            text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
+        } else {
+            renderGenericContentStream(stream);
         }
         text.repaint();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
@@ -280,6 +226,36 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             controller.selectNode(target);
         }
         manager.setLimit(MAX_NUMBER_OF_EDITS);
+    }
+
+    /**
+     * Append an inline image to the content stream pane.
+     *
+     * @param stm
+     *   The {@link PdfStream} containing the image data.
+     */
+    protected void appendInlineImage(final PdfStream stm) {
+        text.append("BI\n", attributemap.get("BI"));
+
+        final StringBuilder inlineImgParams = new StringBuilder();
+        for (final PdfName key : stm.keySet()) {
+            inlineImgParams.append(key).append(' ');
+            append(inlineImgParams, stm.get(key, false));
+            inlineImgParams.append('\n');
+        }
+        text.append(inlineImgParams.toString(), null);
+
+        text.append("ID\n", attributemap.get("ID"));
+
+        boolean imageShown = false;
+        if (stm.get(PdfName.Width, false).isNumber()
+                && stm.get(PdfName.Height, false).isNumber()) {
+            imageShown = insertAndRenderInlineImage(stm);
+        }
+        if(!imageShown) {
+            text.append("Could not process image content\n", null);
+        }
+        text.append("EI\n", attributemap.get("EI"));
     }
 
     protected void append(StringBuilder sb, PdfObject obj) {
@@ -460,6 +436,107 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         text.setText("");
         setTextEditableRoutine(false);
     }
+
+    private boolean insertAndRenderInlineImage(final PdfStream stm) {
+        BufferedImage img;
+        try {
+            // inline image parser takes care of expanding abbreviations
+            img = new PdfImageXObject(stm).getBufferedImage();
+        } catch (IOException e) {
+            LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+            return false;
+        }
+        StyledDocument doc = (StyledDocument) text.getDocument();
+        MutableAttributeSet style = new SimpleAttributeSet();
+        StyleConstants.setIcon(style, new ImageIcon(img));
+
+        try {
+            doc.insertString(doc.getLength(), "<image>", style);
+            text.append("\n", null);
+            text.insertComponent(createSaveImageButton(img));
+            text.append("\n", null);
+        } catch (BadLocationException e) {
+            LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+            return false;
+        }
+        return true;
+
+    }
+
+    private JButton createSaveImageButton(final BufferedImage saveImg) {
+
+        final JButton saveImgButton = new JButton("Save Image");
+        saveImgButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                try {
+                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
+                    fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".jpg"));
+                    fileDialog.setFile("Untitled.jpg");
+                    fileDialog.setVisible(true);
+                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
+                } catch (HeadlessException | IOException e) {
+                    LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
+                }
+            }
+        });
+        return saveImgButton;
+
+    }
+
+    private void renderGenericContentStream(PdfStream stream) {
+        setTextEditableRoutine(true);
+        byte[] bb = null;
+        boolean containsInlineImages = false;
+        try {
+            bb = stream.getBytes();
+
+            final PdfTokenizer tokeniser =
+                    new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
+
+            final PdfCanvasParser ps = new PdfCanvasParser(tokeniser, new PdfResources());
+            final ArrayList<PdfObject> tokens = new ArrayList<>();
+            while (ps.parse(tokens).size() > 0) {
+                // operator is at the end
+                final String operator = (tokens.get(tokens.size() - 1)).toString();
+                // Inline images are parsed as stream + EI
+                if ("EI".equals(operator)
+                        && tokens.size() == INLINE_IMAGE_EXPECTED_TOKEN_COUNT
+                        && tokens.get(0) instanceof PdfStream) {
+                    containsInlineImages = true;
+                    appendInlineImage((PdfStream) tokens.get(0));
+                    continue;
+                }
+                // operands are in front of their operator
+                final StringBuilder operandssb = new StringBuilder();
+                for (int i = 0; i < tokens.size() - 1; i++) {
+                    append(operandssb, tokens.get(i));
+                }
+                final String operands = operandssb.toString();
+
+                final Map<Object, Object> attributes = attributemap.get(operator);
+                text.append(operands, matchingOperands ? attributes : null);
+                text.append(operator + "\n", attributes);
+            }
+
+            // don't allow editing streams with inline images, since we render them as
+            // something that isn't legal PDF syntax.
+            if(containsInlineImages) {
+                // TODO RES-660 Rewrite save logic so content streams including binary data
+                //  can still be edited normally
+                setTextEditableRoutine(false);
+            }
+        } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
+            LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
+            if (bb != null) {
+                text.setText(new String(bb));
+            }
+        } catch (IOException ignored) {
+        }
+        text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
+    }
+
+
 }
 
 class ColorTextPane extends JTextPane {
