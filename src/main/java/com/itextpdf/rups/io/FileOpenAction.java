@@ -58,7 +58,7 @@ public class FileOpenAction extends FileChooserAction {
      * @param parent   a parent Component for chooser dialog
      */
     public FileOpenAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, "Open", filter, parent);
+        super(observer, "Open New File", filter, parent);
     }
 
     @Override

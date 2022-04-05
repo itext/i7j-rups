@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups;
 
-import javax.swing.*;
+import javax.swing.WindowConstants;
 import java.io.File;
 
 /**

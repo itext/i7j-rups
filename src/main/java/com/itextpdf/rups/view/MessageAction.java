@@ -42,27 +42,31 @@
  */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.kernel.actions.data.ITextCoreProductData;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Displays a given message to the user using a {@link JOptionPane}.
+ */
 public class MessageAction implements ActionListener {
 
-    public void actionPerformed(ActionEvent evt) {
-        String message;
-        switch (evt.getActionCommand()) {
-            case RupsMenuBar.ABOUT:
-                message = "RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.";
-                break;
-            case RupsMenuBar.VERSION:
-                message = ITextCoreProductData.getInstance().getVersion();
-                break;
-            default:
-                message = "Unspecified message";
-        }
-        JOptionPane.showMessageDialog(null, message);
+    /**
+     * The message to eb displayed.
+     */
+    private String message;
+
+    /**
+     * Default constructor taking a string to display to the user.
+     *
+     * @param message the message to be displayed
+     */
+    public MessageAction(String message) {
+        this.message = message;
     }
 
+    @Override
+    public void actionPerformed(ActionEvent evt) {
+        JOptionPane.showMessageDialog(null, this.message);
+    }
 }

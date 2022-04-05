@@ -70,10 +70,10 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Controls the components that get their content from iText's PdfReader.

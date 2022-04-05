@@ -43,29 +43,15 @@
 package com.itextpdf.rups;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
-import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.view.RupsTabbedPane;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 public class Rups {
-
-    private RupsController controller;
-
-    private volatile CompareTool.CompareResult lastCompareResult = null;
-
-    protected Rups() {
-        this.controller = null;
-    }
-
-    protected void setController(RupsController controller) {
-        this.controller = controller;
-    }
 
     /**
      * Initializes the main components of the Rups application.
@@ -74,47 +60,44 @@ public class Rups {
      * @param onCloseOperation the close operation
      */
     public static void startNewApplication(final File f, final int onCloseOperation) {
-        final Rups rups = new Rups();
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new JFrame();
-                // defines the size and location
-                initFrameDim(frame);
-                RupsController controller = new RupsController(frame.getSize(), frame, false);
-                initApplication(frame, controller, onCloseOperation);
-                rups.setController(controller);
-                if (null != f && f.canRead()) {
-                    rups.loadDocumentFromFile(f, false);
-                }
-            }
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame();
+            setLookandFeel();
+            initApplication(frame, onCloseOperation);
         });
     }
 
-    public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.loadFile(f, readOnly);
+    static void setLookandFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            } catch (Exception ex) {
+                // WELP IDK
             }
-        });
+        }
     }
 
-    static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
-        // title bar
-        frame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
-        frame.setIconImages(FrameIconUtil.loadFrameIcons());
-        frame.setDefaultCloseOperation(onCloseOperation);
-        // the content
-        frame.setJMenuBar(controller.getMenuBar());
-        frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
-        frame.setVisible(true);
-    }
-
-    static void initFrameDim(JFrame frame) {
+    static void initApplication(JFrame frame, final int onCloseOperation) {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
         frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
         frame.setResizable(true);
+
+        // title bar
+        frame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion() + " - Research Edition");
+        frame.setIconImages(FrameIconUtil.loadFrameIcons());
+        frame.setDefaultCloseOperation(onCloseOperation);
+
+        RupsTabbedPane tabbedPane = new RupsTabbedPane(screen);
+
+        // menu bar
+        RupsController rupsController = new RupsController(tabbedPane);
+        frame.setJMenuBar(rupsController.getMenuBar());
+        // the content
+        frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+        frame.setVisible(true);
     }
 
 }

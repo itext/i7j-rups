@@ -42,12 +42,10 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.FileCompareAction;
-import com.itextpdf.rups.io.FileOpenAction;
-import com.itextpdf.rups.io.FileSaveAction;
+import com.itextpdf.rups.io.*;
 import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.PdfFile;
 
@@ -69,9 +67,17 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     public static final String FILE_MENU = "File";
     /**
+     * Caption for the Edit Menu.
+     */
+    public static final String EDIT_MENU = "Edit";
+    /**
+     * Caption for View Menu
+     */
+    public static final String VIEW_MENU = "View";
+    /**
      * Caption for "Open file".
      */
-    public static final String OPEN = "Open";
+    public static final String OPEN = "Open New File";
     /**
      * Caption for "Open in PDF Viewer".
      */
@@ -79,7 +85,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
     /**
      * Caption for "Close file".
      */
-    public static final String CLOSE = "Close";
+    public static final String CLOSE = "Close File";
     /**
      * Caption for "Save as..."
      */
@@ -112,6 +118,14 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     protected FileOpenAction fileOpenAction;
     /**
+     * The action needed to close a file/tab.
+     */
+    protected FileCloseAction fileCloseAction;
+    /**
+     * The action needed to open a file in the system viewer.
+     */
+    protected OpenInViewerAction openInViewerAction;
+    /**
      * The action needed to save a file.
      */
     protected FileSaveAction fileSaverAction;
@@ -124,47 +138,36 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 
     /**
      * Creates a JMenuBar.
-     *
-     * @param controller the controller to which this menu bar is added
      */
     public RupsMenuBar(RupsController controller) {
         this.controller = controller;
         items = new HashMap<>();
+
         fileOpenAction = new FileOpenAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+        fileCloseAction = new FileCloseAction(this.controller);
+        openInViewerAction = new OpenInViewerAction(this.controller);
         fileSaverAction = new FileSaveAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
         fileCompareAction = new FileCompareAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
-        MessageAction message = new MessageAction();
+
         JMenu file = new JMenu(FILE_MENU);
         addItem(file, OPEN, fileOpenAction, KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
-        addItem(file, CLOSE, new FileCloseAction(this.controller), KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         addItem(file, SAVE_AS, fileSaverAction, KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
-        addItem(file, COMPARE_WITH, fileCompareAction, KeyStroke.getKeyStroke('Q', KeyEvent.CTRL_DOWN_MASK));
         file.addSeparator();
-        addItem(file, OPENINVIEWER, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (!Desktop.isDesktopSupported()) {
-                    return;
-                }
-                try {
-                    PdfFile pdfFile = RupsMenuBar.this.controller.getPdfFile();
-                    if (pdfFile == null || pdfFile.getDirectory() == null) {
-                        return;
-                    }
-                    File myFile = new File(pdfFile.getDirectory(), pdfFile.getFilename());
-                    Desktop.getDesktop().open(myFile);
-                } catch (IOException ex) {
-                    // no application registered for PDFs
-                }
-            }
-        }, KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
-        addItem(file, NEW_INDIRECT, new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller), KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
+        addItem(file, CLOSE, fileCloseAction, KeyStroke.getKeyStroke('W', KeyEvent.CTRL_DOWN_MASK));
         add(file);
-        add(Box.createGlue());
+
+        addItem(file, COMPARE_WITH, fileCompareAction, KeyStroke.getKeyStroke('Q', KeyEvent.CTRL_DOWN_MASK));
+        addItem(file, NEW_INDIRECT, new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller), KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
+
+        JMenu view = new JMenu(VIEW_MENU);
+        addItem(view, OPENINVIEWER, openInViewerAction, KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
+        add(view);
+
         JMenu help = new JMenu(HELP_MENU);
-        addItem(help, ABOUT, message);
-        addItem(help, VERSION, message);
+        addItem(help, ABOUT, new MessageAction("RUPS is a tool by iText Group NV.\nIt uses iText, a Free Java-PDF Library.\nVisit http://www.itextpdf.com/ for more info.\n\nThis experimental build is the Research Edition of RUPS.\n Functionality may break or behave unexpectedly.\n If so, please notify the Research Team at #research on Slack."));
+        addItem(help, VERSION, new MessageAction(ITextCoreProductData.getInstance().getVersion() + " - Research Edition"));
         add(help);
-        enableItems(false);
+//        enableItems(false);
     }
 
     /**
