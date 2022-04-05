@@ -11,8 +11,8 @@ import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.contextmenu.SaveImageAction;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -24,10 +24,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -173,22 +170,8 @@ public class ContentStreamSyntaxDocument extends DefaultStyledDocument {
     }
 
     protected static JButton createSaveImageButton(final BufferedImage saveImg) {
-
         final JButton saveImgButton = new JButton("Save Image");
-        saveImgButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
-                try {
-                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-                    fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".jpg"));
-                    fileDialog.setFile("Untitled.jpg");
-                    fileDialog.setVisible(true);
-                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
-                } catch (HeadlessException | IOException e) {
-                    LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
-                }
-            }
-        });
+        saveImgButton.addActionListener(new SaveImageAction("Save image", saveImgButton, saveImg));
         return saveImgButton;
     }
 
