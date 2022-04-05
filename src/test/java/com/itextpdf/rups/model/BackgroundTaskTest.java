@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.rups.mock.MockedBackgroundTask;
 import com.itextpdf.test.annotations.type.UnitTest;
 import org.junit.Assert;
 import org.junit.Test;

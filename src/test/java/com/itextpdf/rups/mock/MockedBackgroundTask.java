@@ -40,7 +40,9 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.mock;
+
+import com.itextpdf.rups.model.BackgroundTask;
 
 public class MockedBackgroundTask extends BackgroundTask {
 

@@ -49,34 +49,33 @@ import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileCompareAction;
 import com.itextpdf.rups.io.FileOpenAction;
 import com.itextpdf.rups.io.FileSaveAction;
+import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
-import com.itextpdf.rups.model.PdfFile;
 
 import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-import java.awt.Desktop;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
 public class RupsMenuBar extends JMenuBar implements Observer {
-
-    /**
-     * The RupsController object.
-     */
-    protected RupsController controller;
     /**
      * The action needed to open a file.
      */
     protected FileOpenAction fileOpenAction;
+    /**
+     * The action needed to close a file/tab.
+     */
+    protected FileCloseAction fileCloseAction;
+    /**
+     * The action needed to open a file in the system viewer.
+     */
+    protected OpenInViewerAction openInViewerAction;
     /**
      * The action needed to save a file.
      */
@@ -92,36 +91,27 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 
     /**
      * Creates a JMenuBar.
-     *
-     * @param controller the controller to which this menu bar is added
      */
     public RupsMenuBar(RupsController controller) {
-        this.controller = controller;
         items = new HashMap<>();
-        fileOpenAction = new FileOpenAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
-        fileSaverAction = new FileSaveAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+
+        fileOpenAction = new FileOpenAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
+        fileCloseAction = new FileCloseAction(controller);
+        openInViewerAction = new OpenInViewerAction(controller);
+        fileSaverAction = new FileSaveAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
         fileCompareAction =
-                new FileCompareAction(this.controller, PdfFilter.INSTANCE, this.controller.getMasterComponent());
+                new FileCompareAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
-        addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(this.controller),
+        addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(controller),
                 KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_SAVE_AS.getString(), fileSaverAction,
                 KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_COMPARE_WITH.getString(), fileCompareAction,
                 KeyStroke.getKeyStroke('Q', InputEvent.CTRL_DOWN_MASK));
         file.addSeparator();
-        addItem(file, Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), (ActionEvent e) -> {
-            final PdfFile pdfFile = controller.getPdfFile();
-            if (Desktop.isDesktopSupported() && pdfFile != null && pdfFile.getDirectory() != null) {
-                try {
-                    Desktop.getDesktop().open(new File(pdfFile.getDirectory(), pdfFile.getFilename()));
-                } catch (IOException ex) {
-                    // no application registered for PDFs
-                }
-            }
-        }, KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
+        addItem(file, Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), openInViewerAction, KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_NEW_INDIRECT.getString(),
                 new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller),
                 KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
@@ -143,10 +133,11 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         if (observable instanceof RupsController && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
+                case RupsEvent.ALL_FILES_CLOSED:
                     enableItems(false);
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
+                case RupsEvent.OPEN_FILE_EVENT:
                     enableItems(true);
                     break;
                 case RupsEvent.ROOT_NODE_CLICKED_EVENT:
@@ -182,7 +173,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      *
      * @param enabled true for enabling; false for disabling
      */
-    protected void enableItems(boolean enabled) {
+    public void enableItems(boolean enabled) {
         enableItem(Language.MENU_BAR_CLOSE.getString(), enabled);
         enableItem(Language.MENU_BAR_SAVE_AS.getString(), enabled);
         enableItem(Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), enabled);

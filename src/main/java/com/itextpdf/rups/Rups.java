@@ -43,30 +43,23 @@
 package com.itextpdf.rups;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
-import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.view.Language;
+import com.itextpdf.rups.view.RupsDropTarget;
+import com.itextpdf.rups.view.RupsMenuBar;
+import com.itextpdf.rups.view.RupsTabbedPane;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 public class Rups {
-
-    private RupsController controller;
-
-    private volatile CompareTool.CompareResult lastCompareResult = null;
-
-    protected Rups() {
-        this.controller = null;
-    }
-
-    protected void setController(RupsController controller) {
-        this.controller = controller;
-    }
 
     /**
      * Initializes the main components of the Rups application.
@@ -75,39 +68,54 @@ public class Rups {
      * @param onCloseOperation the close operation
      */
     public static void startNewApplication(final File f, final int onCloseOperation) {
-        final Rups rups = new Rups();
         SwingUtilities.invokeLater(() -> {
-            final JFrame frame = new JFrame();
-            initFrameDim(frame);
-            final RupsController controller = new RupsController(frame.getSize(), frame, false);
-            initApplication(frame, controller, onCloseOperation);
-            rups.setController(controller);
-            if (null != f && f.canRead()) {
-                rups.loadDocumentFromFile(f, false);
+            setLookandFeel();
+            IRupsController rupsController = initApplication(new JFrame(), onCloseOperation);
+            if ( f != null ) {
+                loadDocumentFromFile(rupsController, f);
             }
         });
     }
 
-    public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        SwingUtilities.invokeLater(() -> controller.loadFile(f, readOnly));
+    static void loadDocumentFromFile(IRupsController rupsController, File f) {
+        SwingUtilities.invokeLater(() -> rupsController.openNewFile(f));
     }
 
-    static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
+    static void setLookandFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            } catch (Exception ex) {
+                // WELP IDK
+            }
+        }
+    }
+
+    static IRupsController initApplication(JFrame frame, final int onCloseOperation) {
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
+        frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
+        frame.setResizable(true);
+
         // title bar
         frame.setTitle(
                 String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion()));
         frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(onCloseOperation);
-        // the content
-        frame.setJMenuBar(controller.getMenuBar());
-        frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
-        frame.setVisible(true);
-    }
 
-    static void initFrameDim(JFrame frame) {
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
-        frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
-        frame.setResizable(true);
+        final RupsTabbedPane rupsTabbedPane = new RupsTabbedPane();
+        final RupsController rupsController = new RupsController(screen, rupsTabbedPane);
+        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
+        rupsController.addObserver(rupsMenuBar);
+
+        frame.setDropTarget(new RupsDropTarget(rupsController));
+        frame.setJMenuBar(rupsMenuBar);
+
+        frame.getContentPane().add(rupsController.getMasterComponent(), BorderLayout.CENTER);
+        frame.setVisible(true);
+
+        return rupsController;
     }
 }
