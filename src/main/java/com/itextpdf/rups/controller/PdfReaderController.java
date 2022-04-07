@@ -60,6 +60,7 @@ import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.rups.view.itext.*;
+import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
