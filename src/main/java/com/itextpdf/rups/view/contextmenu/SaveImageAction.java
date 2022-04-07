@@ -64,7 +64,7 @@ import java.io.ObjectOutputStream;
 public final class SaveImageAction extends AbstractRupsAction {
     private transient BufferedImage saveImg;
 
-     /**
+    /**
      * Create a save image action with a given name, invoker and target image.
      *
      * @param name the name of the action

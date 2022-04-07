@@ -42,23 +42,20 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.io.source.PdfTokenizer;
-import com.itextpdf.io.source.RandomAccessFileOrArray;
-import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfResources;
 import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
+import com.itextpdf.rups.view.contextmenu.SaveImageAction;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
+import com.itextpdf.rups.view.itext.contentstream.ContentStreamWriter;
+import com.itextpdf.rups.view.itext.contentstream.StyledSyntaxDocument;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.swing.*;
@@ -74,30 +71,25 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.Observable;
 import java.util.Observer;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
+    private static final int MAX_NUMBER_OF_EDITS = 8192;
+
+    private static Method pdfStreamGetInputStreamMethod;
+
     /**
      * The text pane with the content stream.
      */
-    protected final JTextPane text;
-
-    /**
-     * Highlight operands according to their operator
-     */
-    protected static boolean matchingOperands = false;
-
-    /**
-     * Factory that allows you to create RandomAccessSource files
-     */
-    protected static final RandomAccessSourceFactory RASF = new RandomAccessSourceFactory();
+    private final JSyntaxPane text;
 
     protected StreamPanelContextMenu popupMenu;
 
@@ -105,12 +97,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
     protected UndoManager manager;
 
-    private static final int MAX_NUMBER_OF_EDITS = 8192;
-
     //Todo: Remove that field after proper application structure will be implemented.
     private PdfReaderController controller;
-
-    private static Method pdfStreamGetInputStreamMethod;
 
     static {
         try {
@@ -130,8 +118,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
      */
     public SyntaxHighlightedStreamPane(PdfReaderController controller, boolean pluginMode) {
         super();
-        text = new JTextPane();
-        text.setDocument(new ContentStreamSyntaxDocument());
+        this.text = new JSyntaxPane();
+        ToolTipManager.sharedInstance().registerComponent(text);
         setViewportView(text);
         this.controller = controller;
 
@@ -189,7 +177,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     try {
                         doc.insertString(doc.getLength(), "ignored text", style);
                         doc.insertString(doc.getLength(), "\n", SimpleAttributeSet.EMPTY);
-                        text.insertComponent(ContentStreamSyntaxDocument.createSaveImageButton(img));
+                        text.insertComponent(SaveImageAction.createSaveImageButton(img));
                     } catch (BadLocationException e) {
                         LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
                     }
@@ -225,8 +213,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         int sizeEst = text.getText().length();
         ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);
         try {
-            ((ContentStreamSyntaxDocument) text.getDocument()).write(baos);
-        } catch (IOException | BadLocationException e) {
+            new ContentStreamWriter(baos).write(text.getDocument());
+        } catch (IOException e) {
             LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
         }
         ((PdfStream) target.getPdfObject()).setData(baos.toByteArray());
@@ -259,29 +247,40 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     }
 
     private void renderGenericContentStream(PdfStream stream) {
+        StyledSyntaxDocument doc = (StyledSyntaxDocument) text.getDocument();
         setTextEditableRoutine(true);
+
         byte[] bb = null;
         try {
             bb = stream.getBytes();
-
-            final PdfTokenizer tokeniser =
-                    new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
-
-            final PdfCanvasParser ps = new PdfCanvasParser(tokeniser, new PdfResources());
-            final ArrayList<PdfObject> tokens = new ArrayList<>();
-            while (ps.parse(tokens).size() > 0) {
-                ((ContentStreamSyntaxDocument) text.getDocument()).appendGraphicsOperator(tokens, matchingOperands);
-            }
+            doc.processContentStream(bb);
         } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
             LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
             if (bb != null) {
-                text.setText(new String(bb));
+                text.setText(new String(bb, StandardCharsets.ISO_8859_1));
             }
-        } catch (IOException ignored) {
         }
         text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
     }
 
+    private static final class JSyntaxPane extends JTextPane {
+
+        JSyntaxPane() {
+            super(new StyledSyntaxDocument());
+        }
+
+        StyledSyntaxDocument getStyledSyntaxDocument() {
+            // can't just override getDocument() because the superclass
+            // constructor relies on it
+            return (StyledSyntaxDocument) super.getDocument();
+        }
+
+        @Override
+        public String getToolTipText(MouseEvent ev) {
+            String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
+            return toolTip == null ? super.getToolTipText(ev) : toolTip;
+        }
+    }
 
 }
 
