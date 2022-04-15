@@ -49,7 +49,6 @@ import java.awt.event.MouseListener;
 
 /**
  * Class that keeps track of whether the last action was a keyboard or a mouse input.
- * @author Michael Demey
  */
 public class PdfTreeNavigationListener implements KeyListener, MouseListener {
 

@@ -50,12 +50,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FrameIconUtil {
+
+    private static final String LOGO_ICON = "logo.png";
+
     private FrameIconUtil() {
     }
 
     public static List<Image> loadFrameIcons() {
         List<Image> images = new ArrayList<>();
-        Image image = Toolkit.getDefaultToolkit().getImage(Rups.class.getResource("logo.png"));
+        final Image image = Toolkit.getDefaultToolkit().getImage(Rups.class.getResource(LOGO_ICON));
         // Add several scaled instances of the image to let the platform decide which ones to use
         for (int i = 16; i <= 1024; i *= 2) {
             images.add(image.getScaledInstance(i, i, Image.SCALE_SMOOTH));

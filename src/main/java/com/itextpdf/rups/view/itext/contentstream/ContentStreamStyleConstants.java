@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.view.itext.contentstream;
 
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
 
 import javax.swing.ImageIcon;
@@ -52,40 +53,12 @@ import javax.swing.text.StyleConstants;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
  * Constants for dealing with markup in content streams.
  */
 public final class ContentStreamStyleConstants {
-
-    /**
-     * Type-safe attribute markers for debugging convenience.
-     */
-    public static final class Attribute {
-
-        private final String name;
-
-        /**
-         * Creates a new {@link Attribute} with the specified
-         * diagnostic {@code name}.
-         *
-         * @param name the name of the new {@link Attribute}
-         */
-        Attribute(String name) {
-            this.name = name;
-        }
-
-        /**
-         * Return the {@code name} of the attribute.
-         *
-         * @return the attribute's {@code name}
-         */
-        public String toString() {
-            return this.name;
-        }
-    }
 
     /**
      * Binary content attribute marker.
@@ -123,24 +96,19 @@ public final class ContentStreamStyleConstants {
      */
     static final AttributeSet DISPLAY_ONLY_ATTRS;
 
-    static final String TOOLTIP_HEX = "Hex-editable binary content";
-    static final String TOOLTIP_ENCODING = "Encoding: ";
-
-    private static final String INLINE_IMAGE_ALT = "Inline image: %d x %d";
-
     static {
-        MutableAttributeSet mas = new SimpleAttributeSet();
+        final MutableAttributeSet mas = new SimpleAttributeSet();
         mas.addAttribute(StyleConstants.Foreground, Color.BLACK);
         mas.addAttribute(StyleConstants.Background, Color.WHITE);
         DEFAULT_ATTRS = mas;
 
-        MutableAttributeSet editableHexContent = new SimpleAttributeSet();
+        final MutableAttributeSet editableHexContent = new SimpleAttributeSet();
         editableHexContent.addAttribute(StyleConstants.Underline, Boolean.TRUE);
         editableHexContent.addAttribute(StyleConstants.Foreground, Color.GRAY);
         editableHexContent.addAttribute(StyleConstants.FontFamily, "Monospaced");
         EDITABLE_HEX_CONTENT_ATTRS = editableHexContent;
 
-        MutableAttributeSet attrs = new SimpleAttributeSet();
+        final MutableAttributeSet attrs = new SimpleAttributeSet();
         attrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, new byte[0]);
         DISPLAY_ONLY_ATTRS = attrs;
     }
@@ -154,17 +122,17 @@ public final class ContentStreamStyleConstants {
      * This could be read from a configuration file, but is hard coded for now
      */
     static Map<String, AttributeSet> initAttributes() {
-        Map<String, AttributeSet> attributeMap = new HashMap<>();
+        final Map<String, AttributeSet> attributeMap = new HashMap<>();
 
         addPathOps(attributeMap);
         addGraphicsOps(attributeMap);
 
-        MutableAttributeSet xObject = new SimpleAttributeSet();
+        final MutableAttributeSet xObject = new SimpleAttributeSet();
         xObject.addAttribute(StyleConstants.Foreground, Color.BLACK);
         xObject.addAttribute(StyleConstants.Background, Color.YELLOW);
         attributeMap.put("Do", xObject);
 
-        MutableAttributeSet inlineImage = new SimpleAttributeSet();
+        final MutableAttributeSet inlineImage = new SimpleAttributeSet();
         inlineImage.addAttribute(StyleConstants.Foreground, Color.BLACK);
         inlineImage.addAttribute(StyleConstants.Background, Color.YELLOW);
         inlineImage.addAttribute(StyleConstants.Italic, Boolean.TRUE);
@@ -173,7 +141,7 @@ public final class ContentStreamStyleConstants {
 
         addTextOps(attributeMap);
 
-        MutableAttributeSet markedContent = new SimpleAttributeSet();
+        final MutableAttributeSet markedContent = new SimpleAttributeSet();
         markedContent.addAttribute(StyleConstants.Foreground, Color.MAGENTA);
         markedContent.addAttribute(StyleConstants.Background, Color.WHITE);
         attributeMap.put("BMC", markedContent);
@@ -183,8 +151,8 @@ public final class ContentStreamStyleConstants {
     }
 
     private static void addPathOps(Map<String, AttributeSet> attributeMap) {
-        MutableAttributeSet opConstructionPainting = new SimpleAttributeSet();
-        Color darkorange = new Color(255, 140, 0);
+        final MutableAttributeSet opConstructionPainting = new SimpleAttributeSet();
+        final Color darkorange = new Color(255, 140, 0);
         opConstructionPainting.addAttribute(StyleConstants.Foreground, darkorange);
         opConstructionPainting.addAttribute(StyleConstants.Background, Color.WHITE);
         attributeMap.put("m", opConstructionPainting);
@@ -209,14 +177,14 @@ public final class ContentStreamStyleConstants {
     }
 
     private static void addTextOps(Map<String, AttributeSet> attributeMap) {
-        MutableAttributeSet textdelim = new SimpleAttributeSet();
+        final MutableAttributeSet textdelim = new SimpleAttributeSet();
         textdelim.addAttribute(StyleConstants.Foreground, Color.WHITE);
         textdelim.addAttribute(StyleConstants.Background, Color.BLUE);
         textdelim.addAttribute(StyleConstants.Bold, Boolean.TRUE);
         attributeMap.put("BT", textdelim);
         attributeMap.put("ET", textdelim);
 
-        MutableAttributeSet text = new SimpleAttributeSet();
+        final MutableAttributeSet text = new SimpleAttributeSet();
         text.addAttribute(StyleConstants.Foreground, Color.BLUE);
         text.addAttribute(StyleConstants.Background, Color.WHITE);
         attributeMap.put("ID", text);
@@ -238,14 +206,14 @@ public final class ContentStreamStyleConstants {
     }
 
     private static void addGraphicsOps(Map<String, AttributeSet> attributeMap) {
-        MutableAttributeSet graphicsdelim = new SimpleAttributeSet();
+        final MutableAttributeSet graphicsdelim = new SimpleAttributeSet();
         graphicsdelim.addAttribute(StyleConstants.Foreground, Color.WHITE);
         graphicsdelim.addAttribute(StyleConstants.Background, Color.RED);
         graphicsdelim.addAttribute(StyleConstants.Bold, Boolean.TRUE);
         attributeMap.put("q", graphicsdelim);
         attributeMap.put("Q", graphicsdelim);
 
-        MutableAttributeSet graphics = new SimpleAttributeSet();
+        final MutableAttributeSet graphics = new SimpleAttributeSet();
         graphics.addAttribute(StyleConstants.Foreground, Color.RED);
         graphics.addAttribute(StyleConstants.Background, Color.WHITE);
         attributeMap.put("w", graphics);
@@ -273,22 +241,51 @@ public final class ContentStreamStyleConstants {
     }
 
     public static AttributeSet getStyleAttributesFor(final String operator) {
-        AttributeSet attr = ATTRIBUTE_MAP.get(operator);
+        final AttributeSet attr = ATTRIBUTE_MAP.get(operator);
         return attr == null ? DEFAULT_ATTRS : attr;
     }
 
     public static AttributeSet getImageAttributes(final BufferedImage img, final byte[] rawBytes) {
-        MutableAttributeSet imageAttrs = new SimpleAttributeSet();
-        String alt = String.format(Locale.ROOT, INLINE_IMAGE_ALT, img.getWidth(), img.getHeight());
+        final MutableAttributeSet imageAttrs = new SimpleAttributeSet();
+        final String alt = String.format(
+                Language.getLocale(), Language.INLINE_IMAGE_ALT.getString(), img.getWidth(), img.getHeight()
+        );
         StyleConstants.setIcon(imageAttrs, new ImageIcon(img, alt));
         imageAttrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, rawBytes);
         return imageAttrs;
     }
 
     public static AttributeSet getImageSaveButtonAttributes(final BufferedImage img) {
-        MutableAttributeSet buttonAttrs = new SimpleAttributeSet();
+        final MutableAttributeSet buttonAttrs = new SimpleAttributeSet();
         StyleConstants.setComponent(buttonAttrs, SaveImageAction.createSaveImageButton(img));
         buttonAttrs.addAttributes(DISPLAY_ONLY_ATTRS);
         return buttonAttrs;
+    }
+
+    /**
+     * Type-safe attribute markers for debugging convenience.
+     */
+    public static final class Attribute {
+
+        private final String name;
+
+        /**
+         * Creates a new {@link Attribute} with the specified
+         * diagnostic {@code name}.
+         *
+         * @param name the name of the new {@link Attribute}
+         */
+        Attribute(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Return the {@code name} of the attribute.
+         *
+         * @return the attribute's {@code name}
+         */
+        public String toString() {
+            return this.name;
+        }
     }
 }

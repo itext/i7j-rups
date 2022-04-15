@@ -47,7 +47,8 @@ import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.MouseEvent;
@@ -65,9 +66,9 @@ public class PdfTreeContextMenuMouseListener extends ContextMenuMouseListener {
 
     @Override
     public boolean showPopupHook(MouseEvent event) {
-        PdfTree tree = (PdfTree) component;
+        final PdfTree tree = (PdfTree) component;
 
-        int row = tree.getClosestRowForLocation(event.getX(), event.getY());
+        final int row = tree.getClosestRowForLocation(event.getX(), event.getY());
         tree.setSelectionRow(row);
         TreeSelectionModel selectionModel = ((PdfTree) component).getSelectionModel();
         TreePath[] paths = selectionModel.getSelectionPaths();

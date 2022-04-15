@@ -43,6 +43,7 @@
 package com.itextpdf.rups.view.itext.treenodes;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.rups.view.Language;
 
 /**
  * A special treenode that will be used for the trailer dictionary
@@ -50,12 +51,14 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
  */
 public class PdfTrailerTreeNode extends PdfObjectTreeNode {
 
+    private static final String PDF_ICON = "pdf.png";
+
     /**
      * Constructs a simple text tree node.
      */
     public PdfTrailerTreeNode() {
-        super("pdf.png", null);
-        setUserObject("Open a PDF file");
+        super(PDF_ICON, null);
+        setUserObject(Language.OPEN_PDF.getString());
     }
 
     /**

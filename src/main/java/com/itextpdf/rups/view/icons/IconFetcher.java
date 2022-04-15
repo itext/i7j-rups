@@ -43,9 +43,10 @@
 package com.itextpdf.rups.view.icons;
 
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import java.util.HashMap;
 
 /**
@@ -56,12 +57,12 @@ public class IconFetcher {
     /**
      * Cache with icons.
      */
-    protected static HashMap<String, Icon> cache = new HashMap<String, Icon>();
+    private static final HashMap<String, Icon> cache = new HashMap<>();
 
     /**
      * Gets an Icon with a specific name.
      *
-     * @param    filename    the filename of the Icon.
+     * @param filename the filename of the Icon.
      * @return an Icon
      */
     public static Icon getIcon(String filename) {
@@ -74,7 +75,9 @@ public class IconFetcher {
                 icon = new ImageIcon(IconFetcher.class.getResource(filename));
                 cache.put(filename, icon);
             } catch (Exception e) {
-                LoggerHelper.error(LoggerMessages.FINDING_ICON_ERROR + filename, e, IconFetcher.class);
+                LoggerHelper.error(
+                        String.format(Language.ERROR_CANNOT_FIND_FILE.getString(), filename), e, IconFetcher.class
+                );
                 return null;
             }
         }

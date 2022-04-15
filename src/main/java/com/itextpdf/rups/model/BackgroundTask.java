@@ -42,10 +42,10 @@
  */
 package com.itextpdf.rups.model;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 /**
- * Allows you to perform long lasting tasks in background.
+ * Allows you to perform long-lasting tasks in background.
  * If we ever move to Java 6, we should use the SwingWorker class
  * (included in the JDK) instead of this custom Event Dispatching
  * code.
@@ -53,17 +53,9 @@ import javax.swing.*;
 public abstract class BackgroundTask {
 
     /**
-     * Inner class that holds the reference to the thread.
+     * A wrapper for the tread that executes a time-consuming task.
      */
-    private static class ThreadWrapper {
-        private Thread thread;
-        ThreadWrapper(Thread t) { thread = t; }
-        synchronized Thread get() { return thread; }
-        synchronized void clear() { thread = null; }
-    }
-
-    /** A wrapper for the tread that executes a time-consuming task. */
-    private ThreadWrapper thread;
+    private final ThreadWrapper thread;
 
     /**
      * Starts a thread.
@@ -71,23 +63,14 @@ public abstract class BackgroundTask {
      * finally calls the finish().
      */
     public BackgroundTask() {
-        final Runnable doFinished = new Runnable() {
-            public void run() {
-                finished();
-            }
+        final Runnable doFinished = this::finished;
+
+        final Runnable doConstruct = () -> {
+            doTask();
+            SwingUtilities.invokeLater(doFinished);
         };
 
-        Runnable doConstruct = new Runnable() {
-            public void run() {
-                try {
-                    doTask();
-                } finally {
-                    thread.clear();
-                }
-                SwingUtilities.invokeLater(doFinished);
-            }
-        };
-        Thread t = new Thread(doConstruct);
+        final Thread t = new Thread(doConstruct);
         thread = new ThreadWrapper(t);
     }
 
@@ -100,7 +83,7 @@ public abstract class BackgroundTask {
      * Starts the thread.
      */
     public void start() {
-        Thread t = thread.get();
+        final Thread t = thread.get();
         if (t != null) {
             t.start();
         }
@@ -119,20 +102,25 @@ public abstract class BackgroundTask {
     }
 
     /**
-     * Forces the thread to stop what it's doing.
-     */
-    public void interrupt() {
-        Thread t = thread.get();
-        if (t != null) {
-            t.interrupt();
-        }
-        thread.clear();
-    }
-
-    /**
      * Called on the event dispatching thread once the
      * construct method has finished its task.
      */
-    public void finished() {
+    public abstract void finished();
+
+    /**
+     * Inner class that holds the reference to the thread.
+     */
+    private static class ThreadWrapper {
+        private final Thread thread;
+
+        ThreadWrapper(Thread t) {
+            thread = t;
+        }
+
+        Thread get() {
+            synchronized (this) {
+                return thread;
+            }
+        }
     }
 }

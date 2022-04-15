@@ -53,7 +53,7 @@ public class SaveToPdfStreamJTextPaneAction extends AbstractRupsAction {
     }
 
     public void actionPerformed(ActionEvent event) {
-        SyntaxHighlightedStreamPane pane = (SyntaxHighlightedStreamPane) invoker;
+        final SyntaxHighlightedStreamPane pane = (SyntaxHighlightedStreamPane) invoker;
         pane.saveToTarget();
     }
 }

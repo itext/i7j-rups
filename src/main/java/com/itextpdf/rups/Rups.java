@@ -45,13 +45,14 @@ package com.itextpdf.rups;
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 public class Rups {
 
@@ -75,33 +76,26 @@ public class Rups {
      */
     public static void startNewApplication(final File f, final int onCloseOperation) {
         final Rups rups = new Rups();
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new JFrame();
-                // defines the size and location
-                initFrameDim(frame);
-                RupsController controller = new RupsController(frame.getSize(), frame, false);
-                initApplication(frame, controller, onCloseOperation);
-                rups.setController(controller);
-                if (null != f && f.canRead()) {
-                    rups.loadDocumentFromFile(f, false);
-                }
+        SwingUtilities.invokeLater(() -> {
+            final JFrame frame = new JFrame();
+            initFrameDim(frame);
+            final RupsController controller = new RupsController(frame.getSize(), frame, false);
+            initApplication(frame, controller, onCloseOperation);
+            rups.setController(controller);
+            if (null != f && f.canRead()) {
+                rups.loadDocumentFromFile(f, false);
             }
         });
     }
 
     public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.loadFile(f, readOnly);
-            }
-        });
+        SwingUtilities.invokeLater(() -> controller.loadFile(f, readOnly));
     }
 
     static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
         // title bar
-        frame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
+        frame.setTitle(
+                String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion()));
         frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(onCloseOperation);
         // the content
@@ -116,5 +110,4 @@ public class Rups {
         frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
         frame.setResizable(true);
     }
-
 }

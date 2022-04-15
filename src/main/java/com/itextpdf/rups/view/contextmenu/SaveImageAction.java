@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -62,12 +62,14 @@ import java.io.ObjectOutputStream;
  * Action to save an image to the filesystem.
  */
 public final class SaveImageAction extends AbstractRupsAction {
+    static final String IMAGE_FORMAT = "png";
+
     private transient BufferedImage saveImg;
 
     /**
      * Create a save image action with a given name, invoker and target image.
      *
-     * @param name the name of the action
+     * @param name    the name of the action
      * @param invoker the action's invoking component
      * @param saveImg the image to save
      */
@@ -83,8 +85,9 @@ public final class SaveImageAction extends AbstractRupsAction {
      * @return {@link JButton} to perform the save action
      */
     public static JButton createSaveImageButton(final BufferedImage saveImg) {
-        final JButton saveImgButton = new JButton("Save Image");
-        saveImgButton.addActionListener(new SaveImageAction("Save image", saveImgButton, saveImg));
+        final String saveImageString = Language.SAVE_IMAGE.getString();
+        final JButton saveImgButton = new JButton(saveImageString);
+        saveImgButton.addActionListener(new SaveImageAction(saveImageString, saveImgButton, saveImg));
         return saveImgButton;
     }
 
@@ -94,19 +97,22 @@ public final class SaveImageAction extends AbstractRupsAction {
     @Override
     public void actionPerformed(ActionEvent ev) {
         try {
-            final FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-            fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".png"));
-            fileDialog.setFile("Untitled.png");
+            final String file = "Untitled.png";
+            final String suffix = ".png";
+
+            final FileDialog fileDialog = new FileDialog(new Frame(), Language.SAVE.getString(), FileDialog.SAVE);
+            fileDialog.setFilenameFilter((dir, name) -> name.endsWith(suffix));
+            fileDialog.setFile(file);
             fileDialog.setVisible(true);
-            ImageIO.write(saveImg, "png", new File(fileDialog.getDirectory() + fileDialog.getFile()));
+            ImageIO.write(saveImg, IMAGE_FORMAT, new File(fileDialog.getDirectory() + fileDialog.getFile()));
         } catch (HeadlessException | IOException e) {
-            LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
+            LoggerHelper.error(Language.ERROR_PARSING_IMAGE.getString(), e, getClass());
         }
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        ImageIO.write(saveImg, "png", out);
+        ImageIO.write(saveImg, IMAGE_FORMAT, out);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {

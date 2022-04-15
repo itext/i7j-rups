@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import javax.swing.*;
+import javax.swing.JButton;
 
 /**
  * JButton with an Icon that performs an Action if you push it.
@@ -53,7 +53,7 @@ public class IconButton extends JButton {
      * Creates a button with an Icon that performs an
      * action when you push it.
      *
-     * @param listener the icon actionlistener
+     * @param listener the icon ActionListener
      */
     public IconButton(IconActionListener listener) {
         super(listener.getIcon());

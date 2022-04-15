@@ -42,8 +42,8 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTextPane;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 /**
@@ -53,10 +53,6 @@ import java.awt.event.ActionEvent;
  */
 
 public class CopyToClipboardAction extends AbstractRupsAction {
-
-    public CopyToClipboardAction(String name) {
-        super(name);
-    }
 
     public CopyToClipboardAction(String name, Component invoker) {
         super(name, invoker);

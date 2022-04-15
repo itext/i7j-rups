@@ -52,20 +52,20 @@ public interface JTableAutoModelInterface {
      * @return int the number of columns
      * @see javax.swing.table.TableModel#getColumnCount()
      */
-    public int getColumnCount();
+    int getColumnCount();
 
     /**
      * @return int the number of rows
      * @see javax.swing.table.TableModel#getRowCount()
      */
-    public int getRowCount();
+    int getRowCount();
 
     /**
      * @param columnIndex a column number.
      * @return the name of the column
      * @see javax.swing.table.AbstractTableModel#getColumnName(int)
      */
-    public String getColumnName(int columnIndex);
+    String getColumnName(int columnIndex);
 
     /**
      * @param rowIndex    int   a row number
@@ -73,5 +73,5 @@ public interface JTableAutoModelInterface {
      * @return Object    an object corresponding with a cell in the table
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
-    public Object getValueAt(int rowIndex, int columnIndex);
+    Object getValueAt(int rowIndex, int columnIndex);
 }

@@ -42,28 +42,40 @@
  */
 package com.itextpdf.rups.model;
 
-import javax.swing.*;
-import java.awt.*;
+import com.itextpdf.rups.view.Language;
+
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+import javax.swing.UIManager;
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.WindowEvent;
 
 /**
  * An informational dialog window showing the progress of a certain action.
  */
-public class ProgressDialog extends JDialog {
+public final class ProgressDialog extends JDialog {
     /**
      * label showing the message describing what's in progress.
      */
-    protected JLabel message;
+    private final JLabel message;
+
     /**
      * the progress bar
      */
-    protected JProgressBar progress;
+    private final JProgressBar progress;
+
     /**
      * the icon used for this dialog box.
      */
     public static final JLabel INFO = new JLabel(UIManager.getIcon("OptionPane.informationIcon"));
 
-    private boolean pluginMode;
+    private final boolean pluginMode;
 
     /**
      * Creates a Progress frame displaying a certain message
@@ -77,13 +89,13 @@ public class ProgressDialog extends JDialog {
     public ProgressDialog(Component parent, String msg, Frame frame, boolean pluginMode) {
         super(frame, !pluginMode);
         this.pluginMode = pluginMode;
-        this.setTitle("Progress...");
+        this.setTitle(Language.DIALOG_PROGRESS.getString());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(300, 100);
         this.setLocationRelativeTo(parent);
 
         setLayout(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
+        final GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridheight = 2;
@@ -101,7 +113,7 @@ public class ProgressDialog extends JDialog {
 
     @Override
     public void dispose() {
-        Window frame = getOwner();
+        final Window frame = getOwner();
         super.dispose();
         if (!pluginMode) {
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));

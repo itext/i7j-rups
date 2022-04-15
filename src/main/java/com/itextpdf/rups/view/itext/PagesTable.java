@@ -48,6 +48,7 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfPageTreeNode;
@@ -55,7 +56,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
 import com.itextpdf.rups.view.models.JTableAutoModelInterface;
 
-import javax.swing.*;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -71,7 +72,8 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
     /**
      * A list with page nodes.
      */
-    protected ArrayList<PdfPageTreeNode> list = new ArrayList<PdfPageTreeNode>();
+    private ArrayList<PdfPageTreeNode> list = new ArrayList<>();
+
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
@@ -107,19 +109,21 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
                     TreeNodeFactory factory = loader.getNodes();
                     PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
                     PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                    Enumeration<PdfPageTreeNode> p = new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
+                    final Enumeration<PdfPageTreeNode> p =
+                            new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
                     PdfPageTreeNode child;
-                    StringBuffer buf;
+                    final StringBuilder stringBuilder = new StringBuilder();
                     while (p.hasMoreElements()) {
                         child = p.nextElement();
-                        buf = new StringBuffer("Page ");
-                        buf.append(++i);
+                        stringBuilder.setLength(0);
+                        i++;
+                        stringBuilder.append(String.format(Language.PAGE_NUMBER.getString(), i));
                         if (pageLabels != null) {
-                            buf.append(" ( ");
-                            buf.append(pageLabels[i - 1]);
-                            buf.append(" )");
+                            stringBuilder.append(" ( ");
+                            stringBuilder.append(pageLabels[i - 1]);
+                            stringBuilder.append(" )");
                         }
-                        child.setUserObject(buf.toString());
+                        child.setUserObject(stringBuilder.toString());
                         list.add(child);
                     }
                     break;
@@ -153,7 +157,7 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
         if (getRowCount() == 0) return null;
         switch (columnIndex) {
             case 0:
-                return "Object " + list.get(rowIndex).getNumber();
+                return String.format(Language.PAGES_TABLE_OBJECT.getString(), list.get(rowIndex).getNumber());
             case 1:
                 return list.get(rowIndex);
             default:
@@ -168,9 +172,9 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "Object";
+                return Language.OBJECT.getString();
             case 1:
-                return "Page";
+                return Language.PAGE.getString();
             default:
                 return null;
         }
@@ -181,16 +185,19 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
      */
     @Override
     public void valueChanged(ListSelectionEvent evt) {
-        if (evt != null)
+        if (evt != null) {
             super.valueChanged(evt);
-        if (controller == null)
+        }
+        if (controller == null) {
             return;
+        }
         if (getRowCount() > 0) {
             int selectedRow = getSelectedRow();
             if (selectedRow >= 0) {
                 controller.selectNode(list.get(selectedRow));
-                if (listener != null)
+                if (listener != null) {
                     listener.gotoPage(getSelectedRow() + 1);
+                }
             }
         }
     }

@@ -47,9 +47,18 @@ import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
-import com.itextpdf.rups.event.*;
-import com.itextpdf.rups.model.*;
+import com.itextpdf.rups.event.CloseDocumentEvent;
+import com.itextpdf.rups.event.PostCompareEvent;
+import com.itextpdf.rups.event.PostNewIndirectObjectEvent;
+import com.itextpdf.rups.event.RootNodeClickedEvent;
+import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.event.TreeNodeClickedEvent;
+import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.NewIndirectPdfObjectDialog;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.RupsMenuBar;
@@ -58,21 +67,40 @@ import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.HeadlessException;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.StringTokenizer;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -81,22 +109,20 @@ import java.util.*;
 public class RupsController extends Observable
         implements TreeSelectionListener, PageSelectionListener, Observer {
 
-    // member variables
+    private static final int COMPARE_BY_CONTENT_MAX_ERRORCOUNT = 100;
 
-    /* file and controller */
     /**
      * The Pdf file that is currently open in the application.
      */
     protected PdfFile pdfFile;
-    protected StringBuilder rawText = new StringBuilder();
     /**
      * Object with the GUI components for iText.
      *
-     * @since iText 5.0.0 (renamed from reader which was confusing because reader is normally used for a PdfReader instance)
+     * @since iText 5.0.0 (renamed from reader which was confusing because reader is normally used for a PdfReader
+     * instance)
      */
     protected PdfReaderController readerController;
 
-    /* main components */
     /**
      * The JMenuBar for the RUPS application.
      */
@@ -112,17 +138,15 @@ public class RupsController extends Observable
 
     protected Frame ownedFrame;
 
-    private boolean pluginMode;
+    private final boolean pluginMode;
 
     private ObjectLoader loader;
-
-    // constructor
 
     /**
      * Constructs the GUI components of the RUPS application.
      *
-     * @param dimension the dimension
-     * @param frame the frame
+     * @param dimension  the dimension
+     * @param frame      the frame
      * @param pluginMode the plugin mode
      */
     public RupsController(Dimension dimension, Frame frame, boolean pluginMode) {
@@ -162,8 +186,10 @@ public class RupsController extends Observable
         info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
         JTabbedPane editorPane = readerController.getEditorTabs();
         JScrollPane cons = new JScrollPane(console.getTextArea());
-        console.getTextArea().addMouseListener(new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()), console.getTextArea()));
-        editorPane.addTab("Console", null, cons, "Console window (System.out/System.err)");
+        console.getTextArea().addMouseListener(
+                new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()),
+                        console.getTextArea()));
+        editorPane.addTab(Language.EDITOR_CONSOLE.getString(), null, cons, Language.EDITOR_CONSOLE_TOOLTIP.getString());
         editorPane.setSelectedComponent(cons);
         info.add(editorPane, JSplitPane.RIGHT);
 
@@ -188,17 +214,22 @@ public class RupsController extends Observable
                             while (tokens.hasMoreTokens()) {
                                 String urlString = tokens.nextToken();
                                 URL url = new URL(urlString);
-                                files.add(new File(URLDecoder.decode(url.getFile(), "UTF-8")));
+                                files.add(new File(URLDecoder.decode(url.getFile(), StandardCharsets.UTF_8.name())));
                             }
                         }
 
                         if (files == null || files.size() != 1) {
-                            JOptionPane.showMessageDialog(masterComponent, "You can only open one file!", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(masterComponent,
+                                    Language.ERROR_ONLY_OPEN_ONE_FILE.getString(),
+                                    Language.ERROR.getString(), JOptionPane.ERROR_MESSAGE);
                         } else {
                             loadFile(files.get(0), false);
                         }
                     } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-                        JOptionPane.showMessageDialog(masterComponent, "Error opening file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(masterComponent,
+                                String.format(Language.ERROR_OPENING_FILE.getString(), e.getMessage()),
+                                Language.ERROR.getString(),
+                                JOptionPane.ERROR_MESSAGE);
                     }
 
                     dtde.dropComplete(true);
@@ -207,11 +238,6 @@ public class RupsController extends Observable
         }
 
         masterPanel.add(masterComponent, BorderLayout.CENTER);
-    }
-
-    public RupsController(Dimension dimension, File f, Frame frame, boolean pluginMode) {
-        this(dimension, frame, pluginMode);
-        loadFile(f, false);
     }
 
     /**
@@ -268,13 +294,14 @@ public class RupsController extends Observable
         if (o != null && arg instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) arg;
             if (RupsEvent.CONSOLE_WRITE_EVENT == event.getType()) {
-                readerController.getEditorTabs().setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
+                readerController.getEditorTabs()
+                        .setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
             }
         }
     }
 
     /**
-     * @param file the file to load
+     * @param file     the file to load
      * @param readOnly open the file read only or not
      */
     public void loadFile(File file, boolean readOnly) {
@@ -282,7 +309,8 @@ public class RupsController extends Observable
             byte[] contents = readFileToByteArray(file);
             loadRawContent(contents, file.getName(), file.getParentFile(), readOnly);
         } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -291,7 +319,8 @@ public class RupsController extends Observable
             byte[] contents = readStreamToByteArray(is);
             loadRawContent(contents, fileName, directory, readOnly);
         } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -303,12 +332,14 @@ public class RupsController extends Observable
             pdfFile.setDirectory(directory);
             startObjectLoader();
             if (!pluginMode) {
-                String directoryPath = directory == null ? "" : directory.getCanonicalPath() + File.separator;
-                ownedFrame.setTitle("iText RUPS - " + directoryPath + fileName + " - " + ITextCoreProductData.getInstance().getVersion());
+                ownedFrame.setTitle(
+                        String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion())
+                );
             }
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -327,10 +358,11 @@ public class RupsController extends Observable
             res = readStreamToByteArray(inputStream);
         } finally {
             try {
-                if (inputStream != null)
+                if (inputStream != null) {
                     inputStream.close();
+                }
             } catch (IOException e) {
-                LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
+                LoggerHelper.error(Language.ERROR_CLOSING_STREAM.getString(), e, getClass());
             }
         }
         return res;
@@ -339,7 +371,8 @@ public class RupsController extends Observable
     private byte[] readStreamToByteArray(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int read;
-        byte[] buffer = new byte[4096];
+        final int bufferSize = 4096;
+        final byte[] buffer = new byte[bufferSize];
         try {
             while ((read = inputStream.read(buffer)) != -1) {
                 byteArrayOutputStream.write(buffer, 0, read);
@@ -348,26 +381,29 @@ public class RupsController extends Observable
             try {
                 byteArrayOutputStream.close();
             } catch (IOException e) {
-                LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
+                LoggerHelper.error(Language.ERROR_CLOSING_STREAM.getString(), e, getClass());
             }
         }
         return byteArrayOutputStream.toByteArray();
     }
 
     /**
-     * Saves the pdf to the disk
+     * Saves the PDF to the disk
      *
      * @param file java.io.File file to save
      */
     public void saveFile(File file) {
-        FileOutputStream fos = null;
+        OutputStream fos = null;
+        File localFile = file;
         try {
-            if (!file.getName().endsWith(".pdf")) {
-                file = new File(file.getPath() + ".pdf");
+            final String pdfSuffix = ".pdf";
+            if (!localFile.getName().endsWith(pdfSuffix)) {
+                localFile = new File(localFile.getPath() + pdfSuffix);
             }
 
-            if (file.exists()) {
-                int choice = JOptionPane.showConfirmDialog(masterComponent, "File already exists, would you like to overwrite file?", "Warning", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (localFile.exists()) {
+                final int choice = JOptionPane.showConfirmDialog(masterComponent, Language.SAVE_OVERWRITE.getString(),
+                        Language.WARNING.getString(), JOptionPane.YES_NO_CANCEL_OPTION);
                 if (choice == JOptionPane.NO_OPTION || choice == JOptionPane.CANCEL_OPTION) {
                     return;
                 }
@@ -378,21 +414,23 @@ public class RupsController extends Observable
             closeRoutine();
             if (bos != null) {
                 bos.close();
-                fos = new FileOutputStream(file);
+                fos = Files.newOutputStream(localFile.toPath());
                 bos.writeTo(fos);
             }
 
-            JOptionPane.showMessageDialog(masterComponent, "File saved.", "Dialog", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(masterComponent, Language.SAVE_SUCCESS.getString(),
+                    Language.DIALOG.getString(), JOptionPane.INFORMATION_MESSAGE);
             loadFile(file, false);
         } catch (PdfException | IOException | com.itextpdf.io.exceptions.IOException de) {
-            JOptionPane.showMessageDialog(masterComponent, de.getMessage(), "Dialog", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(masterComponent, de.getMessage(), Language.DIALOG.getString(),
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
                 if (fos != null) {
                     fos.close();
                 }
             } catch (IOException e) {
-                LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
+                LoggerHelper.error(Language.ERROR_CLOSING_STREAM.getString(), e, getClass());
             }
         }
     }
@@ -400,8 +438,9 @@ public class RupsController extends Observable
     public void closeRoutine() {
         loader = null;
         PdfDocument docToClose = null;
-        if (pdfFile != null && pdfFile.getPdfDocument() != null)
+        if (pdfFile != null && pdfFile.getPdfDocument() != null) {
             docToClose = pdfFile.getPdfDocument();
+        }
         pdfFile = null;
         setChanged();
         super.notifyObservers(new CloseDocumentEvent());
@@ -409,20 +448,25 @@ public class RupsController extends Observable
             docToClose.close();
         }
         if (!pluginMode) {
-            ownedFrame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
+            ownedFrame.setTitle(
+                    String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion())
+            );
         }
         readerController.getParser().setDocument(null);
     }
 
     public CompareTool.CompareResult compareWithDocument(PdfDocument document) {
         if (getPdfFile() == null || getPdfFile().getPdfDocument() == null) {
-            LoggerHelper.warn(LoggerMessages.NO_OPEN_DOCUMENT, getClass());
+            LoggerHelper.warn(Language.ERROR_NO_OPEN_DOCUMENT_COMPARE.getString(), getClass());
         } else if (document == null) {
-            LoggerHelper.warn(LoggerMessages.COMPARED_DOCUMENT_IS_NULL, getClass());
+            LoggerHelper.warn(Language.ERROR_COMPARED_DOCUMENT_NULL.getString(), getClass());
         } else if (document.isClosed()) {
-            LoggerHelper.warn(LoggerMessages.COMPARED_DOCUMENT_IS_CLOSED, getClass());
+            LoggerHelper.warn(Language.ERROR_COMPARED_DOCUMENT_CLOSED.getString(), getClass());
         } else {
-            CompareTool compareTool = new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
+            final CompareTool compareTool =
+                    new CompareTool()
+                            .setCompareByContentErrorsLimit(COMPARE_BY_CONTENT_MAX_ERRORCOUNT)
+                            .disableCachedPagesComparison();
             return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
         }
         return null;
@@ -433,7 +477,7 @@ public class RupsController extends Observable
                 PdfDocument cmpDocument = new PdfDocument(readerPdf)) {
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
-            LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
+            LoggerHelper.warn(Language.ERROR_COMPARE_DOCUMENT_CREATION.getString(), e, getClass());
             return null;
         }
     }
@@ -444,7 +488,7 @@ public class RupsController extends Observable
             reader.setCloseStream(false);
             return compareWithDocument(cmpDocument);
         } catch (IOException e) {
-            LoggerHelper.warn(LoggerMessages.CREATE_COMPARE_DOC_ERROR, e, getClass());
+            LoggerHelper.warn(Language.ERROR_COMPARE_DOCUMENT_CREATION.getString(), e, getClass());
             return null;
         }
     }
@@ -459,7 +503,7 @@ public class RupsController extends Observable
         readerController.update(this, new PostCompareEvent(compareResult));
         if (compareResult != null) {
             if (compareResult.isOk()) {
-                LoggerHelper.info("Documents are equal", getClass());
+                LoggerHelper.info(Language.COMPARE_EQUAL.getString(), getClass());
             } else {
                 LoggerHelper.info(compareResult.getReport(), getClass());
             }
@@ -467,7 +511,8 @@ public class RupsController extends Observable
     }
 
     private void startObjectLoader() {
-        final ProgressDialog dialog = new ProgressDialog(getMasterComponent(), "Reading PDF document...", ownedFrame, pluginMode);
+        final ProgressDialog dialog =
+                new ProgressDialog(getMasterComponent(), Language.PDF_READING.getString(), ownedFrame, pluginMode);
         if (!pluginMode) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -476,6 +521,7 @@ public class RupsController extends Observable
             });
         }
         loader = new ObjectLoader(this, pdfFile, pdfFile.getFilename(), dialog);
+        loader.start();
     }
 
     // tree selection
@@ -517,7 +563,9 @@ public class RupsController extends Observable
     }
 
     private void showNewIndirectDialog() {
-        NewIndirectPdfObjectDialog dialog = new NewIndirectPdfObjectDialog(ownedFrame, "Create new indirect object", readerController.getParser());
+        final NewIndirectPdfObjectDialog dialog =
+                new NewIndirectPdfObjectDialog(ownedFrame, Language.MENU_BAR_NEW_INDIRECT.getString(),
+                        readerController.getParser());
         dialog.setVisible(true);
         if (dialog.getResult() != null) {
             setChanged();

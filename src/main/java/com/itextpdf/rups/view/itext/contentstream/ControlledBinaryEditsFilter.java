@@ -103,8 +103,8 @@ public class ControlledBinaryEditsFilter extends DocumentFilter {
         } else if (doc.isHexEditable(offset) || (offset > 0 && doc.isHexEditable(offset - 1))) {
             // note: we need to give special treatment to the (offset - 1) case to be able to insert
             // stuff at the end of a hex string.
-            String hex = ensureHex(string);
-            if(hex != null) {
+            final String hex = ensureHex(string);
+            if (hex != null) {
                 super.insertString(fb, offset, hex, hexContentAttrs());
             }
         }
@@ -121,7 +121,7 @@ public class ControlledBinaryEditsFilter extends DocumentFilter {
         if (bothTextual(offset, offset + length)) {
             super.replace(fb, offset, length, text, attrs);
         } else if (contiguousHexEditableRegion(offset, length)) {
-            String hex = ensureHex(text);
+            final String hex = ensureHex(text);
             if (hex == null) {
                 super.remove(fb, offset, length);
             } else {
@@ -131,16 +131,16 @@ public class ControlledBinaryEditsFilter extends DocumentFilter {
     }
 
     private static String ensureHex(String text) {
-        if(text == null) {
+        if (text == null) {
             return null;
         }
-        String hex = ContentStreamHandlingUtils
+        final String hex = ContentStreamHandlingUtils
                 .dropNonHexDigits(text.toLowerCase(Locale.ROOT));
         return hex.isEmpty() ? null : hex;
     }
 
     private static AttributeSet hexContentAttrs() {
-        MutableAttributeSet attrs = new SimpleAttributeSet();
+        final MutableAttributeSet attrs = new SimpleAttributeSet();
         attrs.addAttributes(ContentStreamStyleConstants.EDITABLE_HEX_CONTENT_ATTRS);
         attrs.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
         return attrs;

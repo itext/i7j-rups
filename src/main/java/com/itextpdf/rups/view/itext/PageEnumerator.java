@@ -61,20 +61,25 @@ class PageEnumerator implements Enumeration<PdfPageTreeNode> {
 
     public PageEnumerator(PdfDictionary catalog, TreeNodeFactory factory) {
         this.factory = factory;
-        expand((PdfIndirectReference) catalog.get(PdfName.Pages, false), catalog.getAsDictionary(PdfName.Pages));
+        expand(
+                (PdfIndirectReference) catalog.get(PdfName.Pages, false), catalog.getAsDictionary(PdfName.Pages)
+        );
     }
 
+    @Override
     public boolean hasMoreElements() {
         return cursor < pages.size();
     }
 
+    @Override
     public PdfPageTreeNode nextElement() {
         return pages.get(cursor++);
     }
 
-    public void expand(PdfIndirectReference ref, PdfDictionary dict) {
-        if (dict == null)
+    public final void expand(PdfIndirectReference ref, PdfDictionary dict) {
+        if (dict == null) {
             return;
+        }
         if (PdfName.Pages.equals(dict.getAsName(PdfName.Type))) {
             PdfArray kids = dict.getAsArray(PdfName.Kids);
             if (kids != null) {

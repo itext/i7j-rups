@@ -42,10 +42,9 @@
  */
 package com.itextpdf.rups.view;
 
-import javax.swing.*;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -67,7 +66,7 @@ public class DebugView {
     /**
      * Creates a new DebugView object.
      */
-    private DebugView(boolean pluginMode) {
+    private DebugView() {
         // Add a scrolling text area
         textArea.setEditable(false);
     }
@@ -79,7 +78,7 @@ public class DebugView {
      */
     public static synchronized DebugView getInstance() {
         if (debugView == null) {
-            debugView = new DebugView(false);
+            debugView = new DebugView();
         }
         return debugView;
     }
@@ -89,23 +88,33 @@ public class DebugView {
     }
 
     private void updateTextPane(final String msg) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                textArea.getDocument();
-                if (textArea.getLineCount() >= MAX_LINES) {
-                    String backupString = "";
-                    try {
-                        backupString = textArea.getText(
-                                Math.max(textArea.getDocument().getLength() - BACKUP_SIZE, 0),
-                                Math.min(textArea.getDocument().getLength(), BACKUP_SIZE));
-                    } catch (BadLocationException ignored) {
-                    }
-                    textArea.setText(backupString + "\n...too many output\n");
+        SwingUtilities.invokeLater(new UpdateTextPaneTask(msg));
+    }
+
+    static class UpdateTextPaneTask implements Runnable {
+        private final String msg;
+
+        public UpdateTextPaneTask(String msg) {
+            this.msg = msg;
+        }
+
+        @Override
+        public void run() {
+            JTextArea textArea = DebugView.getInstance().getTextArea();
+            if (textArea.getLineCount() >= MAX_LINES) {
+                String backupString = "";
+                try {
+                    backupString = textArea.getText(Math.max(
+                                    textArea.getDocument().getLength() - BACKUP_SIZE, 0),
+                            Math.min(textArea.getDocument().getLength(), BACKUP_SIZE));
+                } catch (BadLocationException ignored) {
+                    // Intentionally left blank
                 }
-                textArea.append(msg);
-                textArea.setCaretPosition(textArea.getDocument().getLength());
+                textArea.setText(backupString + Language.ERROR_TOO_MANY_OUTPUT.getString());
             }
-        });
+            textArea.append(msg);
+            textArea.setCaretPosition(textArea.getDocument().getLength());
+        }
     }
 
     static class DebugOutputStream extends OutputStream {

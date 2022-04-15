@@ -42,8 +42,11 @@
  */
 package com.itextpdf.rups.model;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -56,16 +59,16 @@ public class ErrorDialogPane {
     }
 
     public static void showErrorDialog(Component parent, Throwable th) {
-        String msg = getTraceString(th);
-        JTextArea textArea = new JTextArea(msg);
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        final String msg = getTraceString(th);
+        final JTextArea textArea = new JTextArea(msg);
+        final JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setPreferredSize(new Dimension(300, 200));
         JOptionPane.showMessageDialog(parent, scrollPane);
     }
 
     private static String getTraceString(Throwable th) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
         th.printStackTrace(pw);
         return sw.toString();
     }

@@ -44,6 +44,7 @@ package com.itextpdf.rups.view.itext.contentstream;
 
 import com.itextpdf.commons.exceptions.ITextException;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.rups.view.Language;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -52,7 +53,6 @@ import javax.swing.text.Element;
 import javax.swing.text.ElementIterator;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
 
 /**
  * Writer implementation for serializing edited content streams.
@@ -80,13 +80,13 @@ public class ContentStreamWriter {
      * @throws IOException if an error occurs during reading
      */
     public void write(Document doc) throws IOException {
-        ElementIterator it = new ElementIterator(doc.getDefaultRootElement());
+        final ElementIterator it = new ElementIterator(doc.getDefaultRootElement());
         Element current = it.next();
 
         while (current != null) {
 
-            AttributeSet attrs = current.getAttributes();
-            if(attrs.getAttribute(ContentStreamStyleConstants.HEX_EDIT) != null) {
+            final AttributeSet attrs = current.getAttributes();
+            if (attrs.getAttribute(ContentStreamStyleConstants.HEX_EDIT) != null) {
                 current = handleHexContent(current, it);
                 continue;
             }
@@ -99,18 +99,18 @@ public class ContentStreamWriter {
     }
 
     private Element handleHexContent(Element initElement, ElementIterator it) throws IOException {
-        Document doc = initElement.getDocument();
+        final Document doc = initElement.getDocument();
         Element current = initElement;
         // collect all contiguous such regions
         // we only convert at the end (to allow abc + 123 to merge into abc123)
-        StringBuilder hexBuf = new StringBuilder();
+        final StringBuilder hexBuf = new StringBuilder();
         do {
-            int start = current.getStartOffset();
-            int end = current.getEndOffset();
+            final int start = current.getStartOffset();
+            final int end = current.getEndOffset();
             try {
-                hexBuf.append(doc.getText(start, end - start).toLowerCase(Locale.ROOT));
+                hexBuf.append(doc.getText(start, end - start).toLowerCase(Language.getLocale()));
             } catch (BadLocationException e) {
-                throw new ITextException("Error querying content stream representation.", e);
+                throw new ITextException(Language.ERROR_QUERY_CONTENT_STREAM.getString(), e);
             }
             // Note: due to the implied linebreak at the end (which is never styled with HEX_EDIT)
             // the check for current != null is strictly speaking not necessary, but we'll leave
@@ -123,18 +123,18 @@ public class ContentStreamWriter {
     }
 
     private void writeLeafElement(Element current) throws IOException {
-        AttributeSet attrs = current.getAttributes();
-        byte[] binaryContent = (byte[]) attrs.getAttribute(ContentStreamStyleConstants.BINARY_CONTENT);
+        final AttributeSet attrs = current.getAttributes();
+        final byte[] binaryContent = (byte[]) attrs.getAttribute(ContentStreamStyleConstants.BINARY_CONTENT);
         if (binaryContent == null) {
-            int start = current.getStartOffset();
-            int end = current.getEndOffset();
+            final int start = current.getStartOffset();
+            final int end = current.getEndOffset();
             String text;
             try {
                 text = current.getDocument().getText(start, end - start);
             } catch (BadLocationException e) {
-                throw new ITextException("Error querying content stream representation.", e);
+                throw new ITextException(Language.ERROR_QUERY_CONTENT_STREAM.getString(), e);
             }
-            String enc = getContentEncoding(current);
+            final String enc = getContentEncoding(current);
             os.write(PdfEncodings.convertToBytes(text, enc));
         } else {
             os.write(binaryContent);
@@ -142,7 +142,7 @@ public class ContentStreamWriter {
     }
 
     private static String getContentEncoding(Element el) {
-        Object encAttr = el.getAttributes().getAttribute(ContentStreamStyleConstants.ENCODING);
+        final Object encAttr = el.getAttributes().getAttribute(ContentStreamStyleConstants.ENCODING);
         return encAttr == null ? PdfEncodings.PDF_DOC_ENCODING : (String) encAttr;
     }
 }

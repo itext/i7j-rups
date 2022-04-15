@@ -44,9 +44,10 @@ package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.event.SaveToFileEvent;
+import com.itextpdf.rups.view.Language;
 
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Component;
 import java.util.Observer;
 
 public class FileSaveAction extends FileChooserAction {
@@ -59,7 +60,7 @@ public class FileSaveAction extends FileChooserAction {
      * @param parent   a parent Component for chooser dialog
      */
     public FileSaveAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, "Save as...", filter, parent);
+        super(observer, Language.MENU_BAR_SAVE_AS.getString(), filter, parent);
     }
 
     @Override

@@ -45,12 +45,15 @@ package com.itextpdf.rups.view.itext.treenodes;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
 /**
  * A FormTreeNode is a standard node in a FormTree.
  */
 public class FormTreeNode extends IconTreeNode {
+
+    private static final String FORM_ICON = "form.png";
 
     /**
      * The corresponding tree node in the PdfTree.
@@ -61,16 +64,16 @@ public class FormTreeNode extends IconTreeNode {
      * Creates the root node of the FormTree.
      */
     public FormTreeNode() {
-        super("form.png", "Form");
+        super(FORM_ICON, Language.FORM.getString());
     }
 
     /**
      * Creates a node corresponding with a node in the PdfTree.
      *
-     * @param    node    a corresponding node
+     * @param node a corresponding node
      */
     public FormTreeNode(PdfObjectTreeNode node) {
-        super("form.png");
+        super(FORM_ICON);
         this.object_node = node;
         if (node.isDictionary()) {
             PdfDictionary dict = (PdfDictionary) node.getPdfObject();
@@ -78,7 +81,7 @@ public class FormTreeNode extends IconTreeNode {
             if (fieldname != null) {
                 this.setUserObject(fieldname);
             } else {
-                this.setUserObject("unnamed field");
+                this.setUserObject(Language.FORM_UNNAMED_FIELD.getString());
             }
         }
     }

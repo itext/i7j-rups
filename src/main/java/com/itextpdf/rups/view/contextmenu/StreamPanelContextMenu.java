@@ -42,9 +42,14 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.JTextPane;
 import javax.swing.text.DefaultEditorKit;
 
 /**
@@ -56,14 +61,9 @@ import javax.swing.text.DefaultEditorKit;
  */
 public class StreamPanelContextMenu extends JPopupMenu {
 
-    private static final String COPY = "Copy";
-    private static final String SELECT_ALL = "Select All";
-    private static final String SAVE_TO_FILE = "Save to File";
-    private static final String SAVE_TO_STREAM = "Save to Stream";
+    private final JMenuItem saveToStream;
 
-    private JMenuItem saveToStream;
-
-    private boolean pluginMode;
+    private final boolean pluginMode;
 
     /**
      * Creates a context menu (right click menu) with two actions:
@@ -76,36 +76,44 @@ public class StreamPanelContextMenu extends JPopupMenu {
      * @param controller the controller
      * @param pluginMode the plugin mode
      */
-    public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller, boolean pluginMode) {
+    public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller,
+            boolean pluginMode) {
         super();
 
         this.pluginMode = pluginMode;
 
-        final JMenuItem copyItem = new JMenuItem();
-        copyItem.setAction(new CopyToClipboardAction(COPY, textPane));
-        copyItem.setText(COPY);
+        final JMenuItem copyItem = getJMenuItem(
+                new CopyToClipboardAction(Language.COPY.getString(), textPane)
+        );
 
-        final JMenuItem selectAllItem = new JMenuItem(SELECT_ALL);
-        selectAllItem.setAction(textPane.getActionMap().get(DefaultEditorKit.selectAllAction));
-        selectAllItem.setText(SELECT_ALL);
+        final JMenuItem selectAllItem = getJMenuItem(
+                textPane.getActionMap().get(DefaultEditorKit.selectAllAction)
+        );
+        selectAllItem.setText(Language.SELECT_ALL.getString());
 
-        JMenuItem saveToFile = new JMenuItem();
-        saveToFile.setText(SAVE_TO_FILE);
-        saveToFile.setAction(new SaveToFileJTextPaneAction(SAVE_TO_FILE, textPane));
+        final JMenuItem saveToFile = getJMenuItem(
+                new SaveToFileJTextPaneAction(Language.SAVE_TO_FILE.getString(), textPane)
+        );
 
-        saveToStream = new JMenuItem();
-        saveToStream.setText(SAVE_TO_STREAM);
-        saveToStream.setAction(new SaveToPdfStreamJTextPaneAction(SAVE_TO_STREAM, controller));
+        saveToStream = getJMenuItem(
+                new SaveToPdfStreamJTextPaneAction(Language.SAVE_TO_STREAM.getString(), controller)
+        );
 
-        add(saveToStream);
-        add(new JSeparator());
-        add(copyItem);
-        add(saveToFile);
-        add(new JSeparator());
         add(selectAllItem);
+        add(copyItem);
+        add(new JSeparator());
+        add(saveToFile);
+        add(this.saveToStream);
     }
 
     public void setSaveToStreamEnabled(boolean enabled) {
         saveToStream.setEnabled(enabled && !pluginMode);
+    }
+
+    static final JMenuItem getJMenuItem(Action rupsAction) {
+        final JMenuItem jMenuItem = new JMenuItem();
+        jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
+        jMenuItem.setAction(rupsAction);
+        return jMenuItem;
     }
 }

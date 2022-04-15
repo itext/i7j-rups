@@ -70,7 +70,7 @@ final class ContentStreamHandlingUtils {
     }
 
     static void hexlify(byte[] bytes, StringBuilder sb) {
-        for (byte b : bytes) {
+        for (final byte b : bytes) {
             sb.append(HEX_DIGITS[(b >> 4) & 0xf]);
             sb.append(HEX_DIGITS[b & 0xf]);
         }
@@ -79,7 +79,7 @@ final class ContentStreamHandlingUtils {
     static int dropNonHexDigits(CharSequence str, char[] out) {
         int digitsFound = 0;
         for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
+            final char c = str.charAt(i);
             if (isHexDigit(c)) {
                 out[digitsFound] = c;
                 digitsFound++;
@@ -89,22 +89,22 @@ final class ContentStreamHandlingUtils {
     }
 
     static String dropNonHexDigits(CharSequence str) {
-        char[] out = new char[str.length()];
-        int digitsFound = dropNonHexDigits(str, out);
+        final char[] out = new char[str.length()];
+        final int digitsFound = dropNonHexDigits(str, out);
         return new String(out, 0, digitsFound);
     }
 
     static byte[] unhexlify(CharSequence str) {
-        char[] digits = new char[str.length()];
-        int digitsFound = dropNonHexDigits(str, digits);
+        final char[] digits = new char[str.length()];
+        final int digitsFound = dropNonHexDigits(str, digits);
 
         // ensure we round up
         byte[] result = new byte[(digitsFound + 1) / 2];
         for (int i = 0; i < result.length; i++) {
-            int ix = 2 * i;
-            int hi = hexDigitValue(digits[ix]);
+            final int ix = 2 * i;
+            final int hi = hexDigitValue(digits[ix]);
             // zero pad if the length is off
-            int lo = ix + 1 >= digitsFound ? 0 : hexDigitValue(digits[ix + 1]);
+            final int lo = ix + 1 >= digitsFound ? 0 : hexDigitValue(digits[ix + 1]);
             result[i] = (byte) (((hi << 4) + lo) & 0xff);
         }
         return result;
@@ -117,9 +117,9 @@ final class ContentStreamHandlingUtils {
     static byte[] ensureEscaped(byte[] stringContent) {
         // re-escape the string to make sure it decodes properly
         //  (have to do it this way since we can't access the original "raw" underlying content)
-        byte[] escapedString = StreamUtil.createBufferedEscapedString(stringContent).toByteArray();
+        final byte[] escapedString = StreamUtil.createBufferedEscapedString(stringContent).toByteArray();
         // drop the surrounding parentheses
-        byte[] innerEsc = new byte[escapedString.length - 2];
+        final byte[] innerEsc = new byte[escapedString.length - 2];
         System.arraycopy(escapedString, 1, innerEsc, 0, innerEsc.length);
         return innerEsc;
     }
@@ -135,16 +135,16 @@ final class ContentStreamHandlingUtils {
     }
 
     static boolean hasUtf8Bom(byte[] b) {
-        return b.length >= 3 && b[0] == (byte)0xEF && b[1] == (byte)0xBB && b[2] == (byte)0xBF;
+        return b.length >= 3 && b[0] == (byte) 0xEF && b[1] == (byte) 0xBB && b[2] == (byte) 0xBF;
     }
 
     static boolean isMaybePdfDocEncodedText(byte[] b) {
         // No explicit encoding -> make an attempt with PDFDocEncoding
-        String asPdfDoc = PdfEncodings.convertToString(b, PdfEncodings.PDF_DOC_ENCODING);
+        final String asPdfDoc = PdfEncodings.convertToString(b, PdfEncodings.PDF_DOC_ENCODING);
         // check whether the result looks like a sensible text string
         for (int i = 0; i < asPdfDoc.length(); i++) {
-            char c = asPdfDoc.charAt(i);
-            if(!Character.isLetterOrDigit(c) && PERMITTED_SYMBOLS.indexOf(c) == -1) {
+            final char c = asPdfDoc.charAt(i);
+            if (!Character.isLetterOrDigit(c) && PERMITTED_SYMBOLS.indexOf(c) == -1) {
                 return false;
             }
         }
@@ -152,6 +152,6 @@ final class ContentStreamHandlingUtils {
     }
 
     private static int hexDigitValue(char c) {
-        return (c <= '9' ? (c - '0') : (0xa + (c - 'a')));
+        return c <= '9' ? (c - '0') : (0xa + (c - 'a'));
     }
 }

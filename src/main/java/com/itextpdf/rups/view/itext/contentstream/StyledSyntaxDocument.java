@@ -54,7 +54,7 @@ import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -89,7 +89,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      * Set matching operands mode. In matching operands mode, operands are
      * marked up in the same style as their operators. The default is {@code false}.
      *
-     * @param matchingOperands  new setting value
+     * @param matchingOperands new setting value
      */
     public void setMatchingOperands(boolean matchingOperands) {
         this.matchingOperands = matchingOperands;
@@ -108,7 +108,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      * points to textual stream content. This covers everything except strings with unknown
      * encodings and inline images.
      *
-     * @param pos  the position in the textual representation of the document to check
+     * @param pos the position in the textual representation of the document to check
      * @return {@code false} if binary stream content, {@code true} otherwise
      */
     public boolean isTextual(int pos) {
@@ -123,11 +123,11 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      * This currently only applies to string objects with unknown encodings.
      *
      * <p>
-     *     Note that this does not apply to strings that use PDF-native hex syntax, but
-     *     only to cases where the in-document representation uses the string syntax
-     *     with parentheses.
+     * Note that this does not apply to strings that use PDF-native hex syntax, but
+     * only to cases where the in-document representation uses the string syntax
+     * with parentheses.
      *
-     * @param pos  the position in the textual representation of the document to check
+     * @param pos the position in the textual representation of the document to check
      * @return {@code false} if hex-editable stream content, {@code true} otherwise
      */
     public boolean isHexEditable(int pos) {
@@ -139,19 +139,19 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     /**
      * Process a content stream and add its operators to the document.
      *
-     * @param streamContent  the stream content
+     * @param streamContent the stream content
      */
     public void processContentStream(byte[] streamContent) {
         setSmartEditLock(false);
         final ArrayList<PdfObject> tokens = new ArrayList<>();
 
-        PdfCanvasParser ps = ContentStreamHandlingUtils.createCanvasParserFor(streamContent);
+        final PdfCanvasParser ps = ContentStreamHandlingUtils.createCanvasParserFor(streamContent);
         try {
             while (!ps.parse(tokens).isEmpty()) {
                 appendGraphicsOperator(tokens);
             }
         } catch (IOException | BadLocationException e) {
-            throw new ITextException("Error building content stream representation.", e);
+            throw new ITextException(Language.ERROR_BUILDING_CONTENT_STREAM.getString(), e);
         }
         setSmartEditLock(true);
     }
@@ -159,17 +159,17 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     /**
      * Get the tooltip text (if any) at the given position in the document.
      *
-     * @param pos  the position for which to fetch the tooltip text
-     * @return  a string, or {@code null} if there is no tooltip.
+     * @param pos the position for which to fetch the tooltip text
+     * @return a string, or {@code null} if there is no tooltip.
      */
     public String getToolTipAt(int pos) {
-        AttributeSet charAttrs = getCharacterElement(pos).getAttributes();
-        if(charAttrs.getAttribute(ContentStreamStyleConstants.HEX_EDIT) != null) {
-            return ContentStreamStyleConstants.TOOLTIP_HEX;
+        final AttributeSet charAttrs = getCharacterElement(pos).getAttributes();
+        if (charAttrs.getAttribute(ContentStreamStyleConstants.HEX_EDIT) != null) {
+            return Language.TOOLTIP_HEX.getString();
         }
-        String encoding = (String) charAttrs.getAttribute(ContentStreamStyleConstants.ENCODING);
-        if(encoding != null) {
-            return ContentStreamStyleConstants.TOOLTIP_ENCODING + encoding;
+        final String encoding = (String) charAttrs.getAttribute(ContentStreamStyleConstants.ENCODING);
+        if (encoding != null) {
+            return String.format(Language.TOOLTIP_ENCODING.getString(), encoding);
         }
         return null;
     }
@@ -177,11 +177,11 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     /**
      * Append a PDF object to the content stream document.
      *
-     * @param obj     the object to add
-     * @param attrs   the attributes to add
+     * @param obj   the object to add
+     * @param attrs the attributes to add
      */
     protected void appendPdfObject(PdfObject obj, AttributeSet attrs) throws BadLocationException {
-        AttributeSet effAttrs = attrs == null ? SimpleAttributeSet.EMPTY : attrs;
+        final AttributeSet effAttrs = attrs == null ? SimpleAttributeSet.EMPTY : attrs;
         switch (obj.getType()) {
             case PdfObject.STRING:
                 appendPdfString((PdfString) obj, effAttrs);
@@ -250,16 +250,16 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
         try {
             // inline image parser takes care of expanding abbreviations
-            BufferedImage img = new PdfImageXObject(stm).getBufferedImage();
+            final BufferedImage img = new PdfImageXObject(stm).getBufferedImage();
             insertAndRenderInlineImage(img, stm.getBytes(false));
             appendText("\nEI\n", getStyleAttributes("EI"));
         } catch (IOException | ITextException e) {
-            LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+            LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
 
             // display error message backed by raw image data
-            MutableAttributeSet attrs = new SimpleAttributeSet();
+            final MutableAttributeSet attrs = new SimpleAttributeSet();
             attrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, stm.getBytes(false));
-            appendText("Could not process image content\n", attrs);
+            appendText(Language.ERROR_PROCESSING_IMAGE.getString(), attrs);
             // in this case we don't add extra whitespace before EI
             // since iText potentially gobbled it when it attempted to parse the
             // (corrupt?) image
@@ -295,7 +295,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
             appendEncodedTextString(b, PdfEncodings.UNICODE_BIG, attrs);
         } else if (ContentStreamHandlingUtils.hasUtf8Bom(b)) {
             appendEncodedTextString(b, PdfEncodings.UTF8, attrs);
-        } else if(ContentStreamHandlingUtils.isMaybePdfDocEncodedText(b)) {
+        } else if (ContentStreamHandlingUtils.isMaybePdfDocEncodedText(b)) {
             appendEncodedTextString(b, PdfEncodings.PDF_DOC_ENCODING, attrs);
         } else {
             appendBinaryTextString(b, attrs);
@@ -304,15 +304,15 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
     private void appendBinaryTextString(byte[] b, AttributeSet attrs) throws BadLocationException {
         // display the string in marked-up hex, and make sure it's backed by the "true" binary value
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         ContentStreamHandlingUtils.hexlify(b, sb);
-        MutableAttributeSet binAttrs = new SimpleAttributeSet();
+        final MutableAttributeSet binAttrs = new SimpleAttributeSet();
         binAttrs.addAttributes(attrs);
         binAttrs.addAttributes(ContentStreamStyleConstants.EDITABLE_HEX_CONTENT_ATTRS);
         binAttrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, ContentStreamHandlingUtils.ensureEscaped(b));
         binAttrs.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
 
-        MutableAttributeSet delimAttrs = new SimpleAttributeSet();
+        final MutableAttributeSet delimAttrs = new SimpleAttributeSet();
         delimAttrs.addAttributes(attrs);
         delimAttrs.addAttributes(ContentStreamStyleConstants.EDITABLE_HEX_CONTENT_ATTRS);
         delimAttrs.addAttributes(ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
@@ -324,7 +324,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     }
 
     private void appendEncodedTextString(byte[] b, String encoding, AttributeSet attrs) throws BadLocationException {
-        MutableAttributeSet encAttrs = new SimpleAttributeSet();
+        final MutableAttributeSet encAttrs = new SimpleAttributeSet();
         encAttrs.addAttributes(attrs);
         encAttrs.addAttribute(ContentStreamStyleConstants.ENCODING, encoding);
         appendText("(", attrs);
@@ -334,7 +334,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
     private void appendPdfString(PdfString str, AttributeSet attrs) throws BadLocationException {
         if (str.isHexWriting()) {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             sb.append('<');
             ContentStreamHandlingUtils.hexlify(str.getValueBytes(), sb);
             sb.append("> ");
@@ -342,23 +342,23 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
         } else {
             // note: this always hits the code path with encoding = null in our case,
             // so this should always return the underlying string as-is.
-            byte[] b = str.getValueBytes();
+            final byte[] b = str.getValueBytes();
             appendSmartTextString(b, attrs);
         }
     }
 
     private void appendPdfDictionary(PdfDictionary dict, AttributeSet attrs) throws BadLocationException {
         appendText("<<", attrs);
-        for (PdfName key : dict.keySet()) {
+        for (final PdfName key : dict.keySet()) {
             appendPdfObject(key, attrs);
             appendPdfObject(dict.get(key, false), attrs);
         }
         appendText(">> ", attrs);
     }
 
-    private void appendPdfArray(PdfArray arr, AttributeSet attrs) throws BadLocationException {
+    private void appendPdfArray(Iterable<PdfObject> arr, AttributeSet attrs) throws BadLocationException {
         appendText("[", attrs);
-        for (PdfObject item : arr) {
+        for (final PdfObject item : arr) {
             appendPdfObject(item, attrs);
         }
         appendText("] ", attrs);
@@ -374,12 +374,12 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
     private void insertAndRenderInlineImage(final BufferedImage img, byte[] rawBytes) throws BadLocationException {
         // add the image
-        AttributeSet imageAttrs = ContentStreamStyleConstants.getImageAttributes(img, rawBytes);
+        final AttributeSet imageAttrs = ContentStreamStyleConstants.getImageAttributes(img, rawBytes);
         insertString(getLength(), " ", imageAttrs);
         appendDisplayOnlyNewline();
 
         // add the button
-        AttributeSet buttonAttrs = ContentStreamStyleConstants.getImageSaveButtonAttributes(img);
+        final AttributeSet buttonAttrs = ContentStreamStyleConstants.getImageSaveButtonAttributes(img);
         insertString(getLength(), " ", buttonAttrs);
         appendDisplayOnlyNewline();
     }

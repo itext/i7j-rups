@@ -42,8 +42,8 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.AbstractAction;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 /**

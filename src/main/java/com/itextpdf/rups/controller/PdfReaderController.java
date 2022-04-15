@@ -42,35 +42,56 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.kernel.utils.objectpathitems.ArrayPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.DictPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.IndirectPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.LocalPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.ObjectPath;
-import com.itextpdf.rups.event.*;
+import com.itextpdf.rups.event.NodeAddArrayChildEvent;
+import com.itextpdf.rups.event.NodeAddDictChildEvent;
+import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
+import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
+import com.itextpdf.rups.event.OpenPlainTextEvent;
+import com.itextpdf.rups.event.OpenStructureEvent;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-import com.itextpdf.rups.view.itext.*;
+import com.itextpdf.rups.view.itext.FormTree;
+import com.itextpdf.rups.view.itext.OutlineTree;
+import com.itextpdf.rups.view.itext.PagesTable;
+import com.itextpdf.rups.view.itext.PdfObjectPanel;
+import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.PlainText;
+import com.itextpdf.rups.view.itext.StructureTree;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.KeyListener;
 import java.util.Observable;
 import java.util.Observer;
@@ -127,6 +148,9 @@ public class PdfReaderController extends Observable implements Observer {
      */
     protected TreeNodeFactory nodes;
 
+    /**
+     * The PlainText representation.
+     */
     protected PlainText text;
 
     private Stack<IconTreeNode> highlights = new Stack<>();
@@ -142,8 +166,8 @@ public class PdfReaderController extends Observable implements Observer {
      * @param pageSelectionListener when somebody changes a page, this listener changes accordingly
      * @param pluginMode            the plugin mode
      */
-    public PdfReaderController(TreeSelectionListener treeSelectionListener,
-                               PageSelectionListener pageSelectionListener, boolean pluginMode) {
+    public PdfReaderController(TreeSelectionListener treeSelectionListener, PageSelectionListener pageSelectionListener,
+            boolean pluginMode) {
         pdfTree = new PdfTree();
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
@@ -166,36 +190,47 @@ public class PdfReaderController extends Observable implements Observer {
         addObserver(text);
 
         navigationTabs = new JTabbedPane();
-        navigationTabs.addTab("Pages", null, new JScrollPane(pages), "Pages");
-        navigationTabs.addTab("Outlines", null, new JScrollPane(outlines), "Outlines (Bookmarks)");
-        navigationTabs.addTab("Structure", null, new JScrollPane(structure), "Structure tree");
-        navigationTabs.addTab("Form", null, new JScrollPane(form), "Interactive Form");
-        navigationTabs.addTab("XFA", null, new JScrollPane(form.getXfaTree()), "Tree view of the XFA form");
-        navigationTabs.addTab("XRef", null, new JScrollPane(xref), "Cross-reference table");
-        navigationTabs.addTab("PlainText", null, new JScrollPane(text), "Plain text representation of the PDF");
+        final String pagesString = Language.PAGES.getString();
+        navigationTabs.addTab(pagesString, null, new JScrollPane(pages), pagesString);
+        navigationTabs.addTab(Language.OUTLINES.getString(), null, new JScrollPane(outlines),
+                Language.OUTLINES_BOOKMARKS.getString());
+        navigationTabs.addTab(Language.STRUCTURE.getString(), null, new JScrollPane(structure),
+                Language.STRUCTURE_TREE.getString());
+        navigationTabs.addTab(Language.FORM.getString(), null, new JScrollPane(form),
+                Language.FORM_INTERACTIVE.getString());
+        navigationTabs.addTab(Language.FORM_XFA.getString(), null, new JScrollPane(form.getXfaTree()),
+                Language.FORM_XFA_DESCRIPTION.getString());
+        navigationTabs.addTab(Language.XREF.getString(), null, new JScrollPane(xref),
+                Language.XREF_DESCRIPTION.getString());
+        navigationTabs.addTab(Language.PLAINTEXT.getString(), null, new JScrollPane(text),
+                Language.PLAINTEXT_DESCRIPTION.getString());
         navigationTabs.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 if (navigationTabs.getSelectedIndex() != -1) {
-                    String title = navigationTabs.getTitleAt(navigationTabs.getSelectedIndex());
-                    if ("Structure".equals(title)) {
+                    final String title = navigationTabs.getTitleAt(navigationTabs.getSelectedIndex());
+
+                    if (Language.STRUCTURE.getString().equals(title)) {
                         structure.update(PdfReaderController.this, new OpenStructureEvent());
-                    } else if ("PlainText".equals(title)) {
+                    } else if (Language.PLAINTEXT.getString().equals(title)) {
                         text.update(PdfReaderController.this, new OpenPlainTextEvent());
+                    } else {
+                        // Intentionally empty
                     }
                 }
             }
         });
 
-        objectPanel = new PdfObjectPanel(pluginMode, parser);
+        objectPanel = new PdfObjectPanel(pluginMode);
         addObserver(objectPanel);
         objectPanel.addObserver(this);
         streamPane = new SyntaxHighlightedStreamPane(this, pluginMode);
         addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();
-        editorTabs.addTab("Stream", null, streamPane, "Stream");
-        editorTabs.addTab("XFA", null, form.getXfaTextArea(), "XFA Form XML file");
-        editorTabs.addTab("Debug info", null, debug, "Various debug-specific information");
+        editorTabs.addTab(Language.STREAM.getString(), null, streamPane, Language.STREAM.getString());
+        editorTabs.addTab(Language.FORM_XFA.getString(), null, form.getXfaTextArea(),
+                Language.FORM_XFA_LONG_FORM.getString());
+        editorTabs.addTab(Language.DEBUG_INFO.getString(), null, debug, Language.DEBUG_INFO_DESCRIPTION.getString());
     }
 
     /**
@@ -274,7 +309,7 @@ public class PdfReaderController extends Observable implements Observer {
                     nodes = loader.getNodes();
                     PdfTrailerTreeNode root = pdfTree.getRoot();
                     root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
-                    root.setUserObject("PDF Object Tree (" + loader.getLoaderName() + ")");
+                    root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
                     nodes.expandNode(root);
                     navigationTabs.setSelectedIndex(0);
                     setChanged();
@@ -303,24 +338,20 @@ public class PdfReaderController extends Observable implements Observer {
                     render(node);
                     break;
                 case RupsEvent.NODE_DELETE_DICT_CHILD_EVENT:
-                    deleteTreeNodeDictChild(
-                            ((NodeDeleteDictChildEvent.Content) event.getContent()).parent,
+                    deleteTreeNodeDictChild(((NodeDeleteDictChildEvent.Content) event.getContent()).parent,
                             ((NodeDeleteDictChildEvent.Content) event.getContent()).key);
                     break;
                 case RupsEvent.NODE_ADD_DICT_CHILD_EVENT:
-                    addTreeNodeDictChild(
-                            ((NodeAddDictChildEvent.Content) event.getContent()).parent,
+                    addTreeNodeDictChild(((NodeAddDictChildEvent.Content) event.getContent()).parent,
                             ((NodeAddDictChildEvent.Content) event.getContent()).key,
                             ((NodeAddDictChildEvent.Content) event.getContent()).index);
                     break;
                 case RupsEvent.NODE_ADD_ARRAY_CHILD_EVENT:
-                    addTreeNodeArrayChild(
-                            ((NodeAddArrayChildEvent.Content) event.getContent()).parent,
+                    addTreeNodeArrayChild(((NodeAddArrayChildEvent.Content) event.getContent()).parent,
                             ((NodeAddArrayChildEvent.Content) event.getContent()).index);
                     break;
                 case RupsEvent.NODE_DELETE_ARRAY_CHILD_EVENT:
-                    deleteTreeChild(
-                            ((NodeDeleteArrayChildEvent.Content) event.getContent()).parent,
+                    deleteTreeChild(((NodeDeleteArrayChildEvent.Content) event.getContent()).parent,
                             ((NodeDeleteArrayChildEvent.Content) event.getContent()).index);
                     break;
                 case RupsEvent.POST_NEW_INDIRECT_OBJECT_EVENT:
@@ -377,10 +408,15 @@ public class PdfReaderController extends Observable implements Observer {
      */
     public void gotoPage(int pageNumber) {
         pageNumber--;
-        if (pages == null || pages.getSelectedRow() == pageNumber)
+
+        if (pages == null
+                || pages.getSelectedRow() == pageNumber) {
             return;
-        if (pageNumber < pages.getRowCount())
+        }
+
+        if (pageNumber < pages.getRowCount()) {
             pages.setRowSelectionInterval(pageNumber, pageNumber);
+        }
     }
 
     protected void highlightChanges(CompareTool.CompareResult compareResult) {
@@ -390,19 +426,19 @@ public class PdfReaderController extends Observable implements Observer {
         }
         for (ObjectPath path : compareResult.getDifferences().keySet()) {
             PdfObjectTreeNode currentNode;
-            Stack<IndirectPathItem> indirectPath = (Stack<IndirectPathItem>) path.getIndirectPath();
+            final Stack<IndirectPathItem> indirectPath = path.getIndirectPath();
             while (!indirectPath.empty()) {
-                IndirectPathItem indirectPathItem = indirectPath.pop();
+                final IndirectPathItem indirectPathItem = indirectPath.pop();
                 currentNode = nodes.getNode(indirectPathItem.getOutObject().getObjNumber());
                 if (currentNode != null) {
                     nodes.expandNode(currentNode);
                 }
             }
-            Stack<LocalPathItem> localPath = (Stack<LocalPathItem>) path.getLocalPath();
+            final Stack<LocalPathItem> localPath = path.getLocalPath();
             currentNode = nodes.getNode(path.getBaseOutObject().getObjNumber());
             while (!localPath.empty() && currentNode != null) {
                 nodes.expandNode(currentNode);
-                LocalPathItem item = localPath.pop();
+                final LocalPathItem item = localPath.pop();
                 if (item instanceof DictPathItem) {
                     currentNode = nodes.getChildNode(currentNode, ((DictPathItem) item).getKey());
                 } else if (item instanceof ArrayPathItem) {
@@ -424,7 +460,6 @@ public class PdfReaderController extends Observable implements Observer {
         }
     }
 
-    //Todo: move all tree manipulations to PdfTree controller and make them private after the proper application structure will be implemented
     public int deleteTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key) {
         PdfObjectTreeNode child = parent.getDictionaryChildNode(key);
         int index = parent.getIndex(child);

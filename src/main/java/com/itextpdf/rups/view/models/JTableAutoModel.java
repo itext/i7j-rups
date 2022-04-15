@@ -58,7 +58,7 @@ public class JTableAutoModel extends AbstractTableModel {
     /**
      * Constructs an auto model for a JTable.
      *
-     * @param    table    a JTable that knows information about its model.
+     * @param table a JTable that knows information about its model.
      */
     public JTableAutoModel(JTableAutoModelInterface table) {
         this.table = table;

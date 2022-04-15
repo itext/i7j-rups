@@ -45,14 +45,15 @@ package com.itextpdf.rups.view.contextmenu;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import javax.swing.*;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,15 +65,7 @@ import java.io.IOException;
  */
 public class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
-    private boolean saveRawBytes;
-
-    public SaveToFilePdfTreeAction(String name) {
-        super(name);
-    }
-
-    public SaveToFilePdfTreeAction(String name, Component invoker) {
-        super(name, invoker);
-    }
+    private final boolean saveRawBytes;
 
     public SaveToFilePdfTreeAction(String name, Component invoker, boolean raw) {
         super(name, invoker);
@@ -80,37 +73,42 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
     }
 
     public void actionPerformed(ActionEvent event) {
+        final Runnable saveRunnable = new Runnable() {
+            @Override public void run() {
+                // get saving location
+                final JFileChooser fileChooser = new JFileChooser();
 
-        // get saving location
-        JFileChooser fileChooser = new JFileChooser();
-
-        if (saveRawBytes) {
-            fileChooser.setDialogTitle(fileChooser.getDialogTitle() + " raw bytes");
-        }
-
-        int choice = fileChooser.showSaveDialog(null);
-        String path;
-
-        if (choice == JFileChooser.APPROVE_OPTION) {
-            path = fileChooser.getSelectedFile().getPath();
-
-            // get the stream
-            PdfTree tree = (PdfTree) invoker;
-            TreeSelectionModel selectionModel = tree.getSelectionModel();
-            TreePath[] paths = selectionModel.getSelectionPaths();
-            PdfObjectTreeNode lastPath = (PdfObjectTreeNode) paths[0].getLastPathComponent();
-            PdfObject object = lastPath.getPdfObject();
-            PdfStream stream = (PdfStream) object;
-
-            // get the bytes and write away
-            try {
-                byte[] array = stream.getBytes(!saveRawBytes);
-                try (FileOutputStream fos = new FileOutputStream(path)) {
-                    fos.write(array);
+                if (saveRawBytes) {
+                    fileChooser.setDialogTitle(fileChooser.getDialogTitle() + Language.RAW_BYTES.getString());
                 }
-            } catch (IOException e) { // TODO : Catch this exception properly
-                LoggerHelper.error(LoggerMessages.WRITING_FILE_ERROR, e, getClass());
+
+                final int choice = fileChooser.showSaveDialog(null);
+                final String path;
+
+                if (choice == JFileChooser.APPROVE_OPTION) {
+                    path = fileChooser.getSelectedFile().getPath();
+
+                    // get the stream
+                    final PdfTree tree = (PdfTree) invoker;
+                    final TreeSelectionModel selectionModel = tree.getSelectionModel();
+                    final TreePath[] paths = selectionModel.getSelectionPaths();
+                    final PdfObjectTreeNode lastPath = (PdfObjectTreeNode) paths[0].getLastPathComponent();
+                    final PdfObject object = lastPath.getPdfObject();
+                    final PdfStream stream = (PdfStream) object;
+
+                    // get the bytes and write away
+                    try {
+                        final byte[] array = stream.getBytes(!saveRawBytes);
+                        try (FileOutputStream fos = new FileOutputStream(path)) {
+                            fos.write(array);
+                        }
+                    } catch (IOException e) { // TODO : Catch this exception properly
+                        LoggerHelper.error(Language.ERROR_WRITING_FILE.getString(), e, getClass());
+                    }
+                }
             }
-        }
+        };
+
+        SwingUtilities.invokeLater(saveRunnable);
     }
 }

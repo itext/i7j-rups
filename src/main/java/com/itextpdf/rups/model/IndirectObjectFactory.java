@@ -44,7 +44,12 @@ package com.itextpdf.rups.model;
 
 import com.itextpdf.io.util.IntHashtable;
 import com.itextpdf.kernel.exceptions.PdfException;
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNull;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.view.Language;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -97,6 +102,7 @@ public class IndirectObjectFactory {
             forbidReleaseField = PdfObject.class.getDeclaredField(FIELD_NAME);
             forbidReleaseField.setAccessible(true);
         } catch (NoSuchFieldException | NoSuchMethodException | SecurityException ignored) {
+            // left intentionally empty
         }
     }
 
@@ -148,11 +154,11 @@ public class IndirectObjectFactory {
             try {
                 object = document.getPdfObject(current);
             } catch (PdfException ignored) {
-                LoggerHelper.info("Attempt to read the object failed. The object number is: " + current, getClass());
+                LoggerHelper.info(String.format(Language.ERROR_READING_OBJECT_NUMBER.getString(), current), getClass());
             }
 
             if (object != null) {
-                int idx = size();
+                final int idx = size();
                 idxToRef.put(idx, current);
                 refToIdx.put(current, idx);
                 store(object);
@@ -168,11 +174,11 @@ public class IndirectObjectFactory {
      * that's why we'll only store the objects that are necessary
      * to construct other objects (for instance the page table).
      *
-     * @param    object    an object we might want to store
+     * @param object an object we might want to store
      */
     private void store(PdfObject object) {
         if (object.isDictionary()) {
-            PdfDictionary dict = (PdfDictionary) object;
+            final PdfDictionary dict = (PdfDictionary) object;
             if (PdfName.Page.equals(dict.get(PdfName.Type, false))) {
                 objects.add(dict);
                 isLoaded.add(true);
@@ -256,7 +262,7 @@ public class IndirectObjectFactory {
      */
     public PdfObject loadObjectByReference(int ref) {
         PdfObject object = getObjectByReference(ref);
-        int idx = getIndexByRef(ref);
+        final int idx = getIndexByRef(ref);
         if (object instanceof PdfNull && !isLoaded.get(idx)) {
             object = document.getPdfObject(ref);
             objects.set(idx, object);
@@ -276,10 +282,13 @@ public class IndirectObjectFactory {
     void addNewIndirectObject(PdfObject object) {
         object.makeIndirect(document);
         ++n;
-        int idx = size();
+        final int idx = size();
         idxToRef.put(idx, object.getIndirectReference().getObjNumber());
         refToIdx.put(object.getIndirectReference().getObjNumber(), idx);
         objects.add(object);
-        LoggerHelper.info("New indirect object was successfully created. Its object number is: " + object.getIndirectReference().getObjNumber(), getClass());
+        LoggerHelper.info(
+                String.format(Language.INDIRECT_OBJECT_CREATION_SUCCESS.getString(),
+                        object.getIndirectReference().getObjNumber()),
+                getClass());
     }
 }

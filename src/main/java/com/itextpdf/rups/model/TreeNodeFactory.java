@@ -42,11 +42,18 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNull;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A factory that creates TreeNode objects corresponding with PDF objects.
@@ -60,7 +67,7 @@ public class TreeNodeFactory {
     /**
      * An list containing the nodes of every indirect object.
      */
-    protected ArrayList<PdfObjectTreeNode> nodes = new ArrayList<PdfObjectTreeNode>();
+    private final List<PdfObjectTreeNode> nodes = new ArrayList<>();
 
     /**
      * Creates a factory that can produce TreeNode objects
@@ -71,7 +78,7 @@ public class TreeNodeFactory {
     public TreeNodeFactory(IndirectObjectFactory objects) {
         this.objects = objects;
         for (int i = 0; i < objects.size(); i++) {
-            int ref = objects.getRefByIndex(i);
+            final int ref = objects.getRefByIndex(i);
             nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDF_NULL, ref));
         }
     }
@@ -98,7 +105,7 @@ public class TreeNodeFactory {
             ref = node.getPdfObject().getIndirectReference();
         }
         if (ref != null) {
-            int idx = objects.getIndexByRef(ref.getObjNumber());
+            final int idx = objects.getIndexByRef(ref.getObjNumber());
             nodes.set(idx, node);
         }
     }
@@ -109,20 +116,23 @@ public class TreeNodeFactory {
      * @param node the parent node
      */
     public void expandNode(PdfObjectTreeNode node) {
-        if (node.getChildCount() > 0) return;
-        PdfObject object = node.getPdfObject();
+        if (node.getChildCount() > 0) {
+            return;
+        }
+        final PdfObject object = node.getPdfObject();
         PdfObjectTreeNode leaf;
 
         switch (object.getType()) {
             case PdfObject.INDIRECT_REFERENCE:
-                PdfIndirectReference ref = (PdfIndirectReference) object;
+                final PdfIndirectReference ref = (PdfIndirectReference) object;
                 leaf = getNode(ref.getObjNumber());
                 addNodes(node, leaf);
-                if (leaf instanceof PdfPagesTreeNode)
+                if (leaf instanceof PdfPagesTreeNode) {
                     expandNode(leaf);
+                }
                 break;
             case PdfObject.ARRAY:
-                PdfArray array = (PdfArray) object;
+                final PdfArray array = (PdfArray) object;
                 for (int i = 0; i < array.size(); ++i) {
                     leaf = PdfObjectTreeNode.getInstance(array.get(i, false));
                     associateIfIndirect(leaf);
@@ -132,7 +142,7 @@ public class TreeNodeFactory {
                 break;
             case PdfObject.DICTIONARY:
             case PdfObject.STREAM:
-                PdfDictionary dict = (PdfDictionary) object;
+                final PdfDictionary dict = (PdfDictionary) object;
                 for (PdfName key : dict.keySet()) {
                     leaf = PdfObjectTreeNode.getInstance(dict, key);
                     associateIfIndirect(leaf);
@@ -186,6 +196,6 @@ public class TreeNodeFactory {
     public void addNewIndirectObject(PdfObject object) {
         objects.addNewIndirectObject(object);
         nodes.add(PdfObjectTreeNode.getInstance(object, object.getIndirectReference().getObjNumber()));
-        LoggerHelper.info("Tree node was successfully created for new indirect object", getClass());
+        LoggerHelper.info(Language.LOG_TREE_NODE_CREATED.getString(), getClass());
     }
 }

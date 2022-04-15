@@ -42,9 +42,13 @@
  */
 package com.itextpdf.rups.view.itext.treenodes;
 
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
@@ -57,22 +61,36 @@ import java.util.Enumeration;
  */
 public class PdfObjectTreeNode extends IconTreeNode {
 
+    private static final String ARRAY_ICON = "array.png";
+    private static final String BOOLEAN_ICON = "boolean.png";
+    private static final String DICTIONARY_ICON = "dictionary.png";
+    private static final String NAME_ICON = "name.png";
+    private static final String NULL_ICON = "null.png";
+    private static final String NUMBER_ICON = "number.png";
+    private static final String REF_ICON = "ref.png";
+    private static final String REF_RECURSIVE_ICON = "ref_recursive.png";
+    private static final String STREAM_ICON = "stream.png";
+    private static final String STRING_ICON = "string.png";
+
     /**
-     * the PDF object corresponding with this node.
-     */
-    protected PdfObject object;
-    /**
-     * the key if the parent of this node is a dictionary.
-     */
-    protected PdfName key = null;
-    /**
-     * if the object is indirect, the number of the PDF object.
+     * If the object is indirect, the number of the PDF object.
      */
     protected int number = -1;
+
     /**
-     * indicates if the object is indirect and recursive.
+     * Indicates if the object is indirect and recursive.
      */
     protected boolean recursive = false;
+
+    /**
+     * The key if the parent of this node is a dictionary.
+     */
+    protected PdfName key = null;
+
+    /**
+     * The PDF object corresponding with this node.
+     */
+    protected PdfObject object;
 
     /**
      * Creates a tree node for a PDF object.
@@ -84,35 +102,36 @@ public class PdfObjectTreeNode extends IconTreeNode {
         this.object = object;
         switch (object.getType()) {
             case PdfObject.INDIRECT_REFERENCE:
-                if (isRecursive())
-                    icon = IconFetcher.getIcon("ref_recursive.png");
-                else
-                    icon = IconFetcher.getIcon("ref.png");
+                if (isRecursive()) {
+                    icon = IconFetcher.getIcon(REF_RECURSIVE_ICON);
+                } else {
+                    icon = IconFetcher.getIcon(REF_ICON);
+                }
                 break;
             case PdfObject.ARRAY:
-                icon = IconFetcher.getIcon("array.png");
+                icon = IconFetcher.getIcon(ARRAY_ICON);
                 break;
             case PdfObject.DICTIONARY:
-                icon = IconFetcher.getIcon("dictionary.png");
+                icon = IconFetcher.getIcon(DICTIONARY_ICON);
                 break;
             case PdfObject.STREAM:
-                icon = IconFetcher.getIcon("stream.png");
+                icon = IconFetcher.getIcon(STREAM_ICON);
                 break;
             case PdfObject.BOOLEAN:
-                icon = IconFetcher.getIcon("boolean.png");
+                icon = IconFetcher.getIcon(BOOLEAN_ICON);
                 break;
             case PdfObject.NAME:
-                icon = IconFetcher.getIcon("name.png");
+                icon = IconFetcher.getIcon(NAME_ICON);
                 break;
             case PdfObject.LITERAL:
             case PdfObject.NULL:
-                icon = IconFetcher.getIcon("null.png");
+                icon = IconFetcher.getIcon(NULL_ICON);
                 break;
             case PdfObject.NUMBER:
-                icon = IconFetcher.getIcon("number.png");
+                icon = IconFetcher.getIcon(NUMBER_ICON);
                 break;
             case PdfObject.STRING:
-                icon = IconFetcher.getIcon("string.png");
+                icon = IconFetcher.getIcon(STRING_ICON);
                 break;
         }
     }
@@ -154,7 +173,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * @return a PdfObjectTreeNode
      */
     public static PdfObjectTreeNode getInstance(PdfObject object, int number) {
-        PdfObjectTreeNode node = getInstance(object);
+        final PdfObjectTreeNode node = getInstance(object);
         node.number = number;
         return node;
     }
@@ -167,7 +186,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * @return a PdfObjectTreeNode
      */
     public static PdfObjectTreeNode getInstance(PdfDictionary dict, PdfName key) {
-        PdfObjectTreeNode node = getInstance(dict.get(key, false));
+        final PdfObjectTreeNode node = getInstance(dict.get(key, false));
         node.setUserObject(getDictionaryEntryCaption(dict, key));
         node.key = key;
         return node;
@@ -241,7 +260,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * @return find node or {@code null}
      */
     public PdfObjectTreeNode getDictionaryChildNode(PdfName key) {
-        Enumeration<TreeNode> children = breadthFirstEnumeration();
+        final Enumeration<TreeNode> children = breadthFirstEnumeration();
         PdfObjectTreeNode child;
         while (children.hasMoreElements()) {
             child = (PdfObjectTreeNode) children.nextElement();
@@ -284,7 +303,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      *
      * @return true if the node is used recursively.
      */
-    public boolean isRecursive() {
+    public final boolean isRecursive() {
         return recursive;
     }
 
@@ -295,28 +314,31 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * @return a caption for a PDF object
      */
     public static String getCaption(PdfObject object) {
-        if (object == null)
-            return "null";
+        if (object == null) {
+            return Language.NULL_AS_TEXT.getString();
+        }
         PdfName type;
         switch (object.getType()) {
             case PdfObject.INDIRECT_REFERENCE: {
                 String reffedCaption = getCaption(((PdfIndirectReference) object).getRefersTo(false));
-                return object.toString() + " -> " + reffedCaption;
+                return object + " -> " + reffedCaption;
             }
             case PdfObject.ARRAY:
-                return "Array";
+                return Language.ARRAY.getString();
             case PdfObject.STREAM:
                 type = ((PdfDictionary) object).getAsName(PdfName.Type);
-                if (type == null)
-                    return "Stream";
-                return "Stream of type: " + type;
+                if (type == null) {
+                    return Language.STREAM.getString();
+                }
+                return String.format(Language.STREAM_OF_TYPE.getString(), type);
             case PdfObject.STRING:
                 return ((PdfString) object).toUnicodeString();
             case PdfObject.DICTIONARY:
                 type = ((PdfDictionary) object).getAsName(PdfName.Type);
-                if (type == null)
-                    return "Dictionary";
-                return "Dictionary of type: " + type;
+                if (type == null) {
+                    return Language.DICTIONARY.getString();
+                }
+                return String.format(Language.DICTIONARY_OF_TYPE.getString(), type);
             default:
                 return object.toString();
         }
@@ -330,9 +352,9 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * @return a caption for the object corresponding with the key in the dictionary.
      */
     public static String getDictionaryEntryCaption(PdfDictionary dict, PdfName key) {
-        StringBuilder buf = new StringBuilder(key.toString());
+        final StringBuilder buf = new StringBuilder(key.toString());
         buf.append(": ");
-        PdfObject valObj = dict.get(key, false);
+        final PdfObject valObj = dict.get(key, false);
         buf.append(getCaption(valObj));
         return buf.toString();
     }
@@ -355,7 +377,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
                 }
             }
         } catch (NullPointerException e) {
-            LoggerHelper.warn(LoggerMessages.PARENT_NODE_NULL_ERROR, e, getClass());
+            LoggerHelper.warn(Language.ERROR_PARENT_NULL.getString(), e, getClass());
         }
         return null;
     }

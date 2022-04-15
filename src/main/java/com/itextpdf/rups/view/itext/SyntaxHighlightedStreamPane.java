@@ -50,7 +50,7 @@ import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
@@ -58,7 +58,13 @@ import com.itextpdf.rups.view.itext.contentstream.ContentStreamWriter;
 import com.itextpdf.rups.view.itext.contentstream.StyledSyntaxDocument;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
+import javax.swing.ToolTipManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
@@ -67,7 +73,7 @@ import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -98,7 +104,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     protected UndoManager manager;
 
     //Todo: Remove that field after proper application structure will be implemented.
-    private PdfReaderController controller;
+    private final PdfReaderController controller;
 
     static {
         try {
@@ -106,7 +112,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             pdfStreamGetInputStreamMethod.setAccessible(true);
         } catch (NoSuchMethodException | SecurityException any) {
             pdfStreamGetInputStreamMethod = null;
-            LoggerHelper.error(LoggerMessages.REFLECTION_PDFSTREAM_ERROR, any, PdfReaderController.class);
+            LoggerHelper.error(Language.ERROR_REFLECTION_PDF_STREAM.getString(), any, PdfReaderController.class);
         }
     }
 
@@ -130,8 +136,10 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         manager = new UndoManager();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
         text.getDocument().addUndoableEditListener(manager);
-        text.registerKeyboardAction(new UndoAction(manager), KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
-        text.registerKeyboardAction(new RedoAction(manager), KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+        text.registerKeyboardAction(new UndoAction(manager),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+        text.registerKeyboardAction(new RedoAction(manager),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
     }
 
     /**
@@ -156,18 +164,19 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             clearPane();
             return;
         }
-        PdfStream stream = (PdfStream) target.getPdfObject();
+        final PdfStream stream = (PdfStream) target.getPdfObject();
         text.setText("");
         //Check if stream is image
         if (PdfName.Image.equals(stream.getAsName(PdfName.Subtype))) {
             try {
                 //Convert byte array back to Image
-                if (!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber())
+                if (!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber()) {
                     return;
+                }
                 PdfImageXObject pimg = new PdfImageXObject(stream);
                 BufferedImage img = pimg.getBufferedImage();
                 if (img == null) {
-                    text.setText("Image can't be loaded.");
+                    text.setText(Language.ERROR_LOADING_IMAGE.getString());
                 } else {
                     //Show image in textpane
                     StyledDocument doc = (StyledDocument) text.getDocument();
@@ -175,15 +184,15 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     StyleConstants.setIcon(style, new ImageIcon(img));
 
                     try {
-                        doc.insertString(doc.getLength(), "ignored text", style);
+                        doc.insertString(doc.getLength(), Language.IGNORED_TEXT.getString(), style);
                         doc.insertString(doc.getLength(), "\n", SimpleAttributeSet.EMPTY);
                         text.insertComponent(SaveImageAction.createSaveImageButton(img));
                     } catch (BadLocationException e) {
-                        LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+                        LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
                     }
                 }
             } catch (IOException e) {
-                LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+                LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
             }
             setTextEditableRoutine(false);
         } else if (stream.get(PdfName.Length1) != null) {
@@ -210,12 +219,12 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         if (controller != null && ((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
             controller.deleteTreeNodeDictChild(target, PdfName.Filter);
         }
-        int sizeEst = text.getText().length();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);
+        final int sizeEst = text.getText().length();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);
         try {
             new ContentStreamWriter(baos).write(text.getDocument());
         } catch (IOException e) {
-            LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+            LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
         }
         ((PdfStream) target.getPdfObject()).setData(baos.toByteArray());
         if (controller != null) {
@@ -224,15 +233,15 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         manager.setLimit(MAX_NUMBER_OF_EDITS);
     }
 
-
     private void setTextEditableRoutine(boolean editable) {
         text.setEditable(editable);
-        if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) && (target.getPdfObject() instanceof PdfStream)) {
+        if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) &&
+                (target.getPdfObject() instanceof PdfStream)) {
             try {
                 popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target.getPdfObject()) == null);
                 return;
             } catch (Exception any) {
-                LoggerHelper.error(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR, any, getClass());
+                LoggerHelper.error(Language.ERROR_CANNOT_CHECK_NULL_FOR_INPUT_STREAM.getString(), any, getClass());
             }
         }
         popupMenu.setSaveToStreamEnabled(false);
@@ -247,7 +256,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     }
 
     private void renderGenericContentStream(PdfStream stream) {
-        StyledSyntaxDocument doc = (StyledSyntaxDocument) text.getDocument();
+        final StyledSyntaxDocument doc = (StyledSyntaxDocument) text.getDocument();
         setTextEditableRoutine(true);
 
         byte[] bb = null;
@@ -255,7 +264,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             bb = stream.getBytes();
             doc.processContentStream(bb);
         } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
-            LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
+            LoggerHelper.warn(Language.ERROR_PARSING_PDF_STREAM.getString(), e, getClass());
             if (bb != null) {
                 text.setText(new String(bb, StandardCharsets.ISO_8859_1));
             }
@@ -277,7 +286,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
         @Override
         public String getToolTipText(MouseEvent ev) {
-            String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
+            final String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
             return toolTip == null ? super.getToolTipText(ev) : toolTip;
         }
     }

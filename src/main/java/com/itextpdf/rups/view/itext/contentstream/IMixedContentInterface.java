@@ -51,7 +51,7 @@ public interface IMixedContentInterface {
      * Check if a position in the textual (on-screen) representation of the document actually
      * points to textual stream content.
      *
-     * @param pos  the position in the textual representation of the document to check
+     * @param pos the position in the textual representation of the document to check
      * @return {@code false} if binary stream content, {@code true} otherwise
      */
     boolean isTextual(int pos);
@@ -60,7 +60,7 @@ public interface IMixedContentInterface {
      * Check if a position in the textual (on-screen) representation of the document
      * points to editable binary content that is represented hexadecimally.
      *
-     * @param pos  the position in the textual representation of the document to check
+     * @param pos the position in the textual representation of the document to check
      * @return {@code false} if hex-editable stream content, {@code true} otherwise
      */
     boolean isHexEditable(int pos);

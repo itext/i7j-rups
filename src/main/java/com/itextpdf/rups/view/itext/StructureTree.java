@@ -48,12 +48,14 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
 
-import javax.swing.*;
+import javax.swing.JTree;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -70,6 +72,10 @@ import java.util.concurrent.ExecutionException;
  * the PDF file (if any).
  */
 public class StructureTree extends JTree implements TreeSelectionListener, Observer {
+
+    private static final String BULLET_GO_ICON = "bullet_go.png";
+
+    private static final String CHART_ORG_ICON = "chart_organisation.png";
 
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
@@ -92,7 +98,7 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
 
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
+            final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
                     loader = null;
@@ -117,19 +123,20 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
                         break;
                     }
                     loaded = true;
-                    setModel(new DefaultTreeModel(new DefaultMutableTreeNode("Loading...")));
+                    setModel(new DefaultTreeModel(new DefaultMutableTreeNode(Language.LOADING.getString())));
                     worker = new SwingWorker<TreeModel, Integer>() {
                         @Override
                         protected TreeModel doInBackground() {
-                            TreeNodeFactory factory = loader.getNodes();
-                            PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-                            PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                            PdfObjectTreeNode structuretree = factory.getChildNode(catalog, PdfName.StructTreeRoot);
+                            final TreeNodeFactory factory = loader.getNodes();
+                            final PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+                            final PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+                            final PdfObjectTreeNode structuretree =
+                                    factory.getChildNode(catalog, PdfName.StructTreeRoot);
                             if (structuretree == null) {
                                 return new DefaultTreeModel(new StructureTreeNode());
                             }
-                            StructureTreeNode root = new StructureTreeNode();
-                            PdfObjectTreeNode kids = factory.getChildNode(structuretree, PdfName.K);
+                            final StructureTreeNode root = new StructureTreeNode();
+                            final PdfObjectTreeNode kids = factory.getChildNode(structuretree, PdfName.K);
                             loadKids(factory, root, kids);
                             return new DefaultTreeModel(root);
                         }
@@ -138,7 +145,7 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
                         protected void done() {
                             try {
                                 if (!isCancelled()) {
-                                    TreeModel model = this.get();
+                                    final TreeModel model = this.get();
                                     StructureTree.this.setModel(model);
                                 }
                             } catch (InterruptedException any) {
@@ -163,40 +170,47 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
         }
         factory.expandNode(object_node);
         if (object_node.isDictionary()) {
-            PdfDictionary dict = (PdfDictionary) object_node.getPdfObject();
+            final PdfDictionary dict = (PdfDictionary) object_node.getPdfObject();
             if (PdfName.MCR.equals(dict.getAsName(PdfName.Type))) {
-                structure_node.add(new StructureTreeNode(factory.getChildNode(object_node, PdfName.MCID), "bullet_go.png"));
+                structure_node.add(
+                        new StructureTreeNode(factory.getChildNode(object_node, PdfName.MCID), BULLET_GO_ICON));
                 return;
             }
             if (PdfName.OBJR.equals(dict.getAsName(PdfName.Type))) {
-                structure_node.add(new StructureTreeNode(factory.getChildNode(object_node, PdfName.Obj), "bullet_go.png"));
+                structure_node.add(
+                        new StructureTreeNode(factory.getChildNode(object_node, PdfName.Obj), BULLET_GO_ICON)
+                );
                 return;
             }
-            StructureTreeNode leaf = new StructureTreeNode(object_node, "chart_organisation.png");
+
+            final StructureTreeNode leaf = new StructureTreeNode(object_node, CHART_ORG_ICON);
             structure_node.add(leaf);
-            PdfObjectTreeNode kids = factory.getChildNode(object_node, PdfName.K);
+            final PdfObjectTreeNode kids = factory.getChildNode(object_node, PdfName.K);
             loadKids(factory, leaf, kids);
         } else if (object_node.isArray()) {
-            Enumeration<TreeNode> children = object_node.children();
+            final Enumeration<TreeNode> children = object_node.children();
             while (children.hasMoreElements()) {
                 loadKids(factory, structure_node, (PdfObjectTreeNode) children.nextElement());
             }
         } else if (object_node.isIndirectReference()) {
             loadKids(factory, structure_node, (PdfObjectTreeNode) object_node.getFirstChild());
         } else {
-            StructureTreeNode leaf = new StructureTreeNode(object_node, "bullet_go.png");
+            final StructureTreeNode leaf = new StructureTreeNode(object_node, BULLET_GO_ICON);
             structure_node.add(leaf);
         }
     }
 
     public void valueChanged(TreeSelectionEvent e) {
-        if (controller == null)
+        if (controller == null) {
             return;
-        StructureTreeNode selectednode = (StructureTreeNode) this.getLastSelectedPathComponent();
-        if (selectednode == null)
+        }
+        final StructureTreeNode selectednode = (StructureTreeNode) this.getLastSelectedPathComponent();
+        if (selectednode == null) {
             return;
-        PdfObjectTreeNode node = selectednode.getCorrespondingPdfObjectNode();
-        if (node != null)
+        }
+        final PdfObjectTreeNode node = selectednode.getCorrespondingPdfObjectNode();
+        if (node != null) {
             controller.selectNode(node);
+        }
     }
 }

@@ -44,9 +44,10 @@ package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.view.Language;
 
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Component;
 import java.util.Observer;
 
 public class FileOpenAction extends FileChooserAction {
@@ -58,7 +59,7 @@ public class FileOpenAction extends FileChooserAction {
      * @param parent   a parent Component for chooser dialog
      */
     public FileOpenAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, "Open", filter, parent);
+        super(observer, Language.OPEN.getString(), filter, parent);
     }
 
     @Override

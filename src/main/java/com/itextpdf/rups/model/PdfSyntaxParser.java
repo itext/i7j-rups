@@ -42,14 +42,20 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.commons.exceptions.ITextException;
 import com.itextpdf.io.source.PdfTokenizer;
 import com.itextpdf.io.source.RandomAccessFileOrArray;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfBoolean;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfLiteral;
+import com.itextpdf.kernel.pdf.PdfNull;
+import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
+import com.itextpdf.rups.view.Language;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JOptionPane;
+import java.awt.Component;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,7 +66,7 @@ public class PdfSyntaxParser {
 
     private PdfDocument document;
     private boolean isValid = true;
-    private List<PdfLiteral> unrecognizedChunks = new LinkedList<>();
+    private final List<PdfLiteral> unrecognizedChunks = new LinkedList<>();
 
     public void setDocument(PdfDocument document) {
         this.document = document;
@@ -79,27 +85,28 @@ public class PdfSyntaxParser {
         unrecognizedChunks.clear();
         openArraysCount = 0;
         openDictionaryCount = 0;
-        byte[] bytesToParse = s.getBytes();
-        RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
-        PdfTokenizer tokenizer = new PdfTokenizer(new RandomAccessFileOrArray(factory.createSource(bytesToParse)));
-        UnderlineParser parser = new UnderlineParser(tokenizer);
+        final byte[] bytesToParse = s.getBytes();
+        final RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
+        final PdfTokenizer tokenizer =
+                new PdfTokenizer(new RandomAccessFileOrArray(factory.createSource(bytesToParse)));
+        final UnderlineParser parser = new UnderlineParser(tokenizer);
         PdfObject result;
         try {
             result = parser.readObject();
             if (parser.nextValidToken()) {
-                LoggerHelper.warn(LoggerMessages.PARSED_INPUT_WAS_TRUNCATED, getClass());
+                LoggerHelper.warn(Language.ERROR_TRUNCATED_INPUT.getString(), getClass());
             }
             if (openArraysCount != 0) {
-                throw new RuntimeException(LoggerMessages.INCORRECT_SEQUENCE_OF_ARRAY_BRACKETS);
+                throw new ITextException(Language.ERROR_INCORRECT_ARRAY_BRACKETS.getString());
             }
             if (openDictionaryCount != 0) {
-                throw new RuntimeException(LoggerMessages.INCORRECT_SEQUENCE_OF_DICTIONARY_BRACKETS);
+                throw new ITextException(Language.ERROR_INCORRECT_DICTIONARY_BRACKETS.getString());
             }
             if (!isValid) {
                 int input = JOptionPane.showConfirmDialog(
                         requester,
-                        getUnknownValues() + "Do you want to keep those chunks as Literals?",
-                        "Unrecognized chunks in the input!",
+                        getUnknownValues() + Language.KEEP_CHUNKS_AS_LITERALS.getString(),
+                        Language.TITLE_UNRECOGNIZED_CHUNKS.getString(),
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
                 if (input != JOptionPane.YES_OPTION || failOnError) {
@@ -107,15 +114,15 @@ public class PdfSyntaxParser {
                 }
             }
         } catch (IOException | RuntimeException any) {
-            LoggerHelper.warn(LoggerMessages.CANNOT_PARSE_PDF_OBJECT, any, getClass());
+            LoggerHelper.warn(Language.ERROR_PARSING_PDF_OBJECT.getString(), any, getClass());
             result = null;
         }
         return result;
     }
 
     private String getUnknownValues() {
-        StringBuilder builder = new StringBuilder();
-        for (PdfLiteral literal : unrecognizedChunks) {
+        final StringBuilder builder = new StringBuilder();
+        for (final PdfLiteral literal : unrecognizedChunks) {
             builder.append(literal.toString());
             builder.append("\n");
         }
@@ -123,14 +130,12 @@ public class PdfSyntaxParser {
     }
 
     private void addUnknownValue(PdfLiteral value) {
-        LoggerHelper.warn(LoggerMessages.UNEXPECTED_CHUNK_OF_SYNTAX + " : " + value, getClass());
+        LoggerHelper.warn(Language.ERROR_UNEXPECTED_SYNTAX.getString() + " : " + value, getClass());
         unrecognizedChunks.add(value);
         isValid = false;
     }
 
     private class UnderlineParser extends PdfCanvasParser {
-
-        private PdfObject tempObject;
 
         /**
          * Creates a new instance of PdfContentParser
@@ -149,7 +154,7 @@ public class PdfSyntaxParser {
          */
         @Override
         public PdfObject readObject() throws IOException {
-            tempObject = super.readObject();
+            final PdfObject tempObject = super.readObject();
             //Additional checks
             if (tempObject.getType() == PdfObject.LITERAL) {
                 final PdfTokenizer.TokenType type = getTokeniser().getTokenType();
@@ -160,8 +165,9 @@ public class PdfSyntaxParser {
                     case EndDic:
                         break;
                     case Ref:
-                        if (document == null)
-                            throw new RuntimeException(LoggerMessages.EDITING_REFERENCE_NO_DOCUMENT_ERROR);
+                        if (document == null) {
+                            throw new ITextException(Language.ERROR_EDITING_UNSPECIFIED_DOCUMENT.getString());
+                        }
                         return document.getPdfObject(getTokeniser().getObjNr()).getIndirectReference();
                     default:
                         if (getTokeniser().tokenValueEqualsTo(PdfTokenizer.Null)) {
@@ -198,7 +204,8 @@ public class PdfSyntaxParser {
                     break;
                 case Obj:
                 case EndObj:
-                    throw new RuntimeException(getTokeniser().getTokenType() + LoggerMessages.CHUNK_OF_THIS_TYPE_NOT_ALLOWED_HERE);
+                    throw new ITextException(
+                            getTokeniser().getTokenType() + Language.ERROR_ILLEGAL_CHUNK.getString());
                 case EndOfFile:
                     return false;
                 default:

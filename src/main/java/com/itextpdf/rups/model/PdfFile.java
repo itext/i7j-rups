@@ -42,17 +42,24 @@
  */
 package com.itextpdf.rups.model;
 
+import com.ibm.icu.text.StringPrep;
+import com.ibm.icu.text.StringPrepParseException;
 import com.itextpdf.kernel.exceptions.BadPasswordException;
 import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+import com.itextpdf.rups.view.Language;
 
-import com.ibm.icu.text.StringPrepParseException;
-import com.ibm.icu.text.StringPrep;
-import javax.swing.*;
-import java.io.*;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -88,33 +95,12 @@ public class PdfFile {
 
     protected ByteArrayOutputStream baos = null;
 
-    protected boolean readOnly = false;
-
     public static final int MAX_PASSWORD_BYTE_LENGTH = 127;
 
     /**
      * Constructs a PdfFile object.
      *
-     * @param file the File to read
-     * @throws IOException  an I/O exception
-     * @throws PdfException a PDF exception
-     */
-    public PdfFile(File file) throws IOException, PdfException {
-        if (file == null)
-            throw new IOException("No file selected.");
-        directory = file.getParentFile();
-        filename = file.getName();
-        try {
-            readFile(new FileInputStream(file), false, readOnly);
-        } catch (BadPasswordException bpe) {
-            readFile(new FileInputStream(file), true, readOnly);
-        }
-    }
-
-    /**
-     * Constructs a PdfFile object.
-     *
-     * @param file the byte[] to read
+     * @param file     the byte[] to read
      * @param readOnly read only
      * @throws IOException  an I/O exception
      * @throws PdfException a PDF exception
@@ -130,13 +116,13 @@ public class PdfFile {
     }
 
     private static byte[] preparePasswordForOpen(String inputPassword) {
-        StringPrep prep = StringPrep.getInstance(StringPrep.RFC4013_SASLPREP);
-        String prepped;
+        final StringPrep prep = StringPrep.getInstance(StringPrep.RFC4013_SASLPREP);
+        final String prepped;
         try {
             // we're invoking StringPrep to open a document -> pass ALLOW_UNASSIGNED
             prepped = prep.prepare(inputPassword, StringPrep.ALLOW_UNASSIGNED);
         } catch (StringPrepParseException e) {
-            throw new PdfException("Failed to process password", e);
+            throw new PdfException(Language.ERROR_PASSWORD.getString(), e);
         }
         byte[] resultingBytes = prepped.getBytes(StandardCharsets.UTF_8);
         if (resultingBytes.length <= MAX_PASSWORD_BYTE_LENGTH) {
@@ -151,16 +137,17 @@ public class PdfFile {
     private static byte[] requestPassword() {
         final JPasswordField passwordField = new JPasswordField(32);
 
-        JOptionPane pane = new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-            @Override
-            public void selectInitialValue() {
-                passwordField.requestFocusInWindow();
-            }
-        };
+        final JOptionPane pane =
+                new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
+                    @Override
+                    public void selectInitialValue() {
+                        passwordField.requestFocusInWindow();
+                    }
+                };
 
-        pane.createDialog(null, "Enter the User or Owner Password of this PDF file").setVisible(true);
+        pane.createDialog(null, Language.ENTER_PASSWORD.getString()).setVisible(true);
 
-        String passwordString = new String(passwordField.getPassword());
+        final String passwordString = new String(passwordField.getPassword());
         return preparePasswordForOpen(passwordString);
     }
 
@@ -175,10 +162,10 @@ public class PdfFile {
      */
     protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
         // reading the file into PdfReader
-        PdfReader reader;
-        PdfWriter writer;
+        final PdfReader reader;
+        final PdfWriter writer;
         permissions = new Permissions();
-        ReaderProperties readerProps = new ReaderProperties();
+        final ReaderProperties readerProps = new ReaderProperties();
         final byte[] password;
         if (checkPass) {
             password = requestPassword();
@@ -195,18 +182,18 @@ public class PdfFile {
             document = new PdfDocument(reader, writer);
         }
         // we have some extra work to do if the document was encrypted
-        if(reader.isEncrypted()) {
+        if (reader.isEncrypted()) {
             permissions.setEncrypted(true);
             permissions.setCryptoMode(reader.getCryptoMode());
             permissions.setPermissions((int) reader.getPermissions());
-            if(password != null) {
+            if (password != null) {
                 if (reader.isOpenedWithFullPermission()) {
                     permissions.setOwnerPassword(password);
                     permissions.setUserPassword(reader.computeUserPassword());
                 } else {
                     JOptionPane.showMessageDialog(
                             null,
-                            "You opened the document using the user password instead of the owner password.");
+                            Language.ERROR_WRONG_PASSWORD.getString());
                 }
             }
         } else {
@@ -242,7 +229,7 @@ public class PdfFile {
         try {
             return new String(rawContent, "Cp1252");
         } catch (UnsupportedEncodingException e) {
-            return "Wrong Encoding";
+            return Language.ERROR_WRONG_ENCODING.getString();
         }
     }
 

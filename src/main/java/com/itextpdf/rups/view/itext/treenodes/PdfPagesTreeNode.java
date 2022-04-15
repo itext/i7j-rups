@@ -48,12 +48,15 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
  * A tree node corresponding with a Pages dictionary in a PDF file.
  */
 public class PdfPagesTreeNode extends PdfObjectTreeNode {
+
+    private static final String PAGES_ICON = "pages.png";
+
     /**
      * Creates a tree node for a Pages dictionary.
      *
-     * @param    object    a PdfDictionary of type pages.
+     * @param object a PdfDictionary of type pages.
      */
     public PdfPagesTreeNode(PdfDictionary object) {
-        super("pages.png", object);
+        super(PAGES_ICON, object);
     }
 }

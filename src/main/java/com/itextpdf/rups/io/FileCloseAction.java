@@ -62,7 +62,7 @@ public class FileCloseAction implements ActionListener {
     /**
      * Creates the close action.
      *
-     * @param    observer    the object that expects you to close a file.
+     * @param observer the object that expects you to close a file.
      */
     public FileCloseAction(Observer observer) {
         this.observer = observer;

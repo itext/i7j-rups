@@ -45,12 +45,15 @@ package com.itextpdf.rups.view.itext.treenodes;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
 /**
  * A node in the OutlineTree.
  */
 public class OutlineTreeNode extends IconTreeNode {
+
+    private static final String OUTLINE_ICON = "outline.png";
 
     /**
      * The corresponding tree node in the PdfTree.
@@ -61,18 +64,18 @@ public class OutlineTreeNode extends IconTreeNode {
      * Creates the root node for the OutlineTree.
      */
     public OutlineTreeNode() {
-        super("outline.png", "Bookmarks");
+        super(OUTLINE_ICON, Language.BOOKMARKS.getString());
     }
 
     /**
      * Creates a node corresponding with a node in the PdfTree.
      *
-     * @param    node    a corresponding node
+     * @param node a corresponding node
      */
     public OutlineTreeNode(PdfObjectTreeNode node) {
-        super("outline.png");
+        super(OUTLINE_ICON);
         this.object_node = node;
-        PdfDictionary dict = (PdfDictionary) node.getPdfObject();
+        final PdfDictionary dict = (PdfDictionary) node.getPdfObject();
         this.setUserObject(dict.get(PdfName.Title, false));
     }
 
@@ -88,10 +91,12 @@ public class OutlineTreeNode extends IconTreeNode {
 
     @Override
     public String toString() {
-        if (userObject == null)
+        if (userObject == null) {
             return "";
-        if (userObject instanceof PdfObject)
+        }
+        if (userObject instanceof PdfObject) {
             return PdfObjectTreeNode.getCaption((PdfObject) userObject);
+        }
         return userObject.toString();
     }
 }

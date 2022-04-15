@@ -52,7 +52,7 @@ import com.itextpdf.rups.view.itext.treenodes.OutlineTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
@@ -106,8 +106,9 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
                     }
                     OutlineTreeNode root = new OutlineTreeNode();
                     PdfObjectTreeNode first = factory.getChildNode(outline, PdfName.First);
-                    if (first != null)
+                    if (first != null) {
                         loadOutline(factory, root, first);
+                    }
                     setModel(new DefaultTreeModel(root));
             }
         }
@@ -133,13 +134,16 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
      * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
      */
     public void valueChanged(TreeSelectionEvent evt) {
-        if (controller == null)
+        if (controller == null) {
             return;
+        }
         OutlineTreeNode selectednode = (OutlineTreeNode) this.getLastSelectedPathComponent();
-        if (selectednode == null)
+        if (selectednode == null) {
             return;
+        }
         PdfObjectTreeNode node = selectednode.getCorrespondingPdfObjectNode();
-        if (node != null)
+        if (node != null) {
             controller.selectNode(node);
+        }
     }
 }

@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups.io;
 
-import javax.swing.*;
+import javax.swing.JTextArea;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -79,7 +79,7 @@ public class TextAreaOutputStream extends OutputStream {
      */
     @Override
     public void write(int i) {
-        byte[] b = {(byte) i};
+        final byte[] b = {(byte) i};
         write(b, 0, 1);
     }
 
@@ -88,7 +88,7 @@ public class TextAreaOutputStream extends OutputStream {
      */
     @Override
     public void write(byte[] b, int off, int len) {
-        String snippet = new String(b, off, len, StandardCharsets.UTF_8);
+        final String snippet = new String(b, off, len, StandardCharsets.UTF_8);
         text.append(snippet);
     }
 
@@ -97,12 +97,12 @@ public class TextAreaOutputStream extends OutputStream {
      */
     @Override
     public void write(byte[] b) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        byte[] snippet = new byte[1024];
+        final ByteArrayInputStream bais = new ByteArrayInputStream(b);
+        final int bufferSize = 1024;
+        final byte[] snippet = new byte[bufferSize];
         int bytesread;
         while ((bytesread = bais.read(snippet)) > 0) {
             write(snippet, 0, bytesread);
         }
     }
-
 }

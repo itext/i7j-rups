@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups;
 
-import javax.swing.*;
+import javax.swing.WindowConstants;
 import java.io.File;
 
 /**
@@ -59,7 +59,7 @@ public class RupsLauncher {
     /**
      * Main method. Starts the RUPS application.
      *
-     * @param    args    no arguments needed
+     * @param args no arguments needed
      */
     public static void main(String[] args) {
         final File f;

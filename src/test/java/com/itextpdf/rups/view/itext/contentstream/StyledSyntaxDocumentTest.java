@@ -45,6 +45,7 @@ package com.itextpdf.rups.view.itext.contentstream;
 import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.test.annotations.type.UnitTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -585,7 +586,7 @@ public class StyledSyntaxDocumentTest {
         doc.processContentStream(origBytes);
 
         int start = doc.getText(0, doc.getLength()).indexOf("こんにちは");
-        String expected = ContentStreamStyleConstants.TOOLTIP_ENCODING + "UnicodeBig";
+        String expected = String.format(Language.TOOLTIP_ENCODING.getString(), "UnicodeBig");
         Assert.assertEquals(expected, doc.getToolTipAt(start));
     }
 
@@ -598,7 +599,7 @@ public class StyledSyntaxDocumentTest {
 
         int start = doc.getText(0, doc.getLength()).indexOf("({") + 3;
 
-        String expected = ContentStreamStyleConstants.TOOLTIP_HEX;
+        String expected = Language.TOOLTIP_HEX.getString();
         Assert.assertEquals(expected, doc.getToolTipAt(start));
     }
 

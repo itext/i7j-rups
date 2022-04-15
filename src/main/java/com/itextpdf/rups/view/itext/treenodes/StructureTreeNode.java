@@ -44,9 +44,12 @@ package com.itextpdf.rups.view.itext.treenodes;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
 public class StructureTreeNode extends IconTreeNode {
+
+    private static final String CHART_ORGANISATION_ICON = "chart_organisation.png";
 
     /**
      * The corresponding tree node in the PdfTree.
@@ -57,23 +60,24 @@ public class StructureTreeNode extends IconTreeNode {
      * Creates the root node for the structure tree.
      */
     public StructureTreeNode() {
-        super("chart_organisation.png", "Structure Tree");
+        super(CHART_ORGANISATION_ICON, Language.STRUCTURE_TREE.getString());
     }
 
     /**
-     * @param node the pdfobject treenode
+     * @param node the pdfObject treeNode
      * @param icon the icon name
      */
     public StructureTreeNode(PdfObjectTreeNode node, String icon) {
         super(icon);
         this.object_node = node;
         if (node.isDictionary()) {
-            PdfDictionary dict = (PdfDictionary) node.getPdfObject();
-            //if (dict.get(PdfName.TYPE) == null || dict.checkType(PdfName.STRUCTELEM)) {
-            if (dict.get(PdfName.Type, false) == null || dict.get(PdfName.Type, false).equals(PdfName.StructElem)) {
-                StringBuilder buf = new StringBuilder();
-                if (dict.get(PdfName.S, false) != null)
+            final PdfDictionary dict = (PdfDictionary) node.getPdfObject();
+            if (dict.get(PdfName.Type, false) == null
+                    || dict.get(PdfName.Type, false).equals(PdfName.StructElem)) {
+                final StringBuilder buf = new StringBuilder();
+                if (dict.get(PdfName.S, false) != null) {
                     buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
+                }
                 if (dict.get(PdfName.T, false) != null) {
                     buf.append(" -> ");
                     buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));

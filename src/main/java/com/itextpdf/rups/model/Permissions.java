@@ -200,7 +200,8 @@ public class Permissions {
      */
     public boolean isAllowModifyAnnotations() {
         if (!encrypted) return true;
-        return (EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS & permissions) == EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS;
+        return (EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS & permissions) ==
+                EncryptionConstants.ALLOW_MODIFY_ANNOTATIONS;
     }
 
     /**
@@ -240,6 +241,7 @@ public class Permissions {
      */
     public boolean isAllowDegradedPrinting() {
         if (!encrypted) return true;
-        return (EncryptionConstants.ALLOW_DEGRADED_PRINTING & permissions) == EncryptionConstants.ALLOW_DEGRADED_PRINTING;
+        return (EncryptionConstants.ALLOW_DEGRADED_PRINTING & permissions) ==
+                EncryptionConstants.ALLOW_DEGRADED_PRINTING;
     }
 }

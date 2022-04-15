@@ -42,9 +42,9 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import javax.swing.*;
+import javax.swing.Icon;
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * A tree node with a specific icon.
@@ -71,10 +71,10 @@ public class IconTreeNode extends DefaultMutableTreeNode {
      * Constructs an IconTreeNode.
      *
      * @param icon       the filename of the icon to use for this node.
-     * @param userobject the userobject for this node
+     * @param userObject the userObject for this node
      */
-    public IconTreeNode(String icon, Object userobject) {
-        super(userobject);
+    public IconTreeNode(String icon, Object userObject) {
+        super(userObject);
         this.icon = IconFetcher.getIcon(icon);
     }
 

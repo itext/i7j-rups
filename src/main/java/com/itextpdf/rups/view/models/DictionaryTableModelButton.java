@@ -42,15 +42,14 @@
  */
 package com.itextpdf.rups.view.models;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-/**
- * @author Michael Demey
- */
 
 public class DictionaryTableModelButton extends JButton implements TableCellRenderer {
 
@@ -59,6 +58,7 @@ public class DictionaryTableModelButton extends JButton implements TableCellRend
         setOpaque(true);
         setEnabled(true);
         addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 //Do nothing
             }
@@ -73,8 +73,9 @@ public class DictionaryTableModelButton extends JButton implements TableCellRend
         this.addIcon = addIcon;
     }
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        JLabel label = new JLabel();
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+            int row, int column) {
+        final JLabel label = new JLabel();
         label.setHorizontalAlignment(JLabel.CENTER);
 
         if (row == (table.getRowCount() - 1)) {
