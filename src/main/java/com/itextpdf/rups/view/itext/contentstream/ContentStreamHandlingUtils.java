@@ -61,7 +61,9 @@ final class ContentStreamHandlingUtils {
      * Symbols permitted when guessing whether a string without obvious encoding
      * is text or not.
      */
-    private static final String PERMITTED_SYMBOLS = "<>()\\/?.!{} \n\t";
+    private static final String PERMITTED_SYMBOLS = "<>()\\/?.!{}[]-_@$€#%&*^+=`~,;:|'\" \n\t";
+
+    private static final double PERMITTED_NONTEXT_PROPORTION = 0.1f;
 
     private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
 
@@ -142,13 +144,19 @@ final class ContentStreamHandlingUtils {
         // No explicit encoding -> make an attempt with PDFDocEncoding
         final String asPdfDoc = PdfEncodings.convertToString(b, PdfEncodings.PDF_DOC_ENCODING);
         // check whether the result looks like a sensible text string
+        int unexpectedCharacters = 0;
         for (int i = 0; i < asPdfDoc.length(); i++) {
             final char c = asPdfDoc.charAt(i);
-            if (!Character.isLetterOrDigit(c) && PERMITTED_SYMBOLS.indexOf(c) == -1) {
+            // if the codepoint is undefined in PDFDocEncoding -> immediately assume binary
+            // See Annex D.3 in ISO 32000-2:2020: all values under ^W excluding tab, LF and CR
+            if(c != '\n' && c != '\t' && c != '\r' && c <= '\027') {
                 return false;
             }
+            if(!Character.isLetterOrDigit(c) && PERMITTED_SYMBOLS.indexOf(c) == -1) {
+                unexpectedCharacters += 1;
+            }
         }
-        return true;
+        return unexpectedCharacters <= PERMITTED_NONTEXT_PROPORTION * asPdfDoc.length();
     }
 
     private static int hexDigitValue(char c) {
