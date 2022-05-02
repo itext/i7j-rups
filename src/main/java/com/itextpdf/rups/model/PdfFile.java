@@ -42,8 +42,6 @@
  */
 package com.itextpdf.rups.model;
 
-import com.ibm.icu.text.StringPrep;
-import com.ibm.icu.text.StringPrepParseException;
 import com.itextpdf.kernel.exceptions.BadPasswordException;
 import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -51,6 +49,9 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
 import com.itextpdf.rups.view.Language;
+
+import com.ibm.icu.text.StringPrep;
+import com.ibm.icu.text.StringPrepParseException;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
