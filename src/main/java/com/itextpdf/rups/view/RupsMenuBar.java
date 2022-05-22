@@ -52,16 +52,16 @@ import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
 
-import javax.swing.Box;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.Box;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 public class RupsMenuBar extends JMenuBar implements Observer {
     /**
@@ -101,6 +101,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         fileSaverAction = new FileSaveAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
         fileCompareAction =
                 new FileCompareAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
+
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
@@ -116,6 +117,11 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                 new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller),
                 KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
         add(file);
+
+        final JMenu edit = new JMenu(Language.MENU_BAR_EDIT.getString());
+        addItem(edit, Language.PREFERENCES.getString(), e -> new PreferencesWindow().show());
+        add(edit);
+
         add(Box.createGlue());
 
         final JMenu help = new JMenu(Language.MENU_BAR_HELP.getString());

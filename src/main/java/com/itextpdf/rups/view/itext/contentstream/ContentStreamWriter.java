@@ -44,6 +44,7 @@ package com.itextpdf.rups.view.itext.contentstream;
 
 import com.itextpdf.commons.exceptions.ITextException;
 import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.view.Language;
 
 import javax.swing.text.AttributeSet;
@@ -108,7 +109,7 @@ public class ContentStreamWriter {
             final int start = current.getStartOffset();
             final int end = current.getEndOffset();
             try {
-                hexBuf.append(doc.getText(start, end - start).toLowerCase(Language.getLocale()));
+                hexBuf.append(doc.getText(start, end - start).toLowerCase(RupsConfiguration.INSTANCE.getUserLocale()));
             } catch (BadLocationException e) {
                 throw new ITextException(Language.ERROR_QUERY_CONTENT_STREAM.getString(), e);
             }

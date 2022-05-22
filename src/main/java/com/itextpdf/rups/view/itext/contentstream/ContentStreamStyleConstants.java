@@ -42,18 +42,19 @@
  */
 package com.itextpdf.rups.view.itext.contentstream;
 
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Constants for dealing with markup in content streams.
@@ -248,7 +249,8 @@ public final class ContentStreamStyleConstants {
     public static AttributeSet getImageAttributes(final BufferedImage img, final byte[] rawBytes) {
         final MutableAttributeSet imageAttrs = new SimpleAttributeSet();
         final String alt = String.format(
-                Language.getLocale(), Language.INLINE_IMAGE_ALT.getString(), img.getWidth(), img.getHeight()
+                RupsConfiguration.INSTANCE.getUserLocale(), Language.INLINE_IMAGE_ALT.getString(), img.getWidth(),
+                img.getHeight()
         );
         StyleConstants.setIcon(imageAttrs, new ImageIcon(img, alt));
         imageAttrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, rawBytes);

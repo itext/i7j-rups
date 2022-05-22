@@ -111,4 +111,22 @@ public class RupsTabbedPane {
     public Component getJTabbedPane() {
         return this.jTabbedPane;
     }
+
+    /**
+     * Checks to see whether the provided file has already been opened in RUPS.
+     *
+     * @param file potentially duplicate file
+     *
+     * @return true if already opened, false if not
+     */
+    public boolean isFileAlreadyOpen(File file) {
+        for (int tabIndex = 0; tabIndex < this.jTabbedPane.getTabCount(); tabIndex++) {
+            final String title = this.jTabbedPane.getTitleAt(tabIndex);
+
+            if (title.equals(file.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

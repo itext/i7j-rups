@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.test.annotations.type.UnitTest;
 
 import java.awt.Dimension;
@@ -119,4 +120,19 @@ public class RupsTabbedPaneTest {
         Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
+    @Test
+    public void isFileDuplicateTest() {
+        boolean originalValue = RupsConfiguration.INSTANCE.canOpenDuplicateFiles();
+        RupsConfiguration.INSTANCE.setOpenDuplicateFiles(false);
+        RupsConfiguration.INSTANCE.saveConfiguration();
+
+        File file = new File(INPUT_1);
+        this.tabbedPane.openNewFile(file, this.dimension, false);
+        boolean isAlreadyOpened = this.tabbedPane.isFileAlreadyOpen(file);
+
+        RupsConfiguration.INSTANCE.setOpenDuplicateFiles(originalValue);
+        RupsConfiguration.INSTANCE.saveConfiguration();
+
+        Assert.assertTrue(isAlreadyOpened);
+    }
 }

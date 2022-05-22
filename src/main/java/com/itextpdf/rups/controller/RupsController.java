@@ -42,10 +42,13 @@
  */
 package com.itextpdf.rups.controller;
 
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.AllFilesClosedEvent;
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsTabbedPane;
 
 import java.awt.Component;
@@ -68,7 +71,7 @@ public class RupsController extends Observable
     /**
      * Constructs the GUI components of the RUPS application.
      *
-     * @param dimension The dimension of the screen
+     * @param dimension      The dimension of the screen
      * @param rupsTabbedPane The main tabbed pane
      */
     public RupsController(Dimension dimension, RupsTabbedPane rupsTabbedPane) {
@@ -119,7 +122,7 @@ public class RupsController extends Observable
     @Override
     public final void closeCurrentFile() {
         final boolean lastOne = this.rupsTabbedPane.closeCurrentFile();
-        if ( lastOne ) {
+        if (lastOne) {
             this.update(this, new AllFilesClosedEvent());
         }
     }
@@ -131,7 +134,12 @@ public class RupsController extends Observable
 
     @Override
     public final void openNewFile(File file) {
-        if ( file != null ) {
+        if (file != null) {
+            if (!RupsConfiguration.INSTANCE.canOpenDuplicateFiles() && this.rupsTabbedPane.isFileAlreadyOpen(file)) {
+                LoggerHelper.info(Language.DUPLICATE_FILES_OFF.getString(), this.getClass());
+                return;
+            }
+
             this.rupsTabbedPane.openNewFile(file, this.dimension, false);
             this.update(this, new OpenFileEvent(file));
         }

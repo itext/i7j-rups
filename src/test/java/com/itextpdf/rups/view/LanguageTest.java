@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.test.ExtendedITextTest;
 import com.itextpdf.test.annotations.type.UnitTest;
 import org.junit.Assert;
@@ -59,44 +60,48 @@ public class LanguageTest extends ExtendedITextTest {
 
     @Test
     public void englishUSLocaleTest() {
-        Language.setLocale(Locale.US);
+        RupsConfiguration.INSTANCE.setUserLocale(Locale.US);
         String actual = key.getString();
         Assert.assertEquals(expectedEnUS, actual);
     }
 
     @Test
     public void defaultLocaleTest() {
-        Language.setLocale(Locale.getDefault());
+        RupsConfiguration.INSTANCE.setUserLocale(Locale.getDefault());
         String actual = key.getString();
         Assert.assertEquals(expectedEnUS, actual);
     }
 
     @Test
     public void changeLocale() {
+        Locale userLocale = RupsConfiguration.INSTANCE.getUserLocale();
         String enActual = key.getString();
         Assert.assertNotNull(enActual);
-        Language.setLocale(dutchLocale);
+        RupsConfiguration.INSTANCE.setUserLocale(dutchLocale);
+        RupsConfiguration.INSTANCE.saveConfiguration();
         String nlActual = key.getString();
+        RupsConfiguration.INSTANCE.setUserLocale(userLocale);
+        RupsConfiguration.INSTANCE.saveConfiguration();
         Assert.assertEquals(expectedNlNL, nlActual);
     }
 
     @Test
     public void notExistingLocaleTest() {
-        Language.setLocale(new Locale("gibberish"));
+        RupsConfiguration.INSTANCE.setUserLocale(new Locale("gibberish"));
         String actual = Language.ERROR.getString();
         Assert.assertEquals(expectedEnUS, actual);
     }
 
     @Test
     public void stringFormatOnLocaleTest() {
-        Language.setLocale(Language.getLocale());
+        RupsConfiguration.INSTANCE.setUserLocale(Locale.getDefault());
         String actual = String.format(Language.PAGE_NUMBER.getString(), 1);
         Assert.assertEquals("Page 1", actual);
     }
 
     @Test
     public void nullLocaleTest() {
-        Language.setLocale(null);
+        RupsConfiguration.INSTANCE.setUserLocale(null);
         String actual = Language.ERROR.getString();
         Assert.assertEquals(expectedEnUS, actual);
     }

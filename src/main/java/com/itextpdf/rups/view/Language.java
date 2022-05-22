@@ -42,7 +42,8 @@
  */
 package com.itextpdf.rups.view;
 
-import java.util.Locale;
+import com.itextpdf.rups.RupsConfiguration;
+
 import java.util.ResourceBundle;
 
 /**
@@ -83,6 +84,7 @@ public enum Language {
     DICTIONARY_KEY,
     DICTIONARY_OF_TYPE,
     DICTIONARY_VALUE,
+    DUPLICATE_FILES_OFF,
 
     EDITOR_CONSOLE,
     EDITOR_CONSOLE_TOOLTIP,
@@ -106,9 +108,12 @@ public enum Language {
     ERROR_INCORRECT_DICTIONARY_BRACKETS,
     ERROR_INDEX_NOT_INTEGER,
     ERROR_INDEX_NOT_IN_RANGE,
+    ERROR_INITIALIZING_SETTINGS,
     ERROR_KEY_IS_NOT_NAME,
+    ERROR_LOADING_DEFAULT_SETTINGS,
     ERROR_LOADING_IMAGE,
     ERROR_LOADING_XFA,
+    ERROR_LOOK_AND_FEEL,
     ERROR_NO_OPEN_DOCUMENT_COMPARE,
     ERROR_ONLY_OPEN_ONE_FILE,
     ERROR_OPENING_FILE,
@@ -158,6 +163,7 @@ public enum Language {
     MENU_BAR_ABOUT,
     MENU_BAR_CLOSE,
     MENU_BAR_COMPARE_WITH,
+    MENU_BAR_EDIT,
     MENU_BAR_FILE,
     MENU_BAR_HELP,
     MENU_BAR_NEW_INDIRECT,
@@ -184,6 +190,13 @@ public enum Language {
     PDF_OBJECT_TREE,
     PLAINTEXT,
     PLAINTEXT_DESCRIPTION,
+    PREFERENCES,
+    PREFERENCES_ALLOW_DUPLICATE_FILES,
+    PREFERENCES_OPEN_FOLDER,
+    PREFERENCES_RESET_TO_DEFAULTS,
+    PREFERENCES_RESET_TO_DEFAULTS_CONFIRM,
+    PREFERENCES_RUPS_SETTINGS,
+    PREFERENCES_SELECT_NEW_DEFAULT_FOLDER,
 
     RAW_BYTES,
 
@@ -194,6 +207,7 @@ public enum Language {
     SAVE_SUCCESS,
     SAVE_TO_FILE,
     SAVE_TO_STREAM,
+    SAVE_UNSAVED_CHANGES,
     SELECT_ALL,
     STREAM,
     STREAM_OF_TYPE,
@@ -221,41 +235,13 @@ public enum Language {
      */
     private static final String BUNDLE_LOCATION = "bundles/rups-lang";
 
-
-    /**
-     * Locale Set by User.
-     */
-    private static Locale USER_LOCALE = Locale.getDefault();
-
-    /**
-     * Changes the Locale of the application.
-     *
-     * @param locale new Locale to use
-     */
-    public static void setLocale(final Locale locale) {
-        if ( locale != null ) {
-            USER_LOCALE = locale;
-        } else {
-            USER_LOCALE = Locale.getDefault();
-        }
-
-        ResourceBundle.clearCache();
-    }
-
-    /**
-     * Getter for the user set locale
-     * @return locale
-     */
-    public static Locale getLocale() {
-        return USER_LOCALE;
-    }
-
     /**
      * Retrieves the String appropriate for the selected Locale.
      *
      * @return the correct String value
      */
     public String getString() {
-        return ResourceBundle.getBundle(BUNDLE_LOCATION, USER_LOCALE).getString(name());
+        return ResourceBundle.getBundle(BUNDLE_LOCATION, RupsConfiguration.INSTANCE.getUserLocale()).getString(name());
     }
+
 }

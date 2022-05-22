@@ -72,6 +72,11 @@
       <version>${logback.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>69.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>io</artifactId>
       <version>${itext.version}</version>
@@ -87,10 +92,11 @@
       <version>${dom4j.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.ibm.icu</groupId>
-      <artifactId>icu4j</artifactId>
-      <version>69.1</version>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <version>2.2</version>
     </dependency>
+
     <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>pdftest</artifactId>
@@ -127,6 +133,11 @@
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>5.1.4</version>
+      </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>${assembly-plugin.version}</version>
@@ -169,11 +180,6 @@
             </manifest>
           </archive>
         </configuration>
-      </plugin>
-	  <plugin>
-		<groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-		<version>5.1.4</version>
       </plugin>
     </plugins>
   </build>
