@@ -381,4 +381,21 @@ public class PdfObjectTreeNode extends IconTreeNode {
         }
         return null;
     }
+
+    /**
+     * If this node represents a dictionary with a direct /Type entry of which
+     * the value is a name object, return it.
+     *
+     * @return a {@link PdfName} object or {@code null}
+     */
+    public PdfName getPdfDictionaryType() {
+        PdfObject obj = getPdfObject();
+        if(obj.isDictionary()) {
+            PdfObject name = ((PdfDictionary) obj).get(PdfName.Type, false);
+            if (name instanceof PdfName) {
+                return (PdfName) name;
+            }
+        }
+        return null;
+    }
 }

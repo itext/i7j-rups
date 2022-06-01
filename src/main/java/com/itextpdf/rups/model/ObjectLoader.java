@@ -45,8 +45,8 @@ package com.itextpdf.rups.model;
 import com.itextpdf.rups.event.PostOpenDocumentEvent;
 import com.itextpdf.rups.view.Language;
 
-import javax.swing.SwingUtilities;
 import java.util.Observer;
+import javax.swing.SwingUtilities;
 
 /**
  * Loads the necessary iText PDF objects in Background.
@@ -73,7 +73,7 @@ public class ObjectLoader extends BackgroundTask {
      */
     private final String loaderName;
 
-    private final ProgressDialog progress;
+    private final IProgressDialog progress;
 
     /**
      * Creates a new ObjectLoader.
@@ -83,7 +83,7 @@ public class ObjectLoader extends BackgroundTask {
      * @param observer   the object that will forward the changes.
      * @param file       the PdfFile from which the objects will be read.
      */
-    public ObjectLoader(Observer observer, PdfFile file, String loaderName, ProgressDialog progress) {
+    public ObjectLoader(Observer observer, PdfFile file, String loaderName, IProgressDialog progress) {
         this.observer = observer;
         this.file = file;
         this.loaderName = loaderName;
@@ -151,7 +151,7 @@ public class ObjectLoader extends BackgroundTask {
         try {
             observer.update(null, new PostOpenDocumentEvent(this));
         } catch (Exception ex) {
-            ErrorDialogPane.showErrorDialog(progress, ex);
+            progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());
         }
         progress.setVisible(false);

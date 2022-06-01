@@ -44,6 +44,8 @@ package com.itextpdf.rups.view.itext.treenodes;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
@@ -54,39 +56,38 @@ public class StructureTreeNode extends IconTreeNode {
     /**
      * The corresponding tree node in the PdfTree.
      */
-    protected PdfObjectTreeNode object_node;
+    private final PdfObjectTreeNode objectNode;
 
     /**
      * Creates the root node for the structure tree.
      */
     public StructureTreeNode() {
-        super(CHART_ORGANISATION_ICON, Language.STRUCTURE_TREE.getString());
+        this(null, CHART_ORGANISATION_ICON, Language.STRUCTURE_TREE.getString());
+    }
+
+    public StructureTreeNode(PdfObjectTreeNode node, String icon) {
+        this(node, icon, null, node.getPdfObject());
     }
 
     /**
-     * @param node the pdfObject treeNode
+     * @param referenceTarget the pdfObject treeNode to jump to
      * @param icon the icon name
+     * @param extractedText the extracted text
+     * @param pdfObject the {@link PdfObject} in focus
      */
-    public StructureTreeNode(PdfObjectTreeNode node, String icon) {
-        super(icon);
-        this.object_node = node;
-        if (node.isDictionary()) {
-            final PdfDictionary dict = (PdfDictionary) node.getPdfObject();
-            if (dict.get(PdfName.Type, false) == null
-                    || dict.get(PdfName.Type, false).equals(PdfName.StructElem)) {
-                final StringBuilder buf = new StringBuilder();
-                if (dict.get(PdfName.S, false) != null) {
-                    buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
-                }
-                if (dict.get(PdfName.T, false) != null) {
-                    buf.append(" -> ");
-                    buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));
-                }
-                this.setUserObject(buf.toString());
-                return;
-            }
-        }
-        this.setUserObject(node);
+    public StructureTreeNode(PdfObjectTreeNode referenceTarget, String icon, String extractedText,
+                             PdfObject pdfObject) {
+        this(referenceTarget, icon, extractUserObject(pdfObject, extractedText, referenceTarget));
+    }
+
+    /**
+     * @param referenceTarget the pdfObject treeNode to jump to
+     * @param icon the icon name
+     * @param userObject the user object to use as the node label
+     */
+    protected StructureTreeNode(PdfObjectTreeNode referenceTarget, String icon, Object userObject) {
+        super(icon, userObject);
+        this.objectNode = referenceTarget;
     }
 
     /**
@@ -96,6 +97,51 @@ public class StructureTreeNode extends IconTreeNode {
      * @return a PdfObjectTreeNode in the PdfTree
      */
     public PdfObjectTreeNode getCorrespondingPdfObjectNode() {
-        return object_node;
+        return objectNode;
+    }
+
+    private static Object ingestDictionaryNode(PdfDictionary dict, PdfObjectTreeNode node) {
+        final Object userObj;
+        final PdfObject dictType = dict.get(PdfName.Type, false);
+        if (PdfName.StructElem.equals(dictType)) {
+            final StringBuilder buf = new StringBuilder();
+            if (dict.get(PdfName.S, false) != null) {
+                buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
+            }
+            if (dict.get(PdfName.T, false) != null) {
+                buf.append(" -> ");
+                buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));
+            }
+            final PdfString actualText = dict.getAsString(PdfName.ActualText);
+            if (actualText != null) {
+                formatExtractedText(buf, actualText.toUnicodeString());
+            }
+            userObj = buf.toString();
+        } else if (PdfName.OBJR.equals(dictType)){
+            userObj = "OBJR => " + node.getPdfObject().getIndirectReference();
+        } else {
+            userObj = node;
+        }
+        return userObj;
+    }
+
+    protected static void formatExtractedText(StringBuilder base, String extractedText) {
+        base.append(" [").append(extractedText).append(']');
+    }
+
+    protected static Object extractUserObject(
+            PdfObject pdfObject, String extractedText, PdfObjectTreeNode referenceTarget) {
+        if (pdfObject == null) {
+            return null;
+        }
+        if (pdfObject.isDictionary()) {
+            return ingestDictionaryNode((PdfDictionary) pdfObject, referenceTarget);
+        } else if (pdfObject.isNumber() && extractedText != null) {
+            StringBuilder buf = new StringBuilder().append(pdfObject);
+            formatExtractedText(buf, extractedText);
+            return buf.toString();
+        } else {
+            return referenceTarget;
+        }
     }
 }

@@ -59,7 +59,7 @@ import java.awt.event.WindowEvent;
 /**
  * An informational dialog window showing the progress of a certain action.
  */
-public final class ProgressDialog extends JDialog {
+public final class ProgressDialog extends JDialog implements IProgressDialog {
     /**
      * label showing the message describing what's in progress.
      */
@@ -125,6 +125,7 @@ public final class ProgressDialog extends JDialog {
      *
      * @param msg the message describing what's in progress
      */
+    @Override
     public void setMessage(String msg) {
         message.setText(msg);
     }
@@ -134,6 +135,7 @@ public final class ProgressDialog extends JDialog {
      *
      * @param value the current value
      */
+    @Override
     public void setValue(int value) {
         progress.setValue(value);
     }
@@ -144,6 +146,7 @@ public final class ProgressDialog extends JDialog {
      *
      * @param n the maximum value for the progress bar
      */
+    @Override
     public void setTotal(int n) {
         if (n > 0) {
             progress.setMaximum(n);
@@ -153,5 +156,15 @@ public final class ProgressDialog extends JDialog {
             progress.setIndeterminate(true);
             progress.setStringPainted(false);
         }
+    }
+
+    /**
+     * Displays an error dialog for the given exception.
+     *
+     * @param ex exception to display information about
+     */
+    @Override
+    public void showErrorDialog(Exception ex) {
+        ErrorDialogPane.showErrorDialog(this, ex);
     }
 }
