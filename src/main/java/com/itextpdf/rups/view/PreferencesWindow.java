@@ -4,13 +4,15 @@ import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -24,85 +26,145 @@ import javax.swing.WindowConstants;
  */
 public class PreferencesWindow {
 
-    private JFrame jFrame;
+    private JDialog jDialog;
+
+    private GridBagLayout gridBagLayout;
+    private GridBagConstraints left;
+    private GridBagConstraints right;
+
+    private JPanel visualPanel;
+    private JScrollPane generalSettingsScrollPane;
+
+    // Fields to reset
+    private JCheckBox openDuplicateFiles;
+    private JTextField pathField;
 
     public PreferencesWindow() {
-        jFrame = new JFrame();
-        jFrame.setTitle(Language.PREFERENCES.getString());
-        jFrame.setIconImages(FrameIconUtil.loadFrameIcons());
-        jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        jFrame.setLayout(new BorderLayout());
+        initializeJDialog();
+        initializeLayout();
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        createGeneralSettingsTab();
+        createVisualSettingsTab();
+        createTabbedPane();
+        createSaveCancelResetSection();
 
-        JTextField pathField = new JTextField(RupsConfiguration.INSTANCE.getHomeFolder().getPath(), 30);
+        completeJDialogCreation();
+    }
+
+    private void initializeJDialog() {
+        this.jDialog = new JDialog();
+
+        this.jDialog.setTitle(Language.PREFERENCES.getString());
+        this.jDialog.setIconImages(FrameIconUtil.loadFrameIcons());
+        this.jDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        this.jDialog.setModal(true);
+        this.jDialog.setLayout(new BorderLayout());
+    }
+
+    private void initializeLayout() {
+        this.gridBagLayout = new GridBagLayout();
+
+        this.left = new GridBagConstraints();
+        this.left.anchor = GridBagConstraints.EAST;
+
+        this.right = new GridBagConstraints();
+        this.right.weightx = 2.0;
+        this.right.fill = GridBagConstraints.HORIZONTAL;
+        this.right.gridwidth = GridBagConstraints.REMAINDER;
+    }
+
+    private void createGeneralSettingsTab() {
+        this.pathField = new JTextField(RupsConfiguration.INSTANCE.getHomeFolder().getPath(), 30);
         JLabel pathLabel = new JLabel(Language.PREFERENCES_OPEN_FOLDER.getString());
-        pathLabel.setLabelFor(pathField);
+        pathLabel.setLabelFor(this.pathField);
 
         JButton pathChooser = new JButton(Language.PREFERENCES_SELECT_NEW_DEFAULT_FOLDER.getString());
         pathChooser.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser(RupsConfiguration.INSTANCE.getHomeFolder());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int choice = fileChooser.showOpenDialog(jFrame);
+            int choice = fileChooser.showOpenDialog(jDialog);
 
             if (choice == JFileChooser.APPROVE_OPTION) {
                 String path = fileChooser.getSelectedFile().getPath();
-                pathField.setText(path);
+                this.pathField.setText(path);
                 RupsConfiguration.INSTANCE.setHomeFolder(path);
             }
         });
 
         JPanel fieldsPanel = new JPanel();
-        fieldsPanel.add(pathField);
+        fieldsPanel.add(this.pathField);
         fieldsPanel.add(pathChooser);
 
-        JCheckBox openDuplicateFiles = new JCheckBox("", RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
-        openDuplicateFiles.addActionListener(
+        this.openDuplicateFiles = new JCheckBox("", RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        this.openDuplicateFiles.addActionListener(
                 e -> RupsConfiguration.INSTANCE.setOpenDuplicateFiles(((JCheckBox) e.getSource()).isSelected())
         );
         JLabel openDuplicateFilesLabel = new JLabel(Language.PREFERENCES_ALLOW_DUPLICATE_FILES.getString());
-        openDuplicateFilesLabel.setLabelFor(openDuplicateFiles);
+        openDuplicateFilesLabel.setLabelFor(this.openDuplicateFiles);
 
-        JPanel outerPanel = new JPanel();
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        outerPanel.setLayout(gridBagLayout);
+        JPanel generalSettingsPanel = new JPanel();
+        generalSettingsPanel.setLayout(this.gridBagLayout);
 
-        GridBagConstraints left = new GridBagConstraints();
-        left.anchor = GridBagConstraints.EAST;
-        GridBagConstraints right = new GridBagConstraints();
-        right.weightx = 2.0;
-        right.fill = GridBagConstraints.HORIZONTAL;
-        right.gridwidth = GridBagConstraints.REMAINDER;
+        generalSettingsPanel.add(pathLabel, this.left);
+        generalSettingsPanel.add(fieldsPanel, this.right);
 
-        outerPanel.add(pathLabel, left);
-        outerPanel.add(fieldsPanel, right);
+        generalSettingsPanel.add(openDuplicateFilesLabel, this.left);
+        generalSettingsPanel.add(this.openDuplicateFiles, this.right);
 
-        outerPanel.add(openDuplicateFilesLabel, left);
-        outerPanel.add(openDuplicateFiles, right);
+        this.generalSettingsScrollPane = new JScrollPane(generalSettingsPanel);
+    }
 
-        JScrollPane scrollPane = new JScrollPane(outerPanel);
+    private void createVisualSettingsTab() {
+        final JComboBox<String> localeBox = new JComboBox<>();
+        localeBox.addItem("nl-NL");
+        localeBox.addItem("en-US");
+        localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
+        final JLabel localeLabel = new JLabel("Locale");
+        localeLabel.setLabelFor(localeBox);
 
-        tabbedPane.add(Language.PREFERENCES_RUPS_SETTINGS.getString(), scrollPane);
+        localeBox.addActionListener(e -> {
+            Object selectedItem = localeBox.getSelectedItem();
+            String selectedString = (String) selectedItem;
+            RupsConfiguration.INSTANCE.setUserLocale(Locale.forLanguageTag(selectedString));
+        });
 
-        jFrame.add(tabbedPane, BorderLayout.CENTER);
+        this.visualPanel = new JPanel();
+        this.visualPanel.setLayout(this.gridBagLayout);
 
+        this.visualPanel.add(localeLabel, this.left);
+        this.visualPanel.add(localeBox, this.right);
+    }
+
+    private void createTabbedPane() {
+        final JTabbedPane tabbedPane = new JTabbedPane();
+
+        tabbedPane.add(Language.PREFERENCES_RUPS_SETTINGS.getString(), this.generalSettingsScrollPane);
+        tabbedPane.add(Language.PREFERENCES_VISUAL_SETTINGS.getString(), this.visualPanel);
+
+        this.jDialog.add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    private void createSaveCancelResetSection() {
         JPanel buttons = new JPanel();
 
         JButton save = new JButton(Language.SAVE.getString());
-        save.addActionListener(e -> RupsConfiguration.INSTANCE.saveConfiguration());
+        save.addActionListener(e -> {
+            RupsConfiguration.INSTANCE.saveConfiguration();
+            this.jDialog.dispose();
+        });
         buttons.add(save);
 
         JButton cancel = new JButton(Language.DIALOG_CANCEL.getString());
         cancel.addActionListener(e -> {
             if (RupsConfiguration.INSTANCE.hasUnsavedChanges()) {
-                int choice = JOptionPane.showConfirmDialog(jFrame,
+                int choice = JOptionPane.showConfirmDialog(jDialog,
                         Language.SAVE_UNSAVED_CHANGES.getString());
                 if (choice == JOptionPane.OK_OPTION) {
                     RupsConfiguration.INSTANCE.cancelTemporaryChanges();
-                    jFrame.dispose();
+                    this.jDialog.dispose();
                 }
             } else {
-                jFrame.dispose();
+                this.jDialog.dispose();
             }
         });
         buttons.add(cancel);
@@ -110,28 +172,31 @@ public class PreferencesWindow {
         JButton reset = new JButton(Language.PREFERENCES_RESET_TO_DEFAULTS.getString());
 
         reset.addActionListener(e -> {
-            int choice = JOptionPane.showConfirmDialog(jFrame,
+            int choice = JOptionPane.showConfirmDialog(jDialog,
                     Language.PREFERENCES_RESET_TO_DEFAULTS_CONFIRM.getString());
             if (choice == JOptionPane.OK_OPTION) {
                 RupsConfiguration.INSTANCE.resetToDefaultProperties();
 
-                resetView(pathField, openDuplicateFiles);
+                resetView();
             }
         });
         buttons.add(reset);
 
-        jFrame.add(buttons, BorderLayout.SOUTH);
-        jFrame.pack();
-        jFrame.setResizable(false);
+        jDialog.add(buttons, BorderLayout.SOUTH);
     }
 
-    private void resetView(JTextField pathField, JCheckBox openDuplicateFiles) {
-        pathField.setText(RupsConfiguration.INSTANCE.getHomeFolder().getPath());
-        openDuplicateFiles.setSelected(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+    private void completeJDialogCreation() {
+        this.jDialog.pack();
+        this.jDialog.setResizable(false);
     }
 
-    public void show() {
-        jFrame.setLocationRelativeTo(null);
-        jFrame.setVisible(true);
+    private void resetView() {
+        this.pathField.setText(RupsConfiguration.INSTANCE.getHomeFolder().getPath());
+        this.openDuplicateFiles.setSelected(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+    }
+
+    public void show(Component component) {
+        jDialog.setLocationRelativeTo(component);
+        jDialog.setVisible(true);
     }
 }

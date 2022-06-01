@@ -88,12 +88,18 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      * The HashMap with all the actions.
      */
     protected HashMap<String, JMenuItem> items;
+    /**
+     * The Preferences Window
+     */
+    private final PreferencesWindow preferencesWindow;
 
     /**
      * Creates a JMenuBar.
      */
     public RupsMenuBar(RupsController controller) {
         items = new HashMap<>();
+
+        preferencesWindow = new PreferencesWindow();
 
         fileOpenAction = new FileOpenAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
         fileCloseAction = new FileCloseAction(controller);
@@ -119,7 +125,10 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         add(file);
 
         final JMenu edit = new JMenu(Language.MENU_BAR_EDIT.getString());
-        addItem(edit, Language.PREFERENCES.getString(), e -> new PreferencesWindow().show());
+        addItem(edit, Language.PREFERENCES.getString(), e -> {
+                    preferencesWindow.show(controller.getMasterComponent());
+                }
+        );
         add(edit);
 
         add(Box.createGlue());

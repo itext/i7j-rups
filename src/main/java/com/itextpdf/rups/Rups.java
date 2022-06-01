@@ -85,9 +85,7 @@ public class Rups {
 
     static void setLookandFeel() {
         try {
-            if ( !FlatLightLaf.setup()) {
-                UIManager.setLookAndFeel(RupsConfiguration.INSTANCE.getLookAndFeel());
-            }
+            UIManager.setLookAndFeel(RupsConfiguration.INSTANCE.getLookAndFeel());
         } catch (
                 ClassNotFoundException | InstantiationException |
                         IllegalAccessException | UnsupportedLookAndFeelException e) {

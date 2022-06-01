@@ -121,12 +121,22 @@ public class RupsTabbedPane {
      */
     public boolean isFileAlreadyOpen(File file) {
         for (int tabIndex = 0; tabIndex < this.jTabbedPane.getTabCount(); tabIndex++) {
-            final String title = this.jTabbedPane.getTitleAt(tabIndex);
+            Component component = this.jTabbedPane.getComponentAt(tabIndex);
 
-            if (title.equals(file.getName())) {
-                return true;
+            if ( component instanceof RupsPanel ) {
+                RupsPanel rupsPanel = (RupsPanel) component;
+                PdfFile pdfFile = rupsPanel.getPdfFile();
+                File directory = pdfFile.getDirectory();
+                String fileName = pdfFile.getFilename();
+
+                File openedFile = new File(directory, fileName);
+
+                if (openedFile.equals(file)) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 }
