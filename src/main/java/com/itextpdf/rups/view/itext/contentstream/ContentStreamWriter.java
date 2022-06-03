@@ -110,7 +110,7 @@ public class ContentStreamWriter {
             final int start = current.getStartOffset();
             final int end = current.getEndOffset();
             try {
-                hexBuf.append(doc.getText(start, end - start).toLowerCase(Locale.getDefault()));
+                hexBuf.append(doc.getText(start, end - start).toLowerCase(Locale.ROOT));
             } catch (BadLocationException e) {
                 throw new ITextException(Language.ERROR_QUERY_CONTENT_STREAM.getString(), e);
             }

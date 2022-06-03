@@ -7,6 +7,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -38,6 +41,8 @@ public class PreferencesWindow {
     // Fields to reset
     private JCheckBox openDuplicateFiles;
     private JTextField pathField;
+    private JLabel restartLabel;
+    private JComboBox<String> localeBox;
 
     public PreferencesWindow() {
         initializeJDialog();
@@ -59,6 +64,13 @@ public class PreferencesWindow {
         this.jDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         this.jDialog.setModal(true);
         this.jDialog.setLayout(new BorderLayout());
+        this.jDialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                RupsConfiguration.INSTANCE.cancelTemporaryChanges();
+                resetView();
+            }
+        });
     }
 
     private void initializeLayout() {
@@ -115,24 +127,29 @@ public class PreferencesWindow {
     }
 
     private void createVisualSettingsTab() {
-        final JComboBox<String> localeBox = new JComboBox<>();
-        localeBox.addItem("nl-NL");
-        localeBox.addItem("en-US");
-        localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
-        final JLabel localeLabel = new JLabel("Locale");
+        this.localeBox = new JComboBox<>();
+        this.localeBox.addItem("nl-NL");
+        this.localeBox.addItem("en-US");
+        this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
+        final JLabel localeLabel = new JLabel(Language.LOCALE.getString());
         localeLabel.setLabelFor(localeBox);
 
-        localeBox.addActionListener(e -> {
+        this.restartLabel = new JLabel(Language.PREFERENCES_NEED_RESTART.getString());
+        this.restartLabel.setVisible(false);
+
+        this.localeBox.addActionListener(e -> {
             Object selectedItem = localeBox.getSelectedItem();
             String selectedString = (String) selectedItem;
             RupsConfiguration.INSTANCE.setUserLocale(Locale.forLanguageTag(selectedString));
+            this.restartLabel.setVisible(true);
         });
 
         this.visualPanel = new JPanel();
         this.visualPanel.setLayout(this.gridBagLayout);
 
         this.visualPanel.add(localeLabel, this.left);
-        this.visualPanel.add(localeBox, this.right);
+        this.visualPanel.add(this.localeBox, this.right);
+        this.visualPanel.add(this.restartLabel, this.right);
     }
 
     private void createTabbedPane() {
@@ -150,6 +167,7 @@ public class PreferencesWindow {
         JButton save = new JButton(Language.SAVE.getString());
         save.addActionListener(e -> {
             RupsConfiguration.INSTANCE.saveConfiguration();
+            resetView();
             this.jDialog.dispose();
         });
         buttons.add(save);
@@ -176,7 +194,6 @@ public class PreferencesWindow {
                     Language.PREFERENCES_RESET_TO_DEFAULTS_CONFIRM.getString());
             if (choice == JOptionPane.OK_OPTION) {
                 RupsConfiguration.INSTANCE.resetToDefaultProperties();
-
                 resetView();
             }
         });
@@ -193,6 +210,8 @@ public class PreferencesWindow {
     private void resetView() {
         this.pathField.setText(RupsConfiguration.INSTANCE.getHomeFolder().getPath());
         this.openDuplicateFiles.setSelected(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
+        this.restartLabel.setVisible(false);
     }
 
     public void show(Component component) {

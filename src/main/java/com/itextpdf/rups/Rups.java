@@ -52,7 +52,6 @@ import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.RupsTabbedPane;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
