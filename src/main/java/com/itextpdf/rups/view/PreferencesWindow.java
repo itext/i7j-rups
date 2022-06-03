@@ -136,6 +136,7 @@ public class PreferencesWindow {
 
         this.restartLabel = new JLabel(Language.PREFERENCES_NEED_RESTART.getString());
         this.restartLabel.setVisible(false);
+        this.restartLabel.setLabelFor(localeBox);
 
         this.localeBox.addActionListener(e -> {
             Object selectedItem = localeBox.getSelectedItem();
