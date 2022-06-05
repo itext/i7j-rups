@@ -58,7 +58,6 @@ import java.util.ArrayList;
  */
 public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
-    private final boolean pluginMode;
     private final PdfSyntaxParser parser;
     /**
      * The owner component on witch will be displayed all messages
@@ -77,12 +76,10 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      * Creates the TableModel.
      *
      * @param dictionary the dictionary we want to show
-     * @param pluginMode the plugin mode
      * @param parser     the pdf syntax parser
      * @param owner      the owner
      */
-    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode, PdfSyntaxParser parser, Component owner) {
-        this.pluginMode = pluginMode;
+    public DictionaryTableModel(PdfDictionary dictionary, PdfSyntaxParser parser, Component owner) {
         this.dictionary = dictionary;
         this.parser = parser;
         this.parent = owner;
@@ -93,20 +90,20 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      * @see javax.swing.table.TableModel#getColumnCount()
      */
     public int getColumnCount() {
-        return pluginMode ? 2 : 3;
+        return 3;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-        return pluginMode ? dictionary.size() : dictionary.size() + 1;
+        return dictionary.size() + 1;
     }
 
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return !pluginMode && columnIndex < 2;
+        return columnIndex < 2;
     }
 
     /**

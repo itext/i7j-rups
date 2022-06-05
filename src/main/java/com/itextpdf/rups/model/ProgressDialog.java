@@ -75,8 +75,6 @@ public final class ProgressDialog extends JDialog implements IProgressDialog {
      */
     public static final JLabel INFO = new JLabel(UIManager.getIcon("OptionPane.informationIcon"));
 
-    private final boolean pluginMode;
-
     /**
      * Creates a Progress frame displaying a certain message
      * and a progress bar in indeterminate mode.
@@ -84,11 +82,9 @@ public final class ProgressDialog extends JDialog implements IProgressDialog {
      * @param parent     the parent frame of this dialog (used to position the dialog)
      * @param msg        the message that will be displayed.
      * @param frame      the frame
-     * @param pluginMode the plugin mode
      */
-    public ProgressDialog(Component parent, String msg, Frame frame, boolean pluginMode) {
-        super(frame, !pluginMode);
-        this.pluginMode = pluginMode;
+    public ProgressDialog(Component parent, String msg, Frame frame) {
+        super(frame);
         this.setTitle(Language.DIALOG_PROGRESS.getString());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(300, 100);
@@ -115,9 +111,7 @@ public final class ProgressDialog extends JDialog implements IProgressDialog {
     public void dispose() {
         final Window frame = getOwner();
         super.dispose();
-        if (!pluginMode) {
-            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-        }
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
 
     /**

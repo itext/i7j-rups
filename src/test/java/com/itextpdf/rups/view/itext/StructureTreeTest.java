@@ -89,7 +89,7 @@ public class StructureTreeTest extends ExtendedITextTest {
 
     private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile) {
 
-        PdfReaderController controller = new PdfReaderController(null, null, true);
+        PdfReaderController controller = new PdfReaderController(null, null);
         ObjectLoader loader = new ObjectLoader(controller, pdfFile, pdfFile.getFilename(), new DummyProgressDialog());
         // preload everything
         loader.doTask();

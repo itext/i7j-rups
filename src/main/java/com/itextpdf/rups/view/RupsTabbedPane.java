@@ -77,7 +77,7 @@ public class RupsTabbedPane {
             }
 
             RupsPanel rupsPanel = new RupsPanel();
-            RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel, false);
+            RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
             rupsInstanceController.loadFile(file, readonly);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);

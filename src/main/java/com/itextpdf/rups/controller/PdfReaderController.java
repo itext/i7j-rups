@@ -82,6 +82,11 @@ import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
+import java.awt.Color;
+import java.awt.event.KeyListener;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Stack;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -91,11 +96,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.awt.Color;
-import java.awt.event.KeyListener;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Stack;
 
 /**
  * Controls the components that get their content from iText's PdfReader.
@@ -164,10 +164,9 @@ public class PdfReaderController extends Observable implements Observer {
      *
      * @param treeSelectionListener when somebody selects a tree node, this listener listens to the event
      * @param pageSelectionListener when somebody changes a page, this listener changes accordingly
-     * @param pluginMode            the plugin mode
      */
-    public PdfReaderController(TreeSelectionListener treeSelectionListener, PageSelectionListener pageSelectionListener,
-            boolean pluginMode) {
+    public PdfReaderController(TreeSelectionListener treeSelectionListener,
+            PageSelectionListener pageSelectionListener) {
         pdfTree = new PdfTree();
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
@@ -220,10 +219,10 @@ public class PdfReaderController extends Observable implements Observer {
             }
         });
 
-        objectPanel = new PdfObjectPanel(pluginMode);
+        objectPanel = new PdfObjectPanel();
         addObserver(objectPanel);
         objectPanel.addObserver(this);
-        streamPane = new SyntaxHighlightedStreamPane(this, pluginMode);
+        streamPane = new SyntaxHighlightedStreamPane(this);
         addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();

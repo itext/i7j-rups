@@ -61,7 +61,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void jMenuLengthTest() {
         JPopupMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null, false), false);
+                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
         Assert.assertEquals(4, subElements.length);
@@ -70,7 +70,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void jMenuSubItemTypeTest() {
         JPopupMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null, false), false);
+                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
 
@@ -82,7 +82,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void assignedActionsTest() {
         JPopupMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null, false), false);
+                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
 
@@ -98,7 +98,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void saveToStreamDisabledTest() {
         StreamPanelContextMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null, false), false);
+                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
         popupMenu.setSaveToStreamEnabled(false);
 
         MenuElement[] subElements = popupMenu.getSubElements();
@@ -115,7 +115,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void saveToStreamReEnabledTest() {
         StreamPanelContextMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null, false), false);
+                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
         popupMenu.setSaveToStreamEnabled(false);
         popupMenu.setSaveToStreamEnabled(true);
 

@@ -62,7 +62,6 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
      */
     protected PdfArray array;
 
-    private final boolean pluginMode;
     private final PdfSyntaxParser parser;
     /**
      * The owner component on witch will be displayed all messages
@@ -75,27 +74,25 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
      * Creates the TableModel.
      *
      * @param array      a PDF array
-     * @param pluginMode the plugin mode
      * @param parser     the pdf syntax parser
      * @param parent     the parent
      */
-    public PdfArrayTableModel(PdfArray array, boolean pluginMode, PdfSyntaxParser parser, Component parent) {
+    public PdfArrayTableModel(PdfArray array, PdfSyntaxParser parser, Component parent) {
         this.array = array;
-        this.pluginMode = pluginMode;
         this.parser = parser;
         this.parent = parent;
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return !pluginMode && columnIndex < 1;
+        return columnIndex < 1;
     }
 
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
     public int getColumnCount() {
-        return pluginMode ? 1 : 2;
+        return 2;
     }
 
     /**

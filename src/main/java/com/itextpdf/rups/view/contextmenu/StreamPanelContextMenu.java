@@ -63,8 +63,6 @@ public class StreamPanelContextMenu extends JPopupMenu {
 
     private final JMenuItem saveToStream;
 
-    private final boolean pluginMode;
-
     /**
      * Creates a context menu (right click menu) with two actions:
      * - copy
@@ -74,13 +72,9 @@ public class StreamPanelContextMenu extends JPopupMenu {
      *
      * @param textPane   the text pane
      * @param controller the controller
-     * @param pluginMode the plugin mode
      */
-    public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller,
-            boolean pluginMode) {
+    public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller) {
         super();
-
-        this.pluginMode = pluginMode;
 
         final JMenuItem copyItem = getJMenuItem(
                 new CopyToClipboardAction(Language.COPY.getString(), textPane)
@@ -107,7 +101,7 @@ public class StreamPanelContextMenu extends JPopupMenu {
     }
 
     public void setSaveToStreamEnabled(boolean enabled) {
-        saveToStream.setEnabled(enabled && !pluginMode);
+        saveToStream.setEnabled(enabled);
     }
 
     static final JMenuItem getJMenuItem(Action rupsAction) {

@@ -62,17 +62,17 @@ import com.itextpdf.rups.view.models.DictionaryTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
 
+import java.awt.CardLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Observable;
+import java.util.Observer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import java.awt.CardLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Observable;
-import java.util.Observer;
 
 public class PdfObjectPanel extends Observable implements Observer {
 
@@ -104,8 +104,6 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     JTextArea text = new JTextArea();
 
-    private final boolean pluginMode;
-
     private final JPanel panel = new JPanel();
 
     private PdfObjectTreeNode target;
@@ -113,12 +111,8 @@ public class PdfObjectPanel extends Observable implements Observer {
 
     /**
      * Creates a PDF object panel.
-     *
-     * @param pluginMode the plugin mode
      */
-    public PdfObjectPanel(boolean pluginMode) {
-        this.pluginMode = pluginMode;
-
+    public PdfObjectPanel() {
         // layout
         panel.setLayout(layout);
 
@@ -179,25 +173,21 @@ public class PdfObjectPanel extends Observable implements Observer {
             case PdfObject.DICTIONARY:
             case PdfObject.STREAM:
                 final DictionaryTableModel model =
-                        new DictionaryTableModel((PdfDictionary) object, pluginMode, parser, panel);
+                        new DictionaryTableModel((PdfDictionary) object, parser, panel);
                 model.addTableModelListener(new DictionaryModelListener());
                 table.setModel(model);
-                if (!pluginMode) {
-                    table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
-                            IconFetcher.getIcon(ADD_ICON)));
-                }
+                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(
+                        IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON)));
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;
             case PdfObject.ARRAY:
                 final PdfArrayTableModel arrayModel =
-                        new PdfArrayTableModel((PdfArray) object, pluginMode, parser, panel);
+                        new PdfArrayTableModel((PdfArray) object, parser, panel);
                 arrayModel.addTableModelListener(new ArrayModelListener());
                 table.setModel(arrayModel);
-                if (!pluginMode) {
-                    table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
-                            IconFetcher.getIcon(ADD_ICON)));
-                }
+                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
+                        IconFetcher.getIcon(ADD_ICON)));
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;

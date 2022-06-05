@@ -95,8 +95,6 @@ import javax.swing.event.TreeSelectionListener;
 public class RupsInstanceController extends Observable
         implements TreeSelectionListener, PageSelectionListener, Observer {
 
-    private final boolean pluginMode;
-
     private final JPanel ownerPanel;
 
     /**
@@ -124,18 +122,16 @@ public class RupsInstanceController extends Observable
     /**
      * Constructs the GUI components of the RUPS application.
      *
-     * @param dimension  the dimension
-     * @param owner      the jpanel
-     * @param pluginMode the plugin mode
+     * @param dimension the dimension
+     * @param owner     the jpanel
      */
-    public RupsInstanceController(Dimension dimension, JPanel owner, boolean pluginMode) {
+    public RupsInstanceController(Dimension dimension, JPanel owner) {
         // creating components and controllers
         this.ownerPanel = owner;
-        this.pluginMode = pluginMode;
         final Console console = Console.getInstance();
         addObserver(console);
         console.addObserver(this);
-        readerController = new PdfReaderController(this, this, pluginMode);
+        readerController = new PdfReaderController(this, this);
         addObserver(readerController);
 
         // creating the master component
@@ -342,14 +338,12 @@ public class RupsInstanceController extends Observable
 
     private void startObjectLoader() {
         final ProgressDialog dialog =
-                new ProgressDialog(this.ownerPanel, Language.PDF_READING.getString(), null, pluginMode);
-        if (!pluginMode) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    dialog.setVisible(true);
-                }
-            });
-        }
+                new ProgressDialog(this.ownerPanel, Language.PDF_READING.getString(), null);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                dialog.setVisible(true);
+            }
+        });
         loader = new ObjectLoader(this, pdfFile, pdfFile.getFilename(), dialog);
         loader.start();
     }
