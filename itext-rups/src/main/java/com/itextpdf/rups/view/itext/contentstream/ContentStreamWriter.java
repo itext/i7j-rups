@@ -1,0 +1,150 @@
+/*
+    This file is part of the iText (R) project.
+    Copyright (c) 1998-2022 iText Group NV
+    Authors: iText Software.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation with the addition of the
+    following permission added to Section 15 as permitted in Section 7(a):
+    FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
+    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    OF THIRD PARTY RIGHTS
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE.
+    See the GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program; if not, see http://www.gnu.org/licenses or write to
+    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+    Boston, MA, 02110-1301 USA, or download the license from the following URL:
+    http://itextpdf.com/terms-of-use/
+
+    The interactive user interfaces in modified source and object code versions
+    of this program must display Appropriate Legal Notices, as required under
+    Section 5 of the GNU Affero General Public License.
+
+    In accordance with Section 7(b) of the GNU Affero General Public License,
+    a covered work must retain the producer line in every PDF that is created
+    or manipulated using iText.
+
+    You can be released from the requirements of the license by purchasing
+    a commercial license. Buying such a license is mandatory as soon as you
+    develop commercial activities involving the iText software without
+    disclosing the source code of your own applications.
+    These activities include: offering paid services to customers as an ASP,
+    serving PDFs on the fly in a web application, shipping iText with a closed
+    source product.
+
+    For more information, please contact iText Software Corp. at this
+    address: sales@itextpdf.com
+ */
+package com.itextpdf.rups.view.itext.contentstream;
+
+import com.itextpdf.commons.exceptions.ITextException;
+import com.itextpdf.io.font.PdfEncodings;
+
+import com.itextpdf.rups.view.Language;
+
+import java.util.Locale;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.ElementIterator;
+import java.io.IOException;
+import java.io.OutputStream;
+
+/**
+ * Writer implementation for serializing edited content streams.
+ */
+public class ContentStreamWriter {
+    private final OutputStream os;
+
+    /**
+     * Create a content stream writer to output to a specific underlying {@link OutputStream}.
+     *
+     * @param os the {@link OutputStream} to write to
+     */
+    public ContentStreamWriter(OutputStream os) {
+        this.os = os;
+    }
+
+    /**
+     * Serialize a {@link Document} to the writer's output stream, taking into account
+     * special attributes to handle binary content.
+     * Note that this is not guaranteed to produce a byte-for-byte equal
+     * representation of the unedited areas, but the result should be equivalent to
+     * the input from the point of view of PDF graphics operator semantics.
+     *
+     * @param doc the document to serialize
+     * @throws IOException if an error occurs during reading
+     */
+    public void write(Document doc) throws IOException {
+        final ElementIterator it = new ElementIterator(doc.getDefaultRootElement());
+        Element current = it.next();
+
+        while (current != null) {
+
+            final AttributeSet attrs = current.getAttributes();
+            if (attrs.getAttribute(ContentStreamStyleConstants.HEX_EDIT) != null) {
+                current = handleHexContent(current, it);
+                continue;
+            }
+
+            if (current.isLeaf()) {
+                writeLeafElement(current);
+            }
+            current = it.next();
+        }
+    }
+
+    private Element handleHexContent(Element initElement, ElementIterator it) throws IOException {
+        final Document doc = initElement.getDocument();
+        Element current = initElement;
+        // collect all contiguous such regions
+        // we only convert at the end (to allow abc + 123 to merge into abc123)
+        final StringBuilder hexBuf = new StringBuilder();
+        do {
+            final int start = current.getStartOffset();
+            final int end = current.getEndOffset();
+            try {
+                hexBuf.append(doc.getText(start, end - start).toLowerCase(Locale.ROOT));
+            } catch (BadLocationException e) {
+                throw new ITextException(Language.ERROR_QUERY_CONTENT_STREAM.getString(), e);
+            }
+            // Note: due to the implied linebreak at the end (which is never styled with HEX_EDIT)
+            // the check for current != null is strictly speaking not necessary, but we'll leave
+            // it in for good measure
+        } while ((current = it.next()) != null
+                && current.getAttributes().getAttribute(ContentStreamStyleConstants.HEX_EDIT) != null);
+
+        os.write(ContentStreamHandlingUtils.ensureEscaped(ContentStreamHandlingUtils.unhexlify(hexBuf)));
+        return current;
+    }
+
+    private void writeLeafElement(Element current) throws IOException {
+        final AttributeSet attrs = current.getAttributes();
+        final byte[] binaryContent = (byte[]) attrs.getAttribute(ContentStreamStyleConstants.BINARY_CONTENT);
+        if (binaryContent == null) {
+            final int start = current.getStartOffset();
+            final int end = current.getEndOffset();
+            String text;
+            try {
+                text = current.getDocument().getText(start, end - start);
+            } catch (BadLocationException e) {
+                throw new ITextException(Language.ERROR_QUERY_CONTENT_STREAM.getString(), e);
+            }
+            final String enc = getContentEncoding(current);
+            os.write(PdfEncodings.convertToBytes(text, enc));
+        } else {
+            os.write(binaryContent);
+        }
+    }
+
+    private static String getContentEncoding(Element el) {
+        final Object encAttr = el.getAttributes().getAttribute(ContentStreamStyleConstants.ENCODING);
+        return encAttr == null ? PdfEncodings.PDF_DOC_ENCODING : (String) encAttr;
+    }
+}
