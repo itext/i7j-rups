@@ -43,78 +43,78 @@
 package com.itextpdf.rups;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
-import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.view.Language;
+import com.itextpdf.rups.view.RupsDropTarget;
+import com.itextpdf.rups.view.RupsMenuBar;
+import com.itextpdf.rups.view.RupsTabbedPane;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class Rups {
-
-    private RupsController controller;
-
-    private volatile CompareTool.CompareResult lastCompareResult = null;
-
-    protected Rups() {
-        this.controller = null;
-    }
-
-    protected void setController(RupsController controller) {
-        this.controller = controller;
-    }
 
     /**
      * Initializes the main components of the Rups application.
      *
-     * @param f                a file that should be opened on launch
-     * @param onCloseOperation the close operation
+     * @param f a file that should be opened on launch
      */
-    public static void startNewApplication(final File f, final int onCloseOperation) {
-        final Rups rups = new Rups();
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new JFrame();
-                // defines the size and location
-                initFrameDim(frame);
-                RupsController controller = new RupsController(frame.getSize(), frame, false);
-                initApplication(frame, controller, onCloseOperation);
-                rups.setController(controller);
-                if (null != f && f.canRead()) {
-                    rups.loadDocumentFromFile(f, false);
-                }
+    public static void startNewApplication(final File f) {
+        SwingUtilities.invokeLater(() -> {
+            setLookandFeel();
+            final IRupsController rupsController = initApplication(new JFrame());
+            if (f != null) {
+                loadDocumentFromFile(rupsController, f);
             }
         });
     }
 
-    public void loadDocumentFromFile(final File f, final boolean readOnly) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.loadFile(f, readOnly);
-            }
-        });
+    static void loadDocumentFromFile(IRupsController rupsController, File f) {
+        SwingUtilities.invokeLater(() -> rupsController.openNewFile(f));
     }
 
-    static void initApplication(JFrame frame, RupsController controller, final int onCloseOperation) {
-        // title bar
-        frame.setTitle("iText RUPS " + ITextCoreProductData.getInstance().getVersion());
-        frame.setIconImages(FrameIconUtil.loadFrameIcons());
-        frame.setDefaultCloseOperation(onCloseOperation);
-        // the content
-        frame.setJMenuBar(controller.getMenuBar());
-        frame.getContentPane().add(controller.getMasterComponent(), java.awt.BorderLayout.CENTER);
-        frame.setVisible(true);
+    static void setLookandFeel() {
+        try {
+            UIManager.setLookAndFeel(RupsConfiguration.INSTANCE.getLookAndFeel());
+        } catch (
+                ClassNotFoundException | InstantiationException |
+                        IllegalAccessException | UnsupportedLookAndFeelException e) {
+            LoggerHelper.error(Language.ERROR_LOOK_AND_FEEL.getString(), e, Rups.class);
+        }
     }
 
-    static void initFrameDim(JFrame frame) {
+    static IRupsController initApplication(JFrame frame) {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
         frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
         frame.setResizable(true);
-    }
 
+        // title bar
+        frame.setTitle(
+                String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion()));
+        frame.setIconImages(FrameIconUtil.loadFrameIcons());
+        frame.setDefaultCloseOperation(RupsConfiguration.INSTANCE.getCloseOperation());
+
+        final RupsTabbedPane rupsTabbedPane = new RupsTabbedPane();
+        final RupsController rupsController = new RupsController(screen, rupsTabbedPane);
+        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
+        rupsController.addObserver(rupsMenuBar);
+
+        frame.setDropTarget(new RupsDropTarget(rupsController));
+        frame.setJMenuBar(rupsMenuBar);
+
+        frame.getContentPane().add(rupsController.getMasterComponent(), BorderLayout.CENTER);
+        frame.setVisible(true);
+
+        return rupsController;
+    }
 }

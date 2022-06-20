@@ -42,8 +42,8 @@
  */
 package com.itextpdf.rups;
 
-import javax.swing.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure
@@ -52,14 +52,9 @@ import java.io.File;
 public class RupsLauncher {
 
     /**
-     * Allows people to plug in RUPS into their projects without RUPS shutting down the JVM.
-     */
-    public static final int CLOSE_OPERATION = WindowConstants.EXIT_ON_CLOSE;
-
-    /**
      * Main method. Starts the RUPS application.
      *
-     * @param    args    no arguments needed
+     * @param args no arguments needed
      */
     public static void main(String[] args) {
         final File f;
@@ -69,6 +64,6 @@ public class RupsLauncher {
         } else {
             f = null;
         }
-        Rups.startNewApplication(f, CLOSE_OPERATION);
+        Rups.startNewApplication(f);
     }
 }

@@ -42,27 +42,27 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import javax.swing.*;
-import java.awt.*;
+import com.itextpdf.rups.view.Language;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import java.awt.Component;
 
 /**
  * Adds copy and clear functionality to the console screen.
  */
 public class ConsoleContextMenu {
 
-    private static Component invoker;
-
     public static JPopupMenu getPopupMenu(final Component component) {
-        invoker = component;
-        JPopupMenu popup = new JPopupMenu();
-        JMenuItem copyToClipboard = new JMenuItem();
-        copyToClipboard.setText("Copy to Clipboard");
-        copyToClipboard.setAction(new CopyToClipboardAction("Copy to Clipboard", invoker));
+        final JPopupMenu popup = new JPopupMenu();
+        final JMenuItem copyToClipboard = new JMenuItem();
+        copyToClipboard.setText(Language.COPY_TO_CLIPBOARD.getString());
+        copyToClipboard.setAction(new CopyToClipboardAction(Language.COPY_TO_CLIPBOARD.getString(), component));
         popup.add(copyToClipboard);
 
-        JMenuItem clear = new JMenuItem();
-        clear.setText("Clear");
-        clear.setAction(new ClearConsoleAction("Clear", invoker));
+        final JMenuItem clear = new JMenuItem();
+        clear.setText(Language.CLEAR.getString());
+        clear.setAction(new ClearConsoleAction(Language.CLEAR.getString(), component));
         popup.add(clear);
         return popup;
     }

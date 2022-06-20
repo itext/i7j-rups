@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import javax.swing.*;
+import javax.swing.Icon;
 import java.awt.event.ActionListener;
 
 /**

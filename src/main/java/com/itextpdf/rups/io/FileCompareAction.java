@@ -44,9 +44,10 @@ package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.event.CompareWithFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.view.Language;
 
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Component;
 import java.util.Observer;
 
 public class FileCompareAction extends FileChooserAction {
@@ -60,12 +61,12 @@ public class FileCompareAction extends FileChooserAction {
      * @param parent   a parent Component for chooser dialog
      */
     public FileCompareAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, "Compare with...", filter, parent);
+        super(observer, Language.COMPARE_WITH.getString(), filter, parent);
     }
 
     @Override
     protected int showDialog() {
-        return fileChooser.showDialog(parent, "Compare with");
+        return fileChooser.showDialog(parent, Language.MENU_BAR_COMPARE_WITH.getString());
     }
 
     @Override

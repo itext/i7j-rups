@@ -42,11 +42,13 @@
  */
 package com.itextpdf.rups.io;
 
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.RupsEvent;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Observer;
@@ -107,7 +109,7 @@ public abstract class FileChooserAction extends AbstractAction {
      */
     public void actionPerformed(ActionEvent evt) {
         fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(lastSelectedFolder);
+        fileChooser.setCurrentDirectory(RupsConfiguration.INSTANCE.getHomeFolder());
         fileChooser.setSelectedFile(file);
 
         if (filter != null) {

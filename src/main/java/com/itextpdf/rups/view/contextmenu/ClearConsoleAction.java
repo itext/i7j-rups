@@ -42,8 +42,8 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTextPane;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 /**
@@ -52,10 +52,6 @@ import java.awt.event.ActionEvent;
  * @author Michael Demey
  */
 public class ClearConsoleAction extends AbstractRupsAction {
-
-    public ClearConsoleAction(String name) {
-        super(name);
-    }
 
     public ClearConsoleAction(String name, Component invoker) {
         super(name, invoker);

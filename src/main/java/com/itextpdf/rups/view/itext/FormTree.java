@@ -45,7 +45,11 @@ package com.itextpdf.rups.view.itext;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.model.*;
+import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.model.XfaFile;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.FormTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -53,7 +57,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XfaTreeNode;
 import org.dom4j.DocumentException;
 
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
@@ -112,7 +116,7 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
+            final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
                     setModel(new DefaultTreeModel(new FormTreeNode()));
@@ -122,26 +126,26 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
                     repaint();
                     return;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
-                    TreeNodeFactory factory = loader.getNodes();
-                    PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-                    PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                    PdfObjectTreeNode form = factory.getChildNode(catalog, PdfName.AcroForm);
+                    final ObjectLoader loader = (ObjectLoader) event.getContent();
+                    final TreeNodeFactory factory = loader.getNodes();
+                    final PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+                    final PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+                    final PdfObjectTreeNode form = factory.getChildNode(catalog, PdfName.AcroForm);
                     if (form == null) {
                         return;
                     }
-                    PdfObjectTreeNode fields = factory.getChildNode(form, PdfName.Fields);
-                    FormTreeNode root = new FormTreeNode();
+                    final PdfObjectTreeNode fields = factory.getChildNode(form, PdfName.Fields);
+                    final FormTreeNode root = new FormTreeNode();
                     if (fields != null) {
-                        FormTreeNode node = new FormTreeNode(fields);
-                        node.setUserObject("Fields");
+                        final FormTreeNode node = new FormTreeNode(fields);
+                        node.setUserObject(Language.FORM_FIELDS.getString());
                         loadFields(factory, node, fields);
                         root.add(node);
                     }
-                    PdfObjectTreeNode xfa = factory.getChildNode(form, PdfName.XFA);
+                    final PdfObjectTreeNode xfa = factory.getChildNode(form, PdfName.XFA);
                     if (xfa != null) {
-                        XfaTreeNode node = new XfaTreeNode(xfa);
-                        node.setUserObject("XFA");
+                        final XfaTreeNode node = new XfaTreeNode(xfa);
+                        node.setUserObject(Language.FORM_XFA.getString());
                         loadXfa(factory, node, xfa);
                         root.add(node);
                         try {
@@ -149,9 +153,9 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
                             xfaTree.load(xfaFile);
                             xfaTextArea.load(xfaFile);
                         } catch (IOException e) {
-                            LoggerHelper.warn(LoggerMessages.XFA_LOADING_ERROR, e, getClass());
+                            LoggerHelper.warn(Language.ERROR_LOADING_XFA.getString(), e, getClass());
                         } catch (DocumentException e) {
-                            LoggerHelper.error(LoggerMessages.XML_DOM_PARSING_ERROR, e, getClass());
+                            LoggerHelper.error(Language.ERROR_PARSING_XML.getString(), e, getClass());
                         }
                     }
                     setModel(new DefaultTreeModel(root));
@@ -168,8 +172,9 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
      */
     @SuppressWarnings("unchecked")
     private void loadFields(TreeNodeFactory factory, FormTreeNode form_node, PdfObjectTreeNode object_node) {
-        if (object_node == null)
+        if (object_node == null) {
             return;
+        }
         factory.expandNode(object_node);
         if (object_node.isIndirectReference()) {
             loadFields(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
@@ -190,14 +195,17 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
      * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
      */
     public void valueChanged(TreeSelectionEvent evt) {
-        if (controller == null)
+        if (controller == null) {
             return;
-        FormTreeNode selectednode = (FormTreeNode) this.getLastSelectedPathComponent();
-        if (selectednode == null)
+        }
+        final FormTreeNode selectedNode = (FormTreeNode) this.getLastSelectedPathComponent();
+        if (selectedNode == null) {
             return;
-        PdfObjectTreeNode node = selectednode.getCorrespondingPdfObjectNode();
-        if (node != null)
+        }
+        final PdfObjectTreeNode node = selectedNode.getCorrespondingPdfObjectNode();
+        if (node != null) {
             controller.selectNode(node);
+        }
     }
 
     public XfaTree getXfaTree() {
@@ -216,8 +224,9 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
      */
     @SuppressWarnings("unchecked")
     void loadXfa(TreeNodeFactory factory, XfaTreeNode form_node, PdfObjectTreeNode object_node) {
-        if (object_node == null)
+        if (object_node == null) {
             return;
+        }
         factory.expandNode(object_node);
         if (object_node.isIndirectReference()) {
             loadXfa(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
@@ -235,8 +244,7 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
                 form_node.addPacket(key.getPdfObject().toString(), value);
             }
         } else if (object_node.isStream()) {
-            form_node.addPacket("xdp", object_node);
+            form_node.addPacket(Language.FORM_XDP.getString(), object_node);
         }
     }
-
 }

@@ -47,13 +47,15 @@ import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XdpTreeNode;
 
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 
 /**
  * Tree that visualizes the XFA information.
  */
 public class XfaTree extends JTree {
+
+    private static final String ICON = "xfa.png";
 
     /**
      * Constructs an XfaTree.
@@ -64,7 +66,7 @@ public class XfaTree extends JTree {
 
     public void clear() {
         setCellRenderer(new IconTreeCellRenderer());
-        setModel(new DefaultTreeModel(new IconTreeNode("xfa.png")));
+        setModel(new DefaultTreeModel(new IconTreeNode(ICON)));
     }
 
     public void load(XfaFile file) {

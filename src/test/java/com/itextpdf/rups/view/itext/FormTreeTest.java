@@ -74,7 +74,7 @@ public class FormTreeTest extends ExtendedITextTest {
         while (indirectObjectFactory.storeNextObject());
         TreeNodeFactory factory = new TreeNodeFactory(indirectObjectFactory);
 
-        PdfReaderController controller = new PdfReaderController(null, null, true);
+        PdfReaderController controller = new PdfReaderController(null, null);
         FormTree formTree = new FormTree(controller);
 
         PdfObject xfa = pdfDocument.getCatalog().getPdfObject().getAsDictionary(PdfName.AcroForm).getAsArray(PdfName.XFA);

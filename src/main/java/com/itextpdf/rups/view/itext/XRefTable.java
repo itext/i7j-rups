@@ -48,11 +48,12 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IndirectObjectFactory;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
 import com.itextpdf.rups.view.models.JTableAutoModelInterface;
 
-import javax.swing.*;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import java.util.Observable;
@@ -88,7 +89,7 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
+            final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
                     objects = null;
@@ -96,10 +97,10 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
                     repaint();
                     return;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
+                    final ObjectLoader loader = (ObjectLoader) event.getContent();
                     objects = loader.getObjects();
                     setModel(new JTableAutoModel(this));
-                    TableColumn col = getColumnModel().getColumn(0);
+                    final TableColumn col = getColumnModel().getColumn(0);
                     col.setPreferredWidth(5);
                     break;
                 case RupsEvent.POST_NEW_INDIRECT_OBJECT_EVENT:
@@ -156,9 +157,10 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
      * @return a PDF object
      */
     protected String getObjectDescriptionByRow(int rowIndex) {
-        PdfObject object = objects.getObjectByIndex(rowIndex);
-        if (object instanceof PdfNull && !objects.isLoadedByIndex(rowIndex))
-            return "Indirect object";
+        final PdfObject object = objects.getObjectByIndex(rowIndex);
+        if (object instanceof PdfNull && !objects.isLoadedByIndex(rowIndex)) {
+            return Language.INDIRECT_OBJECT.getString();
+        }
         return PdfObjectTreeNode.getCaption(object);
     }
 
@@ -168,9 +170,9 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "Number";
+                return Language.XREF_NUMBER.getString();
             case 1:
-                return "Object";
+                return Language.XREF_OBJECT.getString();
             default:
                 return null;
         }
@@ -192,7 +194,7 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
      * @param ref the reference number of the indirect object
      */
     public void selectRowByReference(int ref) {
-        int row = objects.getIndexByRef(ref);
+        final int row = objects.getIndexByRef(ref);
         setRowSelectionInterval(row, row);
         scrollRectToVisible(getCellRect(row, 1, true));
         valueChanged(null);
@@ -203,10 +205,10 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
      */
     @Override
     public void valueChanged(ListSelectionEvent evt) {
-        if (evt != null)
+        if (evt != null) {
             super.valueChanged(evt);
+        }
         if (controller != null && objects != null) {
-            //controller.render(getObjectByRow(this.getSelectedRow()));
             controller.selectNode(getObjectReferenceByRow(this.getSelectedRow()));
         }
     }

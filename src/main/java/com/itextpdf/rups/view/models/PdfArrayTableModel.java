@@ -45,12 +45,12 @@ package com.itextpdf.rups.view.models;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.PdfSyntaxUtils;
+import com.itextpdf.rups.view.Language;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JOptionPane;
+import java.awt.Component;
 
 /**
  * A TableModel in case we want to show a PDF array in a JTable.
@@ -62,12 +62,11 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
      */
     protected PdfArray array;
 
-    private boolean pluginMode;
-    private PdfSyntaxParser parser;
+    private final PdfSyntaxParser parser;
     /**
      * The owner component on witch will be displayed all messages
      */
-    private Component parent;
+    private final Component parent;
 
     private String tempValue = "";
 
@@ -75,27 +74,25 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
      * Creates the TableModel.
      *
      * @param array      a PDF array
-     * @param pluginMode the plugin mode
      * @param parser     the pdf syntax parser
      * @param parent     the parent
      */
-    public PdfArrayTableModel(PdfArray array, boolean pluginMode, PdfSyntaxParser parser, Component parent) {
+    public PdfArrayTableModel(PdfArray array, PdfSyntaxParser parser, Component parent) {
         this.array = array;
-        this.pluginMode = pluginMode;
         this.parser = parser;
         this.parent = parent;
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return !pluginMode && columnIndex < 1;
+        return columnIndex < 1;
     }
 
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
     public int getColumnCount() {
-        return pluginMode ? 1 : 2;
+        return 2;
     }
 
     /**
@@ -118,7 +115,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        int rowCount = getRowCount();
+        final int rowCount = getRowCount();
 
         if (rowIndex == rowCount - 1) {
             if (columnIndex == 0) {
@@ -126,12 +123,12 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
             }
         } else {
             if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
-                LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
+                LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
             if (columnIndex == 0) {
-                String value = (String) aValue;
-                PdfObject newValue = parser.parseString(value, parent);
+                final String value = (String) aValue;
+                final PdfObject newValue = parser.parseString(value, parent);
                 if (newValue != null) {
                     removeRow(rowIndex);
                     addRow(rowIndex, newValue);
@@ -146,7 +143,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "Array";
+                return Language.ARRAY.getString();
             case 1:
                 return "";
             default:
@@ -164,31 +161,32 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public void validateTempRow() {
         if ("".equalsIgnoreCase(tempValue.trim())) {
-            LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
+            LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
             return;
         }
 
-        PdfObject value = parser.parseString(tempValue, parent);
+        final PdfObject value = parser.parseString(tempValue, parent);
 
         if (value != null) {
             int index;
             while (true) {
-                String result = JOptionPane.showInputDialog(parent, "Choose array index", array.size());
+                final String result =
+                        JOptionPane.showInputDialog(parent, Language.ARRAY_CHOOSE_INDEX.getString(), array.size());
                 if (result == null) {
                     //canceled input
                     return;
                 }
                 try {
-                    index = Integer.valueOf(result);
+                    index = Integer.parseInt(result);
                 } catch (NumberFormatException any) {
-                    LoggerHelper.warn(LoggerMessages.NOT_AN_INTEGER_INDEX, any, getClass());
+                    LoggerHelper.warn(Language.ERROR_INDEX_NOT_INTEGER.getString(), any, getClass());
                     continue;
                 }
                 if (0 <= index && index <= array.size()) {
                     //correct input
                     break;
                 } else {
-                    LoggerHelper.warn(LoggerMessages.NOT_IN_RANGE_INDEX, getClass());
+                    LoggerHelper.warn(Language.ERROR_INDEX_NOT_IN_RANGE.getString(), getClass());
                 }
             }
             addRow(index, value);

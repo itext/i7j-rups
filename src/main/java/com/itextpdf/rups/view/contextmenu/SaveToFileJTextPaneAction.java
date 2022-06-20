@@ -43,10 +43,12 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFileChooser;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -55,58 +57,58 @@ import java.io.IOException;
 /**
  * Custom action to save raw bytes of a stream to a file from the stream panel.
  * This allows selections to be saved as well.
- *
- * @author Michael Demey
  */
 public class SaveToFileJTextPaneAction extends AbstractRupsAction {
-
-    public SaveToFileJTextPaneAction(String name) {
-        super(name);
-    }
 
     public SaveToFileJTextPaneAction(String name, Component invoker) {
         super(name, invoker);
     }
 
     public void actionPerformed(ActionEvent event) {
+        final Runnable saveRunnable = new Runnable() {
+            @Override public void run() {
+                // get saving location
+                final JFileChooser fileChooser = new JFileChooser();
 
-        // get saving location
-        JFileChooser fileChooser = new JFileChooser();
+                final int choice = fileChooser.showSaveDialog(null);
+                final String path;
 
-        int choice = fileChooser.showSaveDialog(null);
-        String path;
+                if (choice == JFileChooser.APPROVE_OPTION) {
+                    path = fileChooser.getSelectedFile().getPath();
 
-        if (choice == JFileChooser.APPROVE_OPTION) {
-            path = fileChooser.getSelectedFile().getPath();
+                    boolean nothingSelected = false;
+                    final JTextPane textPane = (JTextPane) invoker;
 
-            boolean nothingSelected = false;
-            JTextPane textPane = (JTextPane) invoker;
+                    if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
+                        nothingSelected = true;
+                        textPane.selectAll();
+                    }
 
-            if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
-                nothingSelected = true;
-                textPane.selectAll();
-            }
+                    BufferedWriter writer = null;
 
-            BufferedWriter writer = null;
+                    try {
+                        writer = new BufferedWriter(new FileWriter(path));
+                        writer.write(textPane.getSelectedText());
 
-            try {
-                writer = new BufferedWriter(new FileWriter(path));
-                writer.write(textPane.getSelectedText());
+                    } catch (IOException e) { //TODO
+                        LoggerHelper.warn(Language.ERROR_WRITING_FILE.getString(), e, getClass());
+                    } finally {
+                        try {
+                            if (writer != null) {
+                                writer.close();
+                            }
+                        } catch (IOException e) { //TODO
+                            LoggerHelper.error(Language.ERROR_CLOSING_STREAM.getString(), e, getClass());
+                        }
+                    }
 
-            } catch (IOException e) { //TODO
-                LoggerHelper.warn(LoggerMessages.WRITING_FILE_ERROR, e, getClass());
-            } finally {
-                try {
-                    if (writer != null)
-                        writer.close();
-                } catch (IOException e) { //TODO
-                    LoggerHelper.error(LoggerMessages.CLOSING_STREAM_ERROR, e, getClass());
+                    if (nothingSelected) {
+                        textPane.select(0, 0);
+                    }
                 }
             }
+        };
 
-            if (nothingSelected) {
-                textPane.select(0, 0);
-            }
-        }
+        SwingUtilities.invokeLater(saveRunnable);
     }
 }

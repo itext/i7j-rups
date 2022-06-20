@@ -56,5 +56,4 @@ public class StyleAppender extends OutputStreamAppender<ILoggingEvent> {
         setOutputStream(new Console.ConsoleOutputStream(styleType));
         super.start();
     }
-
 }

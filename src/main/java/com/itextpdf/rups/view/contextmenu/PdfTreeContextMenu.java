@@ -42,8 +42,12 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import javax.swing.*;
-import java.awt.*;
+import com.itextpdf.rups.view.Language;
+
+import javax.swing.Action;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import java.awt.Component;
 
 /**
  * Convenience class/factory that return the popup menu for the PdfTree panel.
@@ -52,23 +56,28 @@ import java.awt.*;
  */
 public class PdfTreeContextMenu {
 
-    public static JPopupMenu getPopupMenu(final Component component) {
-        JPopupMenu popup = new JPopupMenu();
+    public static JPopupMenu getPopupMenu(Component component) {
+        final JPopupMenu popup = new JPopupMenu();
 
-        JMenuItem inspect = new JMenuItem();
-        inspect.setText("Inspect Object");
-        inspect.setAction(new InspectObjectAction("Inspect Object", component));
-        popup.add(inspect);
+        popup.add(getJMenuItem(
+                new InspectObjectAction(Language.INSPECT_OBJECT.getString(), component)
+        ));
 
-        JMenuItem saveRawToFile = new JMenuItem();
-        saveRawToFile.setText("Save Raw Bytes to File");
-        saveRawToFile.setAction(new SaveToFilePdfTreeAction("Save Raw Bytes to File", component, true));
-        popup.add(saveRawToFile);
+        popup.add(getJMenuItem(
+                new SaveToFilePdfTreeAction(Language.SAVE_RAW_BYTES_TO_FILE.getString(), component, true)
+        ));
 
-        JMenuItem saveToFile = new JMenuItem();
-        saveToFile.setText("Save to File");
-        saveToFile.setAction(new SaveToFilePdfTreeAction("Save to File", component, false));
-        popup.add(saveToFile);
+        popup.add(getJMenuItem(
+                new SaveToFilePdfTreeAction(Language.SAVE_TO_FILE.getString(), component, false)
+        ));
+
         return popup;
+    }
+
+    static JMenuItem getJMenuItem(AbstractRupsAction rupsAction) {
+        final JMenuItem jMenuItem = new JMenuItem();
+        jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
+        jMenuItem.setAction(rupsAction);
+        return jMenuItem;
     }
 }

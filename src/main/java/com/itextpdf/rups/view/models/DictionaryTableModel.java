@@ -46,11 +46,11 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.PdfSyntaxUtils;
+import com.itextpdf.rups.view.Language;
 
-import java.awt.*;
+import java.awt.Component;
 import java.util.ArrayList;
 
 /**
@@ -58,12 +58,11 @@ import java.util.ArrayList;
  */
 public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
-    private boolean pluginMode;
-    private PdfSyntaxParser parser;
+    private final PdfSyntaxParser parser;
     /**
      * The owner component on witch will be displayed all messages
      */
-    private Component parent;
+    private final Component parent;
     /**
      * The PDF dictionary.
      */
@@ -71,18 +70,16 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     /**
      * An ArrayList with the dictionary keys.
      */
-    protected ArrayList<PdfName> keys = new ArrayList<PdfName>();
+    protected ArrayList<PdfName> keys = new ArrayList<>();
 
     /**
      * Creates the TableModel.
      *
      * @param dictionary the dictionary we want to show
-     * @param pluginMode the plugin mode
      * @param parser     the pdf syntax parser
      * @param owner      the owner
      */
-    public DictionaryTableModel(PdfDictionary dictionary, boolean pluginMode, PdfSyntaxParser parser, Component owner) {
-        this.pluginMode = pluginMode;
+    public DictionaryTableModel(PdfDictionary dictionary, PdfSyntaxParser parser, Component owner) {
         this.dictionary = dictionary;
         this.parser = parser;
         this.parent = owner;
@@ -93,27 +90,27 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      * @see javax.swing.table.TableModel#getColumnCount()
      */
     public int getColumnCount() {
-        return pluginMode ? 2 : 3;
+        return 3;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-        return pluginMode ? dictionary.size() : dictionary.size() + 1;
+        return dictionary.size() + 1;
     }
 
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return !pluginMode && columnIndex < 2;
+        return columnIndex < 2;
     }
 
     /**
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
     public Object getValueAt(int rowIndex, int columnIndex) {
-        int lastRow = keys.size();
+        final int lastRow = keys.size();
 
         if (rowIndex == lastRow) {
             if (columnIndex == 0) {
@@ -138,7 +135,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        int rowCount = getRowCount();
+        final int rowCount = getRowCount();
 
         if (rowIndex == rowCount - 1) {
             if (columnIndex == 0) {
@@ -151,26 +148,26 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
             }
         } else {
             if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
-                LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
+                LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
             if (columnIndex == 0) {
-                String key = (String) aValue;
+                final String key = (String) aValue;
 
-                PdfName oldName = keys.get(rowIndex);
-                PdfName newName = getCorrectKey(key);
+                final PdfName oldName = keys.get(rowIndex);
+                final PdfName newName = getCorrectKey(key);
                 if (newName == null) {
                     return;
                 }
 
-                PdfObject pdfObject = dictionary.get(oldName, false);
+                final PdfObject pdfObject = dictionary.get(oldName, false);
                 removeRow(rowIndex);
                 addRow(newName, pdfObject);
             } else {
-                String value = (String) aValue;
-                PdfObject newValue = parser.parseString(value, parent);
+                final String value = (String) aValue;
+                final PdfObject newValue = parser.parseString(value, parent);
                 if (newValue != null) {
-                    PdfName oldName = keys.get(rowIndex);
+                    final PdfName oldName = keys.get(rowIndex);
                     removeRow(rowIndex);
                     addRow(oldName, newValue);
                 }
@@ -187,9 +184,9 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "Key";
+                return Language.DICTIONARY_KEY.getString();
             case 1:
-                return "Value";
+                return Language.DICTIONARY_VALUE.getString();
             case 2:
                 return "";
             default:
@@ -214,7 +211,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     public void validateTempRow() {
 
         if ("".equalsIgnoreCase(tempKey.trim()) || "".equalsIgnoreCase(tempValue.trim())) {
-            LoggerHelper.warn(LoggerMessages.FIELD_IS_EMPTY, getClass());
+            LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
             return;
         }
 
@@ -222,11 +219,12 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         if (key == null) {
             return;
         }
-        PdfObject value = parser.parseString(tempValue, parent);
+
+        final PdfObject value = parser.parseString(tempValue, parent);
 
         if (value != null) {
             if (dictionary.containsKey(key)) {
-                LoggerHelper.warn(LoggerMessages.KEY_ALREADY_EXIST, getClass());
+                LoggerHelper.warn(Language.ERROR_DUPLICATE_KEY.getString(), getClass());
             } else {
                 addRow(key, value);
 
@@ -255,11 +253,13 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         if (!value.startsWith("/")) {
             value = "/" + value;
         }
-        PdfObject result = parser.parseString(value);
+        final PdfObject result = parser.parseString(value);
+
         if (result instanceof PdfName) {
             return (PdfName) result;
         }
-        LoggerHelper.error(LoggerMessages.KEY_ISNT_PDFNAME, getClass());
+
+        LoggerHelper.error(Language.ERROR_KEY_IS_NOT_NAME.getString(), getClass());
         return null;
     }
 }

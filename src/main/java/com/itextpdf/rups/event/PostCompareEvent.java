@@ -44,7 +44,7 @@ package com.itextpdf.rups.event;
 
 import com.itextpdf.kernel.utils.CompareTool;
 
-public class PostCompareEvent extends RupsEvent{
+public class PostCompareEvent extends RupsEvent {
 
     private CompareTool.CompareResult result;
 

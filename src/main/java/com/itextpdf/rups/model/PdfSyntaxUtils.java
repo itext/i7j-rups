@@ -42,12 +42,17 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfString;
 
 public class PdfSyntaxUtils {
 
     public static synchronized String getSyntaxString(PdfObject object) {
-        StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
         safeAppendSyntaxString(object, stringBuilder);
         return stringBuilder.toString();
     }
@@ -79,7 +84,7 @@ public class PdfSyntaxUtils {
 
     private static void appendSyntaxString(PdfDictionary dictionary, StringBuilder stringBuilder) {
         stringBuilder.append("<< ");
-        for (PdfName key : dictionary.keySet()) {
+        for (final PdfName key : dictionary.keySet()) {
             safeAppendSyntaxString(key, stringBuilder);
             stringBuilder.append(" ");
             safeAppendSyntaxString(dictionary.get(key, false), stringBuilder);

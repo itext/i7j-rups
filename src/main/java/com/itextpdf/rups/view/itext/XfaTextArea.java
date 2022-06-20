@@ -45,7 +45,8 @@ package com.itextpdf.rups.view.itext;
 import com.itextpdf.rups.io.OutputStreamResource;
 import com.itextpdf.rups.io.TextAreaOutputStream;
 
-import javax.swing.*;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import java.io.IOException;
 
 /**

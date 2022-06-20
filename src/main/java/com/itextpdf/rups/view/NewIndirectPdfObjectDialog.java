@@ -47,22 +47,32 @@ import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.NewIndirectObjectEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.AbstractAction;
+import javax.swing.Icon;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
 
     private PdfObject result;
-    private JTextArea textArea;
-    private JOptionPane optionPane;
+    private final JTextArea textArea;
+    private final JOptionPane optionPane;
 
-    private PdfSyntaxParser parser;
+    private final PdfSyntaxParser parser;
 
-    private String btnString1 = "Enter";
-    private String btnString2 = "Cancel";
+    private final String btnString1 = Language.DIALOG_ENTER.getString();
 
     /**
      * Creates the reusable dialog.
@@ -80,21 +90,18 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         textArea = new JTextArea();
         textArea.setMinimumSize(new Dimension(100, 200));
 
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        final JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setMinimumSize(new Dimension(100, 200));
         //Create an array of the text and components to be displayed.
-        Object[] array = {"Value", scrollPane};
+        final Object[] array = {Language.DIALOG_VALUE.getString(), scrollPane};
 
         //Create an array specifying the number of dialog buttons
         //and their text.
-        Object[] options = {btnString1, btnString2};
+        final String btnString2 = Language.DIALOG_CANCEL.getString();
+        final Object[] options = {btnString1, btnString2};
 
         //Create the JOptionPane.
-        optionPane = new JOptionPane(array,
-                JOptionPane.QUESTION_MESSAGE,
-                JOptionPane.YES_NO_OPTION,
-                null,
-                options,
+        optionPane = new JOptionPane(array, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, null, options,
                 options[0]);
 
         //Make this dialog display it.
@@ -102,12 +109,13 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         pack();
         setSize(300, 450);
-        Point parentLocation = parent.getLocation();
+        final Point parentLocation = parent.getLocation();
         setLocation(parentLocation.x + 20, parentLocation.y + 40);
 
         //Handle window closing correctly.
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent we) {
                 /*
                  * Instead of directly closing the window,
@@ -120,6 +128,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         //Ensure the text field always gets the first focus.
         addComponentListener(new ComponentAdapter() {
+            @Override
             public void componentShown(ComponentEvent ce) {
                 textArea.requestFocusInWindow();
             }
@@ -133,13 +142,11 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
      * This method reacts to state changes in the option pane.
      */
     public void propertyChange(PropertyChangeEvent e) {
-        String prop = e.getPropertyName();
+        final String prop = e.getPropertyName();
 
-        if (isVisible()
-                && (e.getSource() == optionPane)
-                && (JOptionPane.VALUE_PROPERTY.equals(prop) ||
-                JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
-            Object value = optionPane.getValue();
+        if (isVisible() && (e.getSource() == optionPane) &&
+                (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
+            final Object value = optionPane.getValue();
 
             if (value == JOptionPane.UNINITIALIZED_VALUE) {
                 //ignore reset
@@ -150,8 +157,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
             //If you don't do this, then if the user
             //presses the same button next time, no
             //property change event will be fired.
-            optionPane.setValue(
-                    JOptionPane.UNINITIALIZED_VALUE);
+            optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
 
             if (btnString1.equals(value)) {
                 result = parser.parseString(textArea.getText(), getContentPane());
@@ -177,7 +183,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
     public static class AddNewIndirectAction extends AbstractAction {
 
-        private RupsController controller;
+        private final RupsController controller;
 
         public AddNewIndirectAction(RupsController controller) {
             super();

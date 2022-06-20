@@ -42,7 +42,8 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -54,8 +55,8 @@ import java.awt.event.MouseEvent;
  */
 public class ContextMenuMouseListener extends MouseAdapter {
 
-    private JPopupMenu popup;
     protected JComponent component;
+    private final JPopupMenu popup;
 
     public ContextMenuMouseListener(JPopupMenu popup, JComponent component) {
         this.popup = popup;

@@ -42,10 +42,19 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.*;
+import com.itextpdf.rups.event.NodeAddArrayChildEvent;
+import com.itextpdf.rups.event.NodeAddDictChildEvent;
+import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
+import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
+import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.models.AbstractPdfObjectPanelTableModel;
@@ -53,34 +62,38 @@ import com.itextpdf.rups.view.models.DictionaryTableModel;
 import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
 
-import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import java.awt.*;
+import java.awt.CardLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 public class PdfObjectPanel extends Observable implements Observer {
 
-    private boolean pluginMode;
-
-    private JPanel panel = new JPanel();
+    private static final String ADD_ICON = "add.png";
+    private static final String CROSS_ICON = "cross.png";
 
     /**
      * Name of a panel in the CardLayout.
      */
-    private static final String TEXT = "text";
+    private static final String TABLE = Language.TABLE.getString();
+
     /**
      * Name of a panel in the CardLayout.
      */
-    private static final String TABLE = "table";
+    private static final String TEXT = Language.TEXT.getString();
 
     /**
      * The layout that will show the info about the PDF object that is being analyzed.
      */
     protected CardLayout layout = new CardLayout();
+
 
     /**
      * Table with dictionary entries.
@@ -91,36 +104,30 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     JTextArea text = new JTextArea();
 
-    private JTableButtonMouseListener mouseListener;
+    private final JPanel panel = new JPanel();
 
     private PdfObjectTreeNode target;
 
+
     /**
      * Creates a PDF object panel.
-     *
-     * @param pluginMode the plugin mode
-     * @param parser     the pdf syntax parser
      */
-    public PdfObjectPanel(boolean pluginMode, PdfSyntaxParser parser) {
-
-        this.pluginMode = pluginMode;
-
+    public PdfObjectPanel() {
         // layout
         panel.setLayout(layout);
 
         // dictionary / array / stream
-        JScrollPane dict_scrollpane = new JScrollPane();
-        dict_scrollpane.setViewportView(table);
-        panel.add(dict_scrollpane, TABLE);
+        final JScrollPane dictScrollPane = new JScrollPane();
+        dictScrollPane.setViewportView(table);
+        panel.add(dictScrollPane, TABLE);
 
         // number / string / ...
-        JScrollPane text_scrollpane = new JScrollPane();
-        text_scrollpane.setViewportView(text);
+        final JScrollPane textScrollPane = new JScrollPane();
+        textScrollPane.setViewportView(text);
         text.setEditable(false);
-        panel.add(text_scrollpane, TEXT);
+        panel.add(textScrollPane, TEXT);
 
-        mouseListener = new JTableButtonMouseListener();
-        table.addMouseListener(mouseListener);
+        table.addMouseListener(new JTableButtonMouseListener());
     }
 
     /**
@@ -141,7 +148,6 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
             clear();
         }
     }
@@ -154,7 +160,7 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     public void render(PdfObjectTreeNode node, PdfSyntaxParser parser) {
         target = node;
-        PdfObject object = node.getPdfObject();
+        final PdfObject object = node.getPdfObject();
         if (object == null) {
             text.setText(null);
             layout.show(panel, TEXT);
@@ -162,25 +168,26 @@ public class PdfObjectPanel extends Observable implements Observer {
             text.repaint();
             return;
         }
+
         switch (object.getType()) {
             case PdfObject.DICTIONARY:
             case PdfObject.STREAM:
-                DictionaryTableModel model = new DictionaryTableModel((PdfDictionary) object, pluginMode, parser, panel);
+                final DictionaryTableModel model =
+                        new DictionaryTableModel((PdfDictionary) object, parser, panel);
                 model.addTableModelListener(new DictionaryModelListener());
                 table.setModel(model);
-                if (!pluginMode) {
-                    table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
-                }
+                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(
+                        IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON)));
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;
             case PdfObject.ARRAY:
-                PdfArrayTableModel arrayModel = new PdfArrayTableModel((PdfArray) object, pluginMode, parser, panel);
+                final PdfArrayTableModel arrayModel =
+                        new PdfArrayTableModel((PdfArray) object, parser, panel);
                 arrayModel.addTableModelListener(new ArrayModelListener());
                 table.setModel(arrayModel);
-                if (!pluginMode) {
-                    table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon("cross.png"), IconFetcher.getIcon("add.png")));
-                }
+                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
+                        IconFetcher.getIcon(ADD_ICON)));
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;
@@ -197,14 +204,14 @@ public class PdfObjectPanel extends Observable implements Observer {
 
     private class JTableButtonMouseListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
-            int selectedColumn = table.getSelectedColumn();
+            final int selectedColumn = table.getSelectedColumn();
 
             if (selectedColumn != ((AbstractPdfObjectPanelTableModel) table.getModel()).getButtonColumn()) {
                 return;
             }
 
-            int selectedRow = table.getSelectedRow();
-            int rowCount = table.getRowCount();
+            final int selectedRow = table.getSelectedRow();
+            final int rowCount = table.getRowCount();
 
             if (rowCount == 1 || rowCount - 1 == selectedRow) {
                 ((AbstractPdfObjectPanelTableModel) table.getModel()).validateTempRow();
@@ -224,13 +231,12 @@ public class PdfObjectPanel extends Observable implements Observer {
     private class DictionaryModelListener implements TableModelListener {
         @Override
         public void tableChanged(TableModelEvent e) {
-            int row = e.getFirstRow();
-            int col = e.getColumn();
+            final int row = e.getFirstRow();
             if (row != e.getLastRow()) {
                 return;
             }
-            PdfName key = (PdfName) table.getValueAt(row, 0);
-            PdfObject value = ((PdfDictionary) target.getPdfObject()).get(key, false);
+            final PdfName key = (PdfName) table.getValueAt(row, 0);
+            final PdfObject value = ((PdfDictionary) target.getPdfObject()).get(key, false);
             switch (e.getType()) {
                 case TableModelEvent.UPDATE:
                     break;
@@ -252,11 +258,11 @@ public class PdfObjectPanel extends Observable implements Observer {
     private class ArrayModelListener implements TableModelListener {
         @Override
         public void tableChanged(TableModelEvent e) {
-            int row = e.getFirstRow();
+            final int row = e.getFirstRow();
             if (row != e.getLastRow()) {
                 return;
             }
-            PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);
+            final PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);
             switch (e.getType()) {
                 case TableModelEvent.UPDATE:
                     break;

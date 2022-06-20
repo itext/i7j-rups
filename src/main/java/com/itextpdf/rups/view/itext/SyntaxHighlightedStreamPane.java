@@ -42,60 +42,60 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.io.source.PdfTokenizer;
-import com.itextpdf.io.source.RandomAccessFileOrArray;
-import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.exceptions.PdfException;
-import com.itextpdf.kernel.pdf.*;
-import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.LoggerMessages;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
+import com.itextpdf.rups.view.contextmenu.SaveImageAction;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
+import com.itextpdf.rups.view.itext.contentstream.ContentStreamWriter;
+import com.itextpdf.rups.view.itext.contentstream.StyledSyntaxDocument;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
+import javax.swing.ToolTipManager;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FilenameFilter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Observable;
+import java.util.Observer;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
+
+    private static final int MAX_NUMBER_OF_EDITS = 8192;
+
+    private static Method pdfStreamGetInputStreamMethod;
 
     /**
      * The text pane with the content stream.
      */
-    protected ColorTextPane text;
-
-    /**
-     * Syntax highlight attributes for operators
-     */
-    protected static Map<String, Map<Object, Object>> attributemap = null;
-
-    /**
-     * Highlight operands according to their operator
-     */
-    protected static boolean matchingOperands = false;
-
-    /**
-     * Factory that allows you to create RandomAccessSource files
-     */
-    protected static final RandomAccessSourceFactory RASF = new RandomAccessSourceFactory();
+    private final JSyntaxPane text;
 
     protected StreamPanelContextMenu popupMenu;
 
@@ -103,12 +103,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
     protected UndoManager manager;
 
-    private static int MAX_NUMBER_OF_EDITS = 8192;
-
     //Todo: Remove that field after proper application structure will be implemented.
-    private PdfReaderController controller;
-
-    private static Method pdfStreamGetInputStreamMethod;
+    private final PdfReaderController controller;
 
     static {
         try {
@@ -116,7 +112,7 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             pdfStreamGetInputStreamMethod.setAccessible(true);
         } catch (NoSuchMethodException | SecurityException any) {
             pdfStreamGetInputStreamMethod = null;
-            LoggerHelper.error(LoggerMessages.REFLECTION_PDFSTREAM_ERROR, any, PdfReaderController.class);
+            LoggerHelper.error(Language.ERROR_REFLECTION_PDF_STREAM.getString(), any, PdfReaderController.class);
         }
     }
 
@@ -124,24 +120,25 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
      * Constructs a SyntaxHighlightedStreamPane.
      *
      * @param controller the pdf reader controller
-     * @param pluginMode the plugin mode
      */
-    public SyntaxHighlightedStreamPane(PdfReaderController controller, boolean pluginMode) {
+    public SyntaxHighlightedStreamPane(PdfReaderController controller) {
         super();
-        initAttributes();
-        text = new ColorTextPane();
+        this.text = new JSyntaxPane();
+        ToolTipManager.sharedInstance().registerComponent(text);
         setViewportView(text);
         this.controller = controller;
 
-        popupMenu = new StreamPanelContextMenu(text, this, pluginMode);
+        popupMenu = new StreamPanelContextMenu(text, this);
         text.setComponentPopupMenu(popupMenu);
         text.addMouseListener(new ContextMenuMouseListener(popupMenu, text));
 
         manager = new UndoManager();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
         text.getDocument().addUndoableEditListener(manager);
-        text.registerKeyboardAction(new UndoAction(manager), KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
-        text.registerKeyboardAction(new RedoAction(manager), KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+        text.registerKeyboardAction(new UndoAction(manager),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+        text.registerKeyboardAction(new RedoAction(manager),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
     }
 
     /**
@@ -166,18 +163,19 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             clearPane();
             return;
         }
-        PdfStream stream = (PdfStream) target.getPdfObject();
+        final PdfStream stream = (PdfStream) target.getPdfObject();
         text.setText("");
         //Check if stream is image
         if (PdfName.Image.equals(stream.getAsName(PdfName.Subtype))) {
             try {
                 //Convert byte array back to Image
-                if (!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber())
+                if (!stream.get(PdfName.Width, false).isNumber() && !stream.get(PdfName.Height, false).isNumber()) {
                     return;
+                }
                 PdfImageXObject pimg = new PdfImageXObject(stream);
                 BufferedImage img = pimg.getBufferedImage();
                 if (img == null) {
-                    text.setText("Image can't be loaded.");
+                    text.setText(Language.ERROR_LOADING_IMAGE.getString());
                 } else {
                     //Show image in textpane
                     StyledDocument doc = (StyledDocument) text.getDocument();
@@ -185,35 +183,15 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                     StyleConstants.setIcon(style, new ImageIcon(img));
 
                     try {
-                        doc.insertString(doc.getLength(), "ignored text", style);
-                        JButton saveImage = new JButton("Save Image");
-                        final BufferedImage saveImg = img;
-                        saveImage.addActionListener(new ActionListener() {
-
-                            public void actionPerformed(ActionEvent event) {
-                                try {
-                                    FileDialog fileDialog = new FileDialog(new Frame(), "Save", FileDialog.SAVE);
-                                    fileDialog.setFilenameFilter(new FilenameFilter() {
-                                        public boolean accept(File dir, String name) {
-                                            return name.endsWith(".jpg");
-                                        }
-                                    });
-                                    fileDialog.setFile("Untitled.jpg");
-                                    fileDialog.setVisible(true);
-                                    ImageIO.write(saveImg, "jpg", new File(fileDialog.getDirectory() + fileDialog.getFile()));
-                                } catch (HeadlessException | IOException e) {
-                                    LoggerHelper.error(LoggerMessages.IMAGE_PARSING_ERROR, e, getClass());
-                                }
-                            }
-                        });
-                        text.append("\n", null);
-                        text.insertComponent(saveImage);
+                        doc.insertString(doc.getLength(), Language.IGNORED_TEXT.getString(), style);
+                        doc.insertString(doc.getLength(), "\n", SimpleAttributeSet.EMPTY);
+                        text.insertComponent(SaveImageAction.createSaveImageButton(img));
                     } catch (BadLocationException e) {
-                        LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+                        LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
                     }
                 }
             } catch (IOException e) {
-                LoggerHelper.error(LoggerMessages.UNEXPECTED_EXCEPTION_DEFAULT, e, getClass());
+                LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
             }
             setTextEditableRoutine(false);
         } else if (stream.get(PdfName.Length1) != null) {
@@ -226,43 +204,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 text.setText("");
                 setTextEditableRoutine(false);
             }
-        } else if (stream.get(PdfName.Length1) == null) {
-            setTextEditableRoutine(true);
-            String newline = "\n";
-            byte[] bb = null;
-            try {
-                bb = stream.getBytes();
-
-                PdfTokenizer tokeniser = new PdfTokenizer(new RandomAccessFileOrArray(RASF.createSource(bb)));
-
-                PdfCanvasParser ps = new PdfCanvasParser(tokeniser);
-                ArrayList<PdfObject> tokens = new ArrayList<>();
-                while (ps.parse(tokens).size() > 0) {
-                    // operator is at the end
-                    String operator = (tokens.get(tokens.size() - 1)).toString();
-                    // operands are in front of their operator
-                    StringBuilder operandssb = new StringBuilder();
-                    for (int i = 0; i < tokens.size() - 1; i++) {
-                        append(operandssb, tokens.get(i));
-                    }
-                    String operands = operandssb.toString();
-
-                    Map<Object, Object> attributes = attributemap.get(operator);
-                    Map<Object, Object> attributesOperands = null;
-                    if (matchingOperands)
-                        attributesOperands = attributes;
-
-                    text.append(operands, attributesOperands);
-                    text.append(operator + newline, attributes);
-                }
-            } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
-                LoggerHelper.warn(LoggerMessages.PDFSTREAM_PARSING_ERROR, e, getClass());
-                if (bb != null) {
-                    text.setText(new String(bb));
-                }
-            } catch (IOException ignored) {
-            }
-            text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
+        } else {
+            renderGenericContentStream(stream);
         }
         text.repaint();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
@@ -275,172 +218,29 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         if (controller != null && ((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
             controller.deleteTreeNodeDictChild(target, PdfName.Filter);
         }
-        ((PdfStream) target.getPdfObject()).setData(text.getText().getBytes());
+        final int sizeEst = text.getText().length();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);
+        try {
+            new ContentStreamWriter(baos).write(text.getDocument());
+        } catch (IOException e) {
+            LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
+        }
+        ((PdfStream) target.getPdfObject()).setData(baos.toByteArray());
         if (controller != null) {
             controller.selectNode(target);
         }
         manager.setLimit(MAX_NUMBER_OF_EDITS);
     }
 
-    protected void append(StringBuilder sb, PdfObject obj) {
-        switch (obj.getType()) {
-            case PdfObject.STRING:
-                PdfString str = (PdfString) obj;
-                if (str.isHexWriting()) {
-                    sb.append("<");
-                    byte[] b = str.getValueBytes();
-                    String hex;
-                    for (byte aB : b) {
-                        hex = Integer.toHexString((aB & 0xFF));
-                        if (hex.length() % 2 == 1)
-                            sb.append("0");
-                        sb.append(hex);
-                    }
-                    sb.append("> ");
-                } else {
-                    sb
-                            .append("(")
-                            .append(obj)
-                            .append(") ");
-                }
-                break;
-            case PdfObject.DICTIONARY:
-                PdfDictionary dict = (PdfDictionary) obj;
-                sb.append("<<");
-                for (PdfName key : dict.keySet()) {
-                    sb
-                            .append(key)
-                            .append(" ");
-                    append(sb, dict.get(key, false));
-                }
-                sb.append(">> ");
-                break;
-            default:
-                sb
-                        .append(obj)
-                        .append(" ");
-        }
-    }
-
-    /**
-     * Initialize the syntax highlighting attributes.
-     * This could be read from a configuration file, but is hard coded for now
-     */
-    protected void initAttributes() {
-        attributemap = new HashMap<>();
-
-        Map<Object, Object> opConstructionPainting = new HashMap<>();
-        Color darkorange = new Color(255, 140, 0);
-        opConstructionPainting.put(StyleConstants.Foreground, darkorange);
-        opConstructionPainting.put(StyleConstants.Background, Color.WHITE);
-        attributemap.put("m", opConstructionPainting);
-        attributemap.put("l", opConstructionPainting);
-        attributemap.put("c", opConstructionPainting);
-        attributemap.put("v", opConstructionPainting);
-        attributemap.put("y", opConstructionPainting);
-        attributemap.put("h", opConstructionPainting);
-        attributemap.put("re", opConstructionPainting);
-        attributemap.put("S", opConstructionPainting);
-        attributemap.put("s", opConstructionPainting);
-        attributemap.put("f", opConstructionPainting);
-        attributemap.put("F", opConstructionPainting);
-        attributemap.put("f*", opConstructionPainting);
-        attributemap.put("B", opConstructionPainting);
-        attributemap.put("B*", opConstructionPainting);
-        attributemap.put("b", opConstructionPainting);
-        attributemap.put("b*", opConstructionPainting);
-        attributemap.put("n", opConstructionPainting);
-        attributemap.put("W", opConstructionPainting);
-        attributemap.put("W*", opConstructionPainting);
-
-        Map<Object, Object> graphicsdelim = new HashMap<>();
-        graphicsdelim.put(StyleConstants.Foreground, Color.WHITE);
-        graphicsdelim.put(StyleConstants.Background, Color.RED);
-        graphicsdelim.put(StyleConstants.Bold, true);
-        attributemap.put("q", graphicsdelim);
-        attributemap.put("Q", graphicsdelim);
-
-        Map<Object, Object> graphics = new HashMap<>();
-        graphics.put(StyleConstants.Foreground, Color.RED);
-        graphics.put(StyleConstants.Background, Color.WHITE);
-        attributemap.put("w", graphics);
-        attributemap.put("J", graphics);
-        attributemap.put("j", graphics);
-        attributemap.put("M", graphics);
-        attributemap.put("d", graphics);
-        attributemap.put("ri", graphics);
-        attributemap.put("i", graphics);
-        attributemap.put("gs", graphics);
-        attributemap.put("cm", graphics);
-        attributemap.put("g", graphics);
-        attributemap.put("G", graphics);
-        attributemap.put("rg", graphics);
-        attributemap.put("RG", graphics);
-        attributemap.put("k", graphics);
-        attributemap.put("K", graphics);
-        attributemap.put("cs", graphics);
-        attributemap.put("CS", graphics);
-        attributemap.put("sc", graphics);
-        attributemap.put("SC", graphics);
-        attributemap.put("scn", graphics);
-        attributemap.put("SCN", graphics);
-        attributemap.put("sh", graphics);
-
-        Map<Object, Object> xObject = new HashMap<>();
-        xObject.put(StyleConstants.Foreground, Color.BLACK);
-        xObject.put(StyleConstants.Background, Color.YELLOW);
-        attributemap.put("Do", xObject);
-
-        Map<Object, Object> inlineImage = new HashMap<>();
-        inlineImage.put(StyleConstants.Foreground, Color.BLACK);
-        inlineImage.put(StyleConstants.Background, Color.YELLOW);
-        inlineImage.put(StyleConstants.Italic, true);
-        attributemap.put("BI", inlineImage);
-        attributemap.put("EI", inlineImage);
-
-        Map<Object, Object> textdelim = new HashMap<>();
-        textdelim.put(StyleConstants.Foreground, Color.WHITE);
-        textdelim.put(StyleConstants.Background, Color.BLUE);
-        textdelim.put(StyleConstants.Bold, true);
-        attributemap.put("BT", textdelim);
-        attributemap.put("ET", textdelim);
-
-        Map<Object, Object> text = new HashMap<>();
-        text.put(StyleConstants.Foreground, Color.BLUE);
-        text.put(StyleConstants.Background, Color.WHITE);
-        attributemap.put("ID", text);
-        attributemap.put("Tc", text);
-        attributemap.put("Tw", text);
-        attributemap.put("Tz", text);
-        attributemap.put("TL", text);
-        attributemap.put("Tf", text);
-        attributemap.put("Tr", text);
-        attributemap.put("Ts", text);
-        attributemap.put("Td", text);
-        attributemap.put("TD", text);
-        attributemap.put("Tm", text);
-        attributemap.put("T*", text);
-        attributemap.put("Tj", text);
-        attributemap.put("'", text);
-        attributemap.put("\"", text);
-        attributemap.put("TJ", text);
-
-        Map<Object, Object> markedContent = new HashMap<>();
-        markedContent.put(StyleConstants.Foreground, Color.MAGENTA);
-        markedContent.put(StyleConstants.Background, Color.WHITE);
-        attributemap.put("BMC", markedContent);
-        attributemap.put("BDC", markedContent);
-        attributemap.put("EMC", markedContent);
-    }
-
     private void setTextEditableRoutine(boolean editable) {
         text.setEditable(editable);
-        if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) && (target.getPdfObject() instanceof PdfStream)) {
+        if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) &&
+                (target.getPdfObject() instanceof PdfStream)) {
             try {
                 popupMenu.setSaveToStreamEnabled(pdfStreamGetInputStreamMethod.invoke(target.getPdfObject()) == null);
                 return;
             } catch (Exception any) {
-                LoggerHelper.error(LoggerMessages.REFLECTION_INVOCATION_PDFSTREAM_ERROR, any, getClass());
+                LoggerHelper.error(Language.ERROR_CANNOT_CHECK_NULL_FOR_INPUT_STREAM.getString(), any, getClass());
             }
         }
         popupMenu.setSaveToStreamEnabled(false);
@@ -453,38 +253,48 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         text.setText("");
         setTextEditableRoutine(false);
     }
-}
 
-class ColorTextPane extends JTextPane {
+    private void renderGenericContentStream(PdfStream stream) {
+        final StyledSyntaxDocument doc = (StyledSyntaxDocument) text.getDocument();
+        setTextEditableRoutine(true);
 
-    /**
-     * Appends a string to the JTextPane, with style attributes applied.
-     *
-     * @param s    the String to be appended
-     * @param attr a Map of attributes used to style the string
-     */
-    public void append(String s, Map<Object, Object> attr) {
-        StyleContext sc = StyleContext.getDefaultStyleContext();
-        AttributeSet aset = SimpleAttributeSet.EMPTY;
-        // some default attributes
-        if (attr == null) {
-            attr = new HashMap<>();
-            attr.put(StyleConstants.Foreground, Color.BLACK);
-            attr.put(StyleConstants.Background, Color.WHITE);
+        byte[] bb = null;
+        try {
+            bb = stream.getBytes();
+            doc.processContentStream(bb);
+        } catch (PdfException | com.itextpdf.io.exceptions.IOException e) {
+            LoggerHelper.warn(Language.ERROR_PARSING_PDF_STREAM.getString(), e, getClass());
+            if (bb != null) {
+                text.setText(new String(bb, StandardCharsets.ISO_8859_1));
+            }
         }
-        // add attributes
-        for (Object key : attr.keySet()) {
-            aset = sc.addAttribute(aset, key, attr.get(key));
-        }
-        int len = getDocument().getLength();
-        setCaretPosition(len);
-        setCharacterAttributes(aset, true);
-        replaceSelection(s);
+        text.setCaretPosition(0); // set the caret at the start so the panel will show the first line
     }
+
+    private static final class JSyntaxPane extends JTextPane {
+
+        JSyntaxPane() {
+            super(new StyledSyntaxDocument());
+        }
+
+        StyledSyntaxDocument getStyledSyntaxDocument() {
+            // can't just override getDocument() because the superclass
+            // constructor relies on it
+            return (StyledSyntaxDocument) super.getDocument();
+        }
+
+        @Override
+        public String getToolTipText(MouseEvent ev) {
+            final String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
+            return toolTip == null ? super.getToolTipText(ev) : toolTip;
+        }
+    }
+
 }
+
 
 class UndoAction extends AbstractAction {
-    private UndoManager manager;
+    private final UndoManager manager;
 
     public UndoAction(UndoManager manager) {
         this.manager = manager;
@@ -500,7 +310,7 @@ class UndoAction extends AbstractAction {
 }
 
 class RedoAction extends AbstractAction {
-    private UndoManager manager;
+    private final UndoManager manager;
 
     public RedoAction(UndoManager manager) {
         this.manager = manager;

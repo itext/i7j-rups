@@ -42,13 +42,28 @@
  */
 package com.itextpdf.rups.view.itext.treenodes;
 
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-import org.dom4j.*;
+import org.dom4j.Attribute;
+import org.dom4j.Branch;
+import org.dom4j.Comment;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.Node;
+import org.dom4j.ProcessingInstruction;
+import org.dom4j.Text;
 
 import java.util.List;
 
 public class XdpTreeNode extends IconTreeNode {
+
+    private static final String ATTRIBUTE_ICON = "attribute.png";
+    private static final String TEXT_ICON = "text.png";
+    private static final String PI_ICON = "pi.png";
+    private static final String XFA_ICON = "xfa.png";
+    private static final String TAG_ICON = "tag.png";
 
     /**
      * Constructs an XdpTreeNode
@@ -66,23 +81,24 @@ public class XdpTreeNode extends IconTreeNode {
             Branch branch = (Branch) node;
             addChildNodes(branch.content());
         }
+
         if (node instanceof Attribute) {
-            icon = IconFetcher.getIcon("attribute.png");
+            icon = IconFetcher.getIcon(ATTRIBUTE_ICON);
             return;
         }
         if (node instanceof Text) {
-            icon = IconFetcher.getIcon("text.png");
+            icon = IconFetcher.getIcon(TEXT_ICON);
             return;
         }
         if (node instanceof ProcessingInstruction) {
-            icon = IconFetcher.getIcon("pi.png");
+            icon = IconFetcher.getIcon(PI_ICON);
             return;
         }
         if (node instanceof Document) {
-            icon = IconFetcher.getIcon("xfa.png");
+            icon = IconFetcher.getIcon(XFA_ICON);
             return;
         }
-        icon = IconFetcher.getIcon("tag.png");
+        icon = IconFetcher.getIcon(TAG_ICON);
     }
 
     private void addChildNodes(List<? extends Node> list) {
@@ -123,7 +139,7 @@ public class XdpTreeNode extends IconTreeNode {
                     "?>";
         }
         if (node instanceof Document) {
-            return "XFA Document";
+            return Language.FORM_XFA_DOCUMENT.getString();
         }
         return getNode().toString();
     }

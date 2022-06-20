@@ -43,9 +43,10 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.rups.event.PostOpenDocumentEvent;
+import com.itextpdf.rups.view.Language;
 
-import javax.swing.*;
 import java.util.Observer;
+import javax.swing.SwingUtilities;
 
 /**
  * Loads the necessary iText PDF objects in Background.
@@ -70,9 +71,9 @@ public class ObjectLoader extends BackgroundTask {
     /**
      * a human readable name for this loaded
      */
-    private String loaderName;
+    private final String loaderName;
 
-    private ProgressDialog progress;
+    private final IProgressDialog progress;
 
     /**
      * Creates a new ObjectLoader.
@@ -82,12 +83,11 @@ public class ObjectLoader extends BackgroundTask {
      * @param observer   the object that will forward the changes.
      * @param file       the PdfFile from which the objects will be read.
      */
-    public ObjectLoader(Observer observer, PdfFile file, String loaderName, ProgressDialog progress) {
+    public ObjectLoader(Observer observer, PdfFile file, String loaderName, IProgressDialog progress) {
         this.observer = observer;
         this.file = file;
         this.loaderName = loaderName;
         this.progress = progress;
-        start();
     }
 
     /**
@@ -134,30 +134,16 @@ public class ObjectLoader extends BackgroundTask {
     public void doTask() {
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                progress.setMessage("Reading the Cross-Reference table");
-                progress.setTotal(n);
-            }
+        SwingUtilities.invokeLater(() -> {
+            progress.setMessage(Language.XREF_READING.getString());
+            progress.setTotal(n);
         });
         while (objects.storeNextObject()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    progress.setValue(objects.getCurrent());
-                }
-            });
+            SwingUtilities.invokeLater(() -> progress.setValue(objects.getCurrent()));
         }
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                progress.setTotal(0);
-            }
-        });
+        SwingUtilities.invokeLater(() -> progress.setTotal(0));
         nodes = new TreeNodeFactory(objects);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                progress.setMessage("Updating GUI");
-            }
-        });
+        SwingUtilities.invokeLater(() -> progress.setMessage(Language.GUI_UPDATING.getString()));
     }
 
     @Override
@@ -165,7 +151,7 @@ public class ObjectLoader extends BackgroundTask {
         try {
             observer.update(null, new PostOpenDocumentEvent(this));
         } catch (Exception ex) {
-            ErrorDialogPane.showErrorDialog(progress, ex);
+            progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());
         }
         progress.setVisible(false);

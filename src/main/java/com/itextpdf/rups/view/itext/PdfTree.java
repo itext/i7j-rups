@@ -50,7 +50,7 @@ import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Observable;
@@ -72,7 +72,7 @@ public class PdfTree extends JTree implements Observer {
     public PdfTree() {
         super();
         root = new PdfTrailerTreeNode();
-        PdfTreeNavigationListener listener = new PdfTreeNavigationListener();
+        final PdfTreeNavigationListener listener = new PdfTreeNavigationListener();
         addKeyListener(listener);
         addMouseListener(listener);
         setCellRenderer(new IconTreeCellRenderer());
@@ -100,7 +100,7 @@ public class PdfTree extends JTree implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
+            final RupsEvent event = (RupsEvent) obj;
             if (RupsEvent.CLOSE_DOCUMENT_EVENT == event.getType()) {
                 root = new PdfTrailerTreeNode();
             }
@@ -114,11 +114,11 @@ public class PdfTree extends JTree implements Observer {
      * Typically this method will be called from a different tree,
      * such as the pages, outlines or form tree.
      *
-     * @param    node    the node that has to be selected
+     * @param node the node that has to be selected
      */
     public void selectNode(PdfObjectTreeNode node) {
         if (node != null) {
-            TreePath path = new TreePath(node.getPath());
+            final TreePath path = new TreePath(node.getPath());
             setSelectionPath(path);
             scrollPathToVisible(path);
         }

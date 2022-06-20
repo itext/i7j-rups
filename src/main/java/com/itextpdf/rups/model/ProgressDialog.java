@@ -42,28 +42,38 @@
  */
 package com.itextpdf.rups.model;
 
-import javax.swing.*;
-import java.awt.*;
+import com.itextpdf.rups.view.Language;
+
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+import javax.swing.UIManager;
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.WindowEvent;
 
 /**
  * An informational dialog window showing the progress of a certain action.
  */
-public class ProgressDialog extends JDialog {
+public final class ProgressDialog extends JDialog implements IProgressDialog {
     /**
      * label showing the message describing what's in progress.
      */
-    protected JLabel message;
+    private final JLabel message;
+
     /**
      * the progress bar
      */
-    protected JProgressBar progress;
+    private final JProgressBar progress;
+
     /**
      * the icon used for this dialog box.
      */
     public static final JLabel INFO = new JLabel(UIManager.getIcon("OptionPane.informationIcon"));
-
-    private boolean pluginMode;
 
     /**
      * Creates a Progress frame displaying a certain message
@@ -72,18 +82,16 @@ public class ProgressDialog extends JDialog {
      * @param parent     the parent frame of this dialog (used to position the dialog)
      * @param msg        the message that will be displayed.
      * @param frame      the frame
-     * @param pluginMode the plugin mode
      */
-    public ProgressDialog(Component parent, String msg, Frame frame, boolean pluginMode) {
-        super(frame, !pluginMode);
-        this.pluginMode = pluginMode;
-        this.setTitle("Progress...");
+    public ProgressDialog(Component parent, String msg, Frame frame) {
+        super(frame);
+        this.setTitle(Language.DIALOG_PROGRESS.getString());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(300, 100);
         this.setLocationRelativeTo(parent);
 
         setLayout(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
+        final GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridheight = 2;
@@ -101,11 +109,9 @@ public class ProgressDialog extends JDialog {
 
     @Override
     public void dispose() {
-        Window frame = getOwner();
+        final Window frame = getOwner();
         super.dispose();
-        if (!pluginMode) {
-            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-        }
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
 
     /**
@@ -113,6 +119,7 @@ public class ProgressDialog extends JDialog {
      *
      * @param msg the message describing what's in progress
      */
+    @Override
     public void setMessage(String msg) {
         message.setText(msg);
     }
@@ -122,6 +129,7 @@ public class ProgressDialog extends JDialog {
      *
      * @param value the current value
      */
+    @Override
     public void setValue(int value) {
         progress.setValue(value);
     }
@@ -132,6 +140,7 @@ public class ProgressDialog extends JDialog {
      *
      * @param n the maximum value for the progress bar
      */
+    @Override
     public void setTotal(int n) {
         if (n > 0) {
             progress.setMaximum(n);
@@ -141,5 +150,15 @@ public class ProgressDialog extends JDialog {
             progress.setIndeterminate(true);
             progress.setStringPainted(false);
         }
+    }
+
+    /**
+     * Displays an error dialog for the given exception.
+     *
+     * @param ex exception to display information about
+     */
+    @Override
+    public void showErrorDialog(Exception ex) {
+        ErrorDialogPane.showErrorDialog(this, ex);
     }
 }

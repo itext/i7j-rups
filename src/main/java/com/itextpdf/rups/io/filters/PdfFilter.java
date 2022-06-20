@@ -42,9 +42,12 @@
  */
 package com.itextpdf.rups.io.filters;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
+import com.itextpdf.rups.RupsConfiguration;
+import com.itextpdf.rups.view.Language;
+
 import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Filters PDF files in a {@link JFileChooser}.
@@ -58,19 +61,24 @@ public class PdfFilter extends FileFilter {
 
     /**
      * @param f File
+     *
      * @return boolean
+     *
      * @see FileFilter#accept(java.io.File)
      */
     public boolean accept(File f) {
-        return f.isDirectory() || f.getName().toLowerCase().endsWith(".pdf");
+        final String suffix = ".pdf";
+        return f != null && (f.isDirectory() || f.getName().toLowerCase(RupsConfiguration.INSTANCE.getUserLocale())
+                .endsWith(suffix));
     }
 
     /**
      * @return String
+     *
      * @see FileFilter#getDescription()
      */
     public String getDescription() {
-        return "*.pdf PDF files";
+        return Language.FILE_FILTER_DESCRIPTION.getString();
     }
 
 }

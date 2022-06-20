@@ -59,23 +59,10 @@ import java.util.Enumeration;
 public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
 
     /**
-     * Start sequence of an artificial boundary between XFA fragments added by RUPS
-     */
-    protected static final byte[] BOUNDARY_START = "<!--\nRUPS XFA individual packet: end of [".getBytes();
-    /**
-     * Middle sequence of an artificial boundary between XFA fragments added by RUPS
-     */
-    protected static final byte[] BOUNDARY_MIDDLE = "]; start of [".getBytes();
-    /**
-     * End sequence of an artificial boundary between XFA fragments added by RUPS
-     */
-    protected static final byte[] BOUNDARY_END = "]\n-->".getBytes();
-
-    /**
      * Creates the root node of the XFA tree.
      * This will be a child of the FormTree root node.
      *
-     * @param    xfa    the XFA node in the PdfTree (a child of the AcroForm node in the PDF catalog)
+     * @param xfa the XFA node in the PdfTree (a child of the AcroForm node in the PDF catalog)
      */
     public XfaTreeNode(PdfObjectTreeNode xfa) {
         super(xfa);
@@ -92,7 +79,7 @@ public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
      */
     @SuppressWarnings("unchecked")
     public void writeTo(OutputStream os) throws IOException {
-        Enumeration<TreeNode> children = this.children();
+        final Enumeration<TreeNode> children = this.children();
         FormTreeNode node;
         PdfStream stream;
         while (children.hasMoreElements()) {
@@ -113,7 +100,7 @@ public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
      * @param value the corresponding stream node in the PdfTree
      */
     public void addPacket(String key, PdfObjectTreeNode value) {
-        FormTreeNode node = new FormTreeNode(value);
+        final FormTreeNode node = new FormTreeNode(value);
         node.setUserObject(key);
         this.add(node);
     }

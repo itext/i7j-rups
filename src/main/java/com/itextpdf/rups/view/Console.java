@@ -45,10 +45,16 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.event.ConsoleWriteEvent;
 import com.itextpdf.rups.event.RupsEvent;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import java.awt.*;
-import java.io.IOException;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Document;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import java.awt.Color;
 import java.io.OutputStream;
 import java.util.Observable;
 import java.util.Observer;
@@ -80,7 +86,7 @@ public class Console extends Observable implements Observer {
     /**
      * Creates a new Console object.
      */
-    private Console(boolean pluginMode) {
+    private Console() {
         // Add a scrolling text area
         textArea.setEditable(false);
     }
@@ -92,7 +98,7 @@ public class Console extends Observable implements Observer {
      */
     public static synchronized Console getInstance() {
         if (console == null) {
-            console = new Console(false);
+            console = new Console();
         }
         return console;
     }
@@ -102,7 +108,7 @@ public class Console extends Observable implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
+            final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
@@ -114,18 +120,18 @@ public class Console extends Observable implements Observer {
 
     private void updateTextPane(final String msg, final String type) {
         SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+            @Override public void run() {
                 try {
-                    Document doc = textArea.getDocument();
-                    AttributeSet attset = styleContext.getStyle(type);
+                    final Document doc = textArea.getDocument();
                     if (doc.getLength() + msg.length() > MAX_TEXT_AREA_SIZE) {
-                        clearWithBuffer("...too many output\n");
+                        Console.this.clearWithBuffer(Language.ERROR_TOO_MANY_OUTPUT.getString());
                     }
-                    doc.insertString(doc.getLength(), msg, attset);
+                    doc.insertString(doc.getLength(), msg, styleContext.getStyle(type));
                     textArea.setCaretPosition(textArea.getDocument().getLength());
-                    setChanged();
-                    notifyObservers(new ConsoleWriteEvent());
+                    Console.this.setChanged();
+                    Console.this.notifyObservers(new ConsoleWriteEvent());
                 } catch (BadLocationException ignored) {
+                    // Intentionally Empty
                 }
             }
         });
@@ -133,22 +139,22 @@ public class Console extends Observable implements Observer {
 
     private void clearWithBuffer(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 try {
-                    String backupString = textArea.getText(
+                    final String backupString = textArea.getText(
                             Math.max(textArea.getDocument().getLength() - BUFFER_SIZE, 0),
                             Math.min(textArea.getDocument().getLength(), BUFFER_SIZE));
                     textArea.setText("");
-                    Document doc = textArea.getDocument();
+                    final Document doc = textArea.getDocument();
                     doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
-                    doc.insertString(doc.getLength(), message == null ? "" : message, styleContext.getStyle(ConsoleStyleContext.INFO));
+                    doc.insertString(doc.getLength(), message == null ? "" : message,
+                            styleContext.getStyle(ConsoleStyleContext.INFO));
                 } catch (BadLocationException any) {
                     textArea.setText(message == null ? "" : message);
                 }
                 textArea.setCaretPosition(textArea.getDocument().getLength());
-                setChanged();
-                notifyObservers(new ConsoleWriteEvent());
+                Console.this.setChanged();
+                Console.this.notifyObservers(new ConsoleWriteEvent());
             }
         });
     }
@@ -164,7 +170,7 @@ public class Console extends Observable implements Observer {
 
     static class ConsoleOutputStream extends OutputStream {
 
-        private String type;
+        private final String type;
 
         ConsoleOutputStream(String type) {
             this.type = type;
@@ -194,22 +200,22 @@ public class Console extends Observable implements Observer {
         /**
          * The name of the Style used for Info messages
          */
-        public static final String INFO = "Info";
+        public static final String INFO = Language.CONSOLE_INFO.getString();
         /**
          * The name of the Style used for chunks of text left after clean up
          */
-        public static final String BACKUP = "Backup";
+        public static final String BACKUP = Language.CONSOLE_BACKUP.getString();
         /**
          * The name of the Style used for Error and Warning messages
          */
-        public static final String ERROR = "Error";
+        public static final String ERROR = Language.CONSOLE_ERROR.getString();
 
         /**
          * Creates the style context for the Console.
          */
         public ConsoleStyleContext() {
             super();
-            Style root = getStyle(DEFAULT_STYLE);
+            final Style root = getStyle(DEFAULT_STYLE);
             Style s = addStyle(INFO, root);
             StyleConstants.setForeground(s, Color.BLACK);
             s = addStyle(BACKUP, root);

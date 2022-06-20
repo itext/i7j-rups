@@ -42,24 +42,25 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import java.awt.*;
+import java.awt.Component;
 
 /**
  * Renders the tree cells with the correct icon.
  */
 public class IconTreeCellRenderer extends DefaultTreeCellRenderer {
 
-    /**
-     * @see javax.swing.tree.DefaultTreeCellRenderer#getTreeCellRendererComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int, boolean)
-     */
+
+    @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                  boolean selected, boolean expanded, boolean leaf, int row,
-                                                  boolean hasFocus) {
-        JLabel displayedLabel = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            boolean selected, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
+        final JLabel displayedLabel =
+                (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         if (value instanceof IconTreeNode) {
-            IconTreeNode node = (IconTreeNode) value;
+            final IconTreeNode node = (IconTreeNode) value;
             displayedLabel.setIcon(node.getIcon());
             if (node.getTextColor() != null) {
                 displayedLabel.setForeground(node.getTextColor());

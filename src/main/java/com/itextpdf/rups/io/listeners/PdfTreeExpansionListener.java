@@ -54,17 +54,16 @@ import javax.swing.tree.TreePath;
 
 /**
  * Listener that checks if the expanded node has one child. If it has one child it should expand it.
- * @author Michael Demey
  */
 public class PdfTreeExpansionListener implements TreeExpansionListener {
 
     public void treeExpanded(TreeExpansionEvent event) {
-        PdfTree  tree = (PdfTree) event.getSource();
+        PdfTree tree = (PdfTree) event.getSource();
         DefaultMutableTreeNode node = ((DefaultMutableTreeNode) event.getPath().getLastPathComponent());
-        if ( node.getChildCount() == 1 ) {
+        if (node.getChildCount() == 1) {
             TreeNode child = node.getChildAt(0);
             tree.selectNode((PdfObjectTreeNode) child);
-            tree.expandPath(new TreePath(((DefaultTreeModel) tree.getModel() ).getPathToRoot(child)));
+            tree.expandPath(new TreePath(((DefaultTreeModel) tree.getModel()).getPathToRoot(child)));
         }
     }
 
