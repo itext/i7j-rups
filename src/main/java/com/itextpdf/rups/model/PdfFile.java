@@ -226,6 +226,12 @@ public class PdfFile {
         return directory;
     }
 
+    public byte[] getBytes() {
+        byte[] b = new byte[rawContent.length];
+        System.arraycopy(rawContent, 0, b, 0, b.length);
+        return b;
+    }
+
     public String getRawContent() {
         try {
             return new String(rawContent, "Cp1252");
