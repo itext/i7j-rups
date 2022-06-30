@@ -43,6 +43,7 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
+import com.itextpdf.research.autoupdate.AutoUpdater;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
@@ -51,9 +52,14 @@ import com.itextpdf.rups.io.FileOpenAction;
 import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.model.LoggerHelper;
 
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -61,6 +67,7 @@ import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 public class RupsMenuBar extends JMenuBar implements Observer {
@@ -129,6 +136,26 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                     preferencesWindow.show(controller.getMasterComponent());
                 }
         );
+        addItem(edit, "AutoUpdate", e -> {
+            try {
+                Path out = Files.createTempFile("pdfupdate-out", ".pdf");
+                try (OutputStream os = Files.newOutputStream(out)) {
+                    AutoUpdater au = new AutoUpdater(controller.getCurrentFile(), os);
+                    if (au.hasAutoUpdate()) {
+                        au.downloadAndApplyUpdate();
+                        LoggerHelper.info("Update written to " + out, RupsMenuBar.class);
+                        controller.openNewFile(out.toFile());
+                    } else {
+                        JOptionPane.showMessageDialog(getParent(),
+                                "This is not an updatable document",
+                                "AutoUpdate error", JOptionPane.ERROR_MESSAGE);
+                        Files.delete(out);
+                    }
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(getParent(), ex.getMessage(), "AutoUpdate error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         add(edit);
 
         add(Box.createGlue());
