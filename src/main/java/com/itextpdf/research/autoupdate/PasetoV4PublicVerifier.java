@@ -3,14 +3,13 @@ package com.itextpdf.research.autoupdate;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import org.bouncycastle.jcajce.spec.RawEncodedKeySpec;
 
 public class PasetoV4PublicVerifier {
 
@@ -30,7 +29,7 @@ public class PasetoV4PublicVerifier {
     public PasetoV4PublicVerifier(byte[] pubKeyBytes)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
          this(KeyFactory.getInstance("Ed25519")
-                 .generatePublic(new RawEncodedKeySpec(pubKeyBytes)));
+                 .generatePublic(new X509EncodedKeySpec(pubKeyBytes)));
     }
 
     public void init(byte[] token, long implicitLength)
