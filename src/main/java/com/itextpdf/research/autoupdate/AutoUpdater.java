@@ -4,6 +4,7 @@ import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.PdfFile;
 
 import com.google.gson.JsonObject;
@@ -11,9 +12,9 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,7 +80,7 @@ public class AutoUpdater {
     }
 
     private URL getUpdateURL() throws MalformedURLException {
-        PdfString repo = autoUpdateDict.getAsString(new PdfName("Repo"));
+        PdfString repo = autoUpdateDict.getAsString(new PdfName("Repository"));
         PdfName addressMode = autoUpdateDict.getAsName(new PdfName("AddressMode"));
         StringBuilder urlStr = new StringBuilder(repo.toUnicodeString());
         if ("ContentDigest".equals(addressMode.getValue())) {
@@ -87,8 +88,11 @@ public class AutoUpdater {
         } else if ("DocumentID".equals(addressMode.getValue())) {
             urlStr.append("/docId/");
         }
-        urlStr.append(getResourceIdentifier());
-        return new URL(urlStr.toString());
+        String resourceId = getResourceIdentifier();
+        urlStr.append(resourceId);
+        URL result = new URL(urlStr.toString());
+        LoggerHelper.info("Fetching update with ID " + resourceId + "; URL is " + result, AutoUpdater.class);
+        return result;
     }
 
     private static boolean nameValueIs(PdfDictionary dict, String key, String expectedValue) {
@@ -120,6 +124,7 @@ public class AutoUpdater {
             try {
                 verifier = new PasetoV4PublicVerifier(pskStr.getValueBytes());
             } catch (GeneralSecurityException e) {
+                LoggerHelper.error(e.getMessage(), e, AutoUpdater.class);
                 throw new UpdateVerificationException("Key deser error", e);
             }
         } else {
@@ -131,7 +136,11 @@ public class AutoUpdater {
         long contentLength = -1;
         try (OutputStream tempOut = Files.newOutputStream(tempFile)) {
             byte[] buf = new byte[2048];
-            URLConnection conn = getUpdateURL().openConnection();
+            HttpURLConnection conn = (HttpURLConnection) getUpdateURL().openConnection();
+
+            if (conn.getResponseCode() != 200) {
+                throw new IOException("Fetch failed; error " + conn.getResponseCode());
+            }
             if (verifier != null) {
                 try {
                     contentLength = conn.getContentLengthLong();
@@ -140,6 +149,7 @@ public class AutoUpdater {
                     }
                     verifier.init(conn.getHeaderField("X-PDF-Update-Token").getBytes(StandardCharsets.UTF_8), contentLength);
                 } catch (GeneralSecurityException e) {
+                    LoggerHelper.error(e.getMessage(), e, AutoUpdater.class);
                     throw new UpdateVerificationException("Cryptographic failure", e);
                 }
             }
@@ -151,6 +161,7 @@ public class AutoUpdater {
                     try {
                         verifier.updateImplicit(buf, 0, bytesRead);
                     } catch (GeneralSecurityException e) {
+                        LoggerHelper.error(e.getMessage(), e, AutoUpdater.class);
                         throw new UpdateVerificationException("Cryptographic failure", e);
                     }
                 }
@@ -162,6 +173,7 @@ public class AutoUpdater {
             try {
                 payload = verifier.verifyAndGetPayload();
             } catch (SignatureException e) {
+                LoggerHelper.error(e.getMessage(), e, AutoUpdater.class);
                 throw new UpdateVerificationException("Cryptographic failure", e);
             }
             // verify the token contents
