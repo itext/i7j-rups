@@ -41,3 +41,29 @@ mvn clean package -P mac
 ```
 
 This will produce `itext-rups.app` in your `target` folder (in itext-rups-{project.version} subfolder). You can copy it to your 'Applications' folder and run it as any other application assuming you have Java installed on your system. Maven 'appbundle' should handle executable file permissions automatically, but you can always give the rights manually like this: `chmod +x /Applications/itext-rups.app/Contents/MacOS/*`.
+
+##### Troubleshooting
+
+-- Error running mvn clean package...
+
+mvn clean package
+[ERROR] Error executing Maven.
+[ERROR] java.lang.IllegalStateException: Unable to load cache item
+[ERROR] Caused by: Unable to load cache item
+[ERROR] Caused by: Could not initialize class com.google.inject.internal.cglib.core.$MethodWrapper
+
+This may be caused by using an unsupported version of java. Try downgrading or upgrading your java version as appropriate.
+
+-- Error generating javadocs
+
+[ERROR] MavenReportException: Error while generating Javadoc: Unable to find javadoc command: The environment variable JAVA_HOME is not correctly set.
+org.apache.maven.reporting.MavenReportException: Unable to find javadoc command: The environment variable JAVA_HOME is not correctly set.
+
+Make sure to define your JAVA_HOME pointing to your jdk installation folder. Or make sure that javadoc is on your command path.
+
+-- Warnings downlaoding package-lists
+
+[WARNING] Error fetching link: http://dom4j.github.io/apidocs/package-list. Ignored it
+
+Some package lists may be unavailable (404 error). This will not cause the build to fail so can be ignored.
+
