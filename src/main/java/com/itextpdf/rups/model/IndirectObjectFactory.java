@@ -46,15 +46,18 @@ import com.itextpdf.io.util.IntHashtable;
 import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.view.Language;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A factory that can produce all the indirect objects in a PDF file.
@@ -77,6 +80,11 @@ public class IndirectObjectFactory {
      * A list of all the indirect objects in a PDF file.
      */
     protected ArrayList<PdfObject> objects = new ArrayList<>();
+
+    /**
+     * List of all Object Streams in a PDF file.
+     */
+    protected List<PdfIndirectReference> objectStreams = new ArrayList<>();
     /**
      * Mapping between the index in the objects list and the reference number in the xref table.
      */
@@ -161,6 +169,14 @@ public class IndirectObjectFactory {
                 final int idx = size();
                 idxToRef.put(idx, current);
                 refToIdx.put(current, idx);
+
+                if ( object.getType() == PdfObject.STREAM ) {
+                    PdfStream stream = (PdfStream) object;
+                    if ( PdfName.ObjStm.equals(stream.get(PdfName.Type) )) {
+                        this.objectStreams.add(stream.getIndirectReference());
+                    }
+                }
+
                 store(object);
                 return true;
             }
@@ -252,6 +268,10 @@ public class IndirectObjectFactory {
 
     public boolean isLoadedByReference(int ref) {
         return isLoaded.get(getIndexByRef(ref));
+    }
+
+    public List<PdfIndirectReference> getObjectStreams() {
+        return objectStreams;
     }
 
     /**
