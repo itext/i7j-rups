@@ -44,6 +44,7 @@ package com.itextpdf.rups.controller;
 
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
@@ -61,6 +62,7 @@ import com.itextpdf.rups.event.OpenPlainTextEvent;
 import com.itextpdf.rups.event.OpenStructureEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
+import com.itextpdf.rups.model.IndirectObjectFactory;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -79,11 +81,13 @@ import com.itextpdf.rups.view.itext.PlainText;
 import com.itextpdf.rups.view.itext.StructureTree;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 import com.itextpdf.rups.view.itext.XRefTable;
+import com.itextpdf.rups.view.itext.treenodes.ObjectStreamTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import java.awt.Color;
 import java.awt.event.KeyListener;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
@@ -310,6 +314,13 @@ public class PdfReaderController extends Observable implements Observer {
                     root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
                     root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
                     nodes.expandNode(root);
+                    IndirectObjectFactory objects = loader.getObjects();
+                    List<PdfIndirectReference> objectStreams = objects.getObjectStreams();
+                    if ( objectStreams != null && !objectStreams.isEmpty() ) {
+                        ObjectStreamTreeNode objStreamNode = new ObjectStreamTreeNode(new PdfArray(objectStreams));
+                        root.add(objStreamNode);
+                        nodes.expandNode(objStreamNode);
+                    }
                     navigationTabs.setSelectedIndex(0);
                     setChanged();
                     super.notifyObservers(event);
