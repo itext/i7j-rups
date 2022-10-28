@@ -4,4 +4,4 @@
 def repoName = "rups"
 def dependencyRegex = "itextcore"
 
-automaticJavaBuild(repoName, dependencyRegex)
+automaticJavaBuild(repoName, dependencyRegex, 'jdk-19-openjdk')
