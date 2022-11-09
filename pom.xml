@@ -269,10 +269,10 @@
           <!--          <reuseForks>true</reuseForks>-->
           <reportsDirectory>target/surefire-reports-${surefire.forkNumber}</reportsDirectory>
           <systemPropertyVariables>
-            <!--            <java.awt.headless>false</java.awt.headless>-->
-            <!--            <awt.toolkit>com.github.caciocavallosilano.cacio.ctc.CTCToolkit</awt.toolkit>-->
-            <!--            <java.awt.graphicsenv>com.github.caciocavallosilano.cacio.ctc.CTCGraphicsEnvironment</java.awt.graphicsenv>-->
-            <!--            <cacio.managed.screensize>1920x1080</cacio.managed.screensize>-->
+            <java.awt.headless>false</java.awt.headless>
+            <awt.toolkit>com.github.caciocavallosilano.cacio.ctc.CTCToolkit</awt.toolkit>
+            <java.awt.graphicsenv>com.github.caciocavallosilano.cacio.ctc.CTCGraphicsEnvironment</java.awt.graphicsenv>
+            <cacio.managed.screensize>1920x1080</cacio.managed.screensize>
           </systemPropertyVariables>
           <includes>
             <include>**/*Test.java</include>

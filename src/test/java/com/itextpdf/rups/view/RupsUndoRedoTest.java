@@ -42,13 +42,16 @@
  */
 package com.itextpdf.rups.view;
 
+import com.github.caciocavallosilano.cacio.ctc.junit.CacioTestRunner;
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import org.assertj.swing.annotation.GUITest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.OrderWith;
+import org.junit.runner.RunWith;
 import org.junit.runner.manipulation.Orderable;
 import org.junit.runner.manipulation.Ordering;
 import org.junit.runners.MethodSorters;
@@ -62,8 +65,11 @@ import org.uispec4j.Window;
 import org.uispec4j.utils.Log;
 import org.uispec4j.interception.WindowHandler;
 import org.uispec4j.interception.WindowInterceptor;
+import com.itextpdf.test.annotations.type.IntegrationTest;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Category(IntegrationTest.class)
+@RunWith(CacioTestRunner.class)
 public class RupsUndoRedoTest extends RupsWindowTest {
 
     private static final String INPUT_FILE = "src/test/resources/com/itextpdf/rups/controller/hello_world.pdf";
@@ -248,10 +254,15 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         doubleClickTree("Info");
         Table infoDict = objectPanel.getTable();
         validateInitialDictionary(infoDict);
+        String originalValue = (String) infoDict.getContentAt(2, 1);
         assertEquals("Key to Modify is on the expected row: ", MODIFICATION_KEY, (String) infoDict.getContentAt(2,0));
         infoDict.editCell(2,1,TEST_VALUE, true);
         assertEquals("Dictionary Tree has 3 children: ",3,pdfTree.getChildCount("Info/Dictionary"));
-        fail("Test Not Implemented");
+        assertEquals("Row Key is Unchanged", MODIFICATION_KEY, (String) infoDict.getContentAt(2,0));
+        assertEquals("Modified Cell is set to Test Value", TEST_VALUE, (String) infoDict.getContentAt(2,1));
+        UNDO(infoDict);
+        validateInitialDictionary(infoDict);
+        assertEquals("Value has reset to original: ", originalValue, (String) infoDict.getContentAt(2,1));
     }
 
     @Test
@@ -262,7 +273,10 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         infoDict.click(2,2);
         assertEquals("Dictionary Tree has 2 children: ",2,pdfTree.getChildCount("Info/Dictionary"));
         assertEquals("Table is now 3 Rows tall: ", 3, infoDict.getRowCount());
-        fail("Test Not Implemented");
+        UNDO(infoDict);
+        assertEquals("Dictionary Tree has 3 children: ",3,pdfTree.getChildCount("Info/Dictionary"));
+        assertEquals("Table is now 4 Rows tall: ", 4, infoDict.getRowCount());
+//        fail("Test Not Implemented");
     }
 
     @Test
@@ -318,11 +332,23 @@ public class RupsUndoRedoTest extends RupsWindowTest {
 
     @Test
     public void phase2canRedoDictUpdate() {
-        fail("Test Not Implemented");
+        phase1canUndoDictUpdate();
+        Table infoDict = objectPanel.getTable();
+        REDO(infoDict);
+        assertEquals("Dictionary Tree has 3 children: ",3,pdfTree.getChildCount("Info/Dictionary"));
+        assertEquals("Table is still 4 Rows tall: ", 4, infoDict.getRowCount());
+        assertEquals("Modification Key is unchanged: ", MODIFICATION_KEY, (String) infoDict.getContentAt(2,0));
+        assertEquals("New Value is equal to Test Value: ", TEST_VALUE, (String) infoDict.getContentAt(2,1));
+//        fail("Test Not Implemented");
     }
 
     @Test
     public void phase2canRedoDictDeletion() {
-        fail("Test Not Implemented");
+        phase1canUndoDictDeletion();
+        Table infoDict = objectPanel.getTable();
+        REDO(infoDict);
+        assertEquals("Dictionary Tree has 2 children: ",2,pdfTree.getChildCount("Info/Dictionary"));
+        assertEquals("Table is now 3 Rows tall: ", 3, infoDict.getRowCount());
+//        fail("Test Not Implemented");
     }
 }
