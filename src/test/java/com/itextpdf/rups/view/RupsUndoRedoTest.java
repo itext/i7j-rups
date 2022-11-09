@@ -42,113 +42,287 @@
  */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.rups.Rups;
-import com.itextpdf.rups.view.icons.IconButton;
+import com.itextpdf.kernel.actions.data.ITextCoreProductData;
+import org.assertj.swing.annotation.GUITest;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runner.OrderWith;
+import org.junit.runner.manipulation.Orderable;
+import org.junit.runner.manipulation.Ordering;
+import org.junit.runners.MethodSorters;
+import org.uispec4j.Key;
 import org.uispec4j.Panel;
 import org.uispec4j.Table;
 import org.uispec4j.Tree;
+import org.uispec4j.Trigger;
+import org.uispec4j.UIComponent;
 import org.uispec4j.Window;
 import org.uispec4j.utils.Log;
+import org.uispec4j.interception.WindowHandler;
+import org.uispec4j.interception.WindowInterceptor;
 
-public class RupsUndoRedoTest extends RupsWindowTest{
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class RupsUndoRedoTest extends RupsWindowTest {
 
     private static final String INPUT_FILE = "src/test/resources/com/itextpdf/rups/controller/hello_world.pdf";
 
     private static Window MAIN_WINDOW;
     private static Panel objectPanel;
     private static Tree pdfTree;
+    private static final String TEST_KEY = "/Test";
+    private static final String MODIFICATION_KEY = "/Producer";
+    private static final String TEST_VALUE = "(Test)";
 
     //TODO: Work out why the hell this is happening:
     // [ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7:test (default-test) on project itext-rups: Execution default-test of goal org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7:test failed: java.lang.NoClassDefFoundError: org/apache/maven/surefire/api/report/ReporterFactory: org.apache.maven.surefire.api.report.ReporterFactory -> [Help 1]
     // org.apache.maven.lifecycle.LifecycleExecutionException: Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7:test (default-test) on project itext-rups: Execution default-test of goal org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7:test failed: java.lang.NoClassDefFoundError: org/apache/maven/surefire/api/report/ReporterFactory
 
+    private void validateInitialArray(Table infoArray) {
+        assertTrue("Table Header identifies the Content as an Array: ", infoArray.getHeader().contentEquals(new String[]{"Array", ""}).isTrue());
+        assertThat("Table is 3 Cells Tall: ", infoArray.rowCountEquals(3));
+    }
+
+    private void validateInitialDictionary(Table infoArray) {
+        assertTrue("Table Header identifies the Content as an Dictionary: ", infoArray.getHeader().contentEquals(new String[]{"Key", "Value", ""}).isTrue());
+        assertThat("Table is 4 Cells Tall: ", infoArray.rowCountEquals(4));
+    }
+
+    private void clickTree(String targetNode) {
+        clickTree(targetNode, 1);
+    }
+
+    private void doubleClickTree(String targetNode) {
+        clickTree(targetNode, 2);
+    }
+
+    private void clickTree(String targetNode, int times) {
+        pdfTree.selectRoot();
+        assertTrue(String.format("PDFTree contains `%s` node: ", targetNode), pdfTree.contains(targetNode));
+        if (times == 2) {
+            pdfTree.doubleClick(targetNode);
+        } else {
+            while (times > 0) {
+                pdfTree.click(targetNode);
+                times--;
+            }
+        }
+    }
+
+    private static void UNDO(UIComponent component) {
+        component.pressKey(Key.control(Key.Z));
+    }
+
+    private static void REDO(UIComponent component) {
+        component.pressKey(Key.control(Key.Y));
+    }
+
+
     @Before
     public void before() {
-       try{
-           setUp(INPUT_FILE);
-       } catch (Exception e){
-           fail(e.getMessage());
-           e.printStackTrace(System.err);
-       }
-       MAIN_WINDOW = getMainWindow();
+        try {
+            setUp(INPUT_FILE);
+        } catch (Exception e) {
+            fail(e.getMessage());
+            e.printStackTrace(System.err);
+        }
+        MAIN_WINDOW = getMainWindow();
 
-       pdfTree = MAIN_WINDOW.getTree("pdfTree");
-       objectPanel = MAIN_WINDOW.getPanel("PdfObjectPanel");
+        // TODO: Change this to match the Maven defined Snapshot name.
+        waitUntil(MAIN_WINDOW.titleEquals(String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion())), 8000);
+        // TODO: Change this to test the panel name.
+        waitUntil(MAIN_WINDOW.getPanel(INPUT_FILE.substring(1 + INPUT_FILE.lastIndexOf('/'))).isEnabled(), 8000);
+        pdfTree = MAIN_WINDOW.getTree("pdfTree");
+        objectPanel = MAIN_WINDOW.getPanel("PdfObjectPanel");
     }
 
     @Test
-    public void canUndoArrayAddition(){
-        String arrayEntry = "Test";
+    public void phase1canUndoArrayAddition() {
 
-        pdfTree.selectRoot();
-        assertTrue("PDFTree contains `ID` node: ",pdfTree.contains("ID"));
-        pdfTree.click("ÏD");
+
+        clickTree("ID");
+        assertEquals("Array Tree has 2 children: ",2,pdfTree.getChildCount("ID"));
+
         Table infoArray = objectPanel.getTable();
+        validateInitialArray(infoArray);
 
-        assertTrue("Table Header identifies the Content as an Array: ", infoArray.getHeader().contentEquals(new String[]{"Array", ""}).isTrue());
-        assertEquals("Table is 3 Cells Tall: ",3,infoArray.getRowCount());
+        infoArray.editCell(2, 1, TEST_VALUE, true);
 
-        infoArray.editCell(3,1, arrayEntry, true);
-        Object cellContent = infoArray.getContentAt(3,2);
+        WindowInterceptor.init(infoArray.triggerClick(2, 1, Key.Modifier.NONE))
+                .process(new WindowHandler() {
+                    @Override
+                    public Trigger process(Window dialog) throws Exception {
+                        assertEquals("Dialog Title is 'Input'", "Input", dialog.getTitle());
+                        assertEquals("Row Value defaults to: 2", "2", dialog.getInputTextBox().getText());
+                        return dialog.getButton("OK").triggerClick();
+                    }
+                }).run();
+        waitUntil("Table is now 4 Cells Tall: ", infoArray.rowCountEquals(4), 5000);
+        assertEquals("Array Tree has 3 children: ",3,pdfTree.getChildCount("ID"));
+        assertEquals("Value of cell content is equal to the test value provided: ", TEST_VALUE, (String) infoArray.getContentAt(2, 0));
+        UNDO(infoArray);
+        assertThat("Table is 3 Cells Tall again: ", infoArray.rowCountEquals(3));
+        assertEquals("Test value is no longer in the table: ", "", infoArray.getContentAt(2, 0));
+        assertEquals("Array Tree has 2 children: ",2,pdfTree.getChildCount("ID"));
 
-        assertTrue("The Content of the second Column is an IconButton: ", cellContent instanceof IconButton);
-
-        ((IconButton) cellContent).doClick();
-
-        assertEquals("Table is now 4 Cells Tall: ",4,infoArray.getRowCount());
-        //TODO: Validate why this isn't failing, since the table is giving a ghost duplicate for the added row.
-
-        cellContent = infoArray.getContentAt(3,1);
-
-        assertTrue("The Content of the First Column is a String: ", cellContent instanceof String);
-
-        assertEquals("Value of cell content is equal to the test value provided: ", arrayEntry, (String)cellContent);
 
     }
 
     @Test
-    public void canUndoArrayUpdate(){
+    public void phase1canUndoArrayUpdate() {
+        // Click Tree
+        clickTree("ID");
+        assertEquals("Array Tree has 2 children: ", 2, pdfTree.getChildCount("ID"));
+        Table infoArray = objectPanel.getTable();
+        validateInitialArray(infoArray);
+        // Store Original Value
+        assertEquals("Value is a String: ", String.class, infoArray.getContentAt(0, 0).getClass());
+        String originalValue = (String) infoArray.getContentAt(0, 0);
+        // Double-Click Table
+        //        infoArray.doubleClick(0, 0);
+        //        infoArray.selectCell(0, 0);
+        // Change Value to "(Test)"
+        infoArray.editCell(0, 0, TEST_VALUE, true);
+        // Press Enter Key
+        infoArray.pressKey(Key.ENTER);
+        // Test Updated value
+        assertEquals("Cell Value is equal to Test Value: ", TEST_VALUE, (String) infoArray.getContentAt(0, 0));
+        assertEquals("Array Tree still has 2 children: ", 2, pdfTree.getChildCount("ID"));
+        // Press Ctrl-Z
+        UNDO(infoArray);
+        // Test Updated Value is back to Original
+        assertEquals("Value has reset to original: ", originalValue, (String) infoArray.getContentAt(0,0));
+        validateInitialArray(infoArray);
+        assertEquals("Array Tree still has 2 children: ", 2, pdfTree.getChildCount("ID"));
     }
 
     @Test
-    public void canUndoArrayDeletion(){
+    public void phase1canUndoArrayDeletion() {
+        // Click Tree
+        clickTree("ID");
+
+        assertEquals("Array Tree has 2 children: ", 2, pdfTree.getChildCount("ID"));
+
+        Table infoArray = objectPanel.getTable();
+        validateInitialArray(infoArray);
+        // Store Original Value
+        assertEquals("Value is a String: ", String.class, infoArray.getContentAt(0, 0).getClass());
+        String originalValue = (String) infoArray.getContentAt(0, 0);
+        // Click Table X Button
+        infoArray.click(0, 1, Key.Modifier.NONE);
+        // Test Tree Size
+        assertEquals("Array Tree has 1 child: ", 1, pdfTree.getChildCount("ID"));
+        // Test Table Length
+        assertEquals("Table is now 2 Cells Tall: ", 2, infoArray.getRowCount());
+        // Press Ctrl-Z
+        UNDO(infoArray);
+        assertEquals("Array Tree has 2 children again: ", 2, pdfTree.getChildCount("ID"));
+        // Test Table Length
+        validateInitialArray(infoArray);
+        // Test Updated Value is back to Original
+        assertEquals("Value has reset to original: ", originalValue, (String) infoArray.getContentAt(0, 0));
     }
 
     @Test
-    public void canUndoDictAddition(){
+    public void phase1canUndoDictAddition() {
+        doubleClickTree("Info");
+        assertEquals("Dict Tree has 3 children: ",3,pdfTree.getChildCount("Info/Dictionary"));
+        Table infoDict = objectPanel.getTable();
+        validateInitialDictionary(infoDict);
+        infoDict.editCell(3,0,TEST_KEY,true);
+        infoDict.editCell(3,1,TEST_VALUE,true);
+        infoDict.click(3,2);
+        assertEquals("Dictionary Tree has 4 children: ",4,pdfTree.getChildCount("Info/Dictionary"));
+        assertEquals("Table is now 5 Rows tall: ", 5, infoDict.getRowCount());
+        assertEquals("New Key is equal to Test Key: ", TEST_KEY, (String) infoDict.getContentAt(3,0));
+        assertEquals("New Value is equal to Test Value: ", TEST_VALUE, (String) infoDict.getContentAt(3,1));
+        UNDO(infoDict);
+        assertEquals("Dict Tree has 3 children again: ",3,pdfTree.getChildCount("Info/Dictionary"));
+        validateInitialDictionary(infoDict);
+        assertFalse("Dict Tree no longer contains the Test Key: ", pdfTree.contains(String.format("Info/Dictionary%s",TEST_KEY)));
     }
 
     @Test
-    public void canUndoDictUpdate(){
+    public void phase1canUndoDictUpdate() {
+        doubleClickTree("Info");
+        Table infoDict = objectPanel.getTable();
+        validateInitialDictionary(infoDict);
+        assertEquals("Key to Modify is on the expected row: ", MODIFICATION_KEY, (String) infoDict.getContentAt(2,0));
+        infoDict.editCell(2,1,TEST_VALUE, true);
+        assertEquals("Dictionary Tree has 3 children: ",3,pdfTree.getChildCount("Info/Dictionary"));
+        fail("Test Not Implemented");
     }
 
     @Test
-    public void canUndoDictDeletion(){
+    public void phase1canUndoDictDeletion() {
+        doubleClickTree("Info");
+        Table infoDict = objectPanel.getTable();
+        validateInitialDictionary(infoDict);
+        infoDict.click(2,2);
+        assertEquals("Dictionary Tree has 2 children: ",2,pdfTree.getChildCount("Info/Dictionary"));
+        assertEquals("Table is now 3 Rows tall: ", 3, infoDict.getRowCount());
+        fail("Test Not Implemented");
     }
 
     @Test
-    public void canRedoArrayAddition(){
+    public void phase2canRedoArrayAddition() {
+
+        // run canUndo test
+        phase1canUndoArrayAddition();
+
+        Table infoArray = objectPanel.getTable();
+        // Press Ctrl-Y
+        REDO(infoArray);
+        assertEquals("Array Tree has 3 children again: ", 3, pdfTree.getChildCount("ID"));
+        // Test Table Length
+        assertEquals("Table is now 4 Cells Tall again: ", 4, infoArray.getRowCount());
+        // Test Table Value
+        assertEquals("Value of cell content is equal to the test value provided: ", TEST_VALUE, (String) infoArray.getContentAt(2, 0));
     }
 
     @Test
-    public void canRedoArrayUpdate(){
+    public void phase2canRedoArrayUpdate() {
+        // run canUndo test
+        phase1canUndoArrayUpdate();
+        Table infoArray = objectPanel.getTable();
+        // Press Ctrl-Y
+        REDO(infoArray);
+        assertEquals("Array Tree still has 2 children: ", 2, pdfTree.getChildCount("ID"));
+        // Test Table Value
+        assertEquals("Value of cell content is equal to the test value again: ", TEST_VALUE, (String) infoArray.getContentAt(0, 0));
     }
 
     @Test
-    public void canRedoArrayDeletion(){
+    public void phase2canRedoArrayDeletion() {
+        // run canUndo test
+        phase1canUndoArrayDeletion();
+        Table infoArray = objectPanel.getTable();
+        // Press Ctrl-Y
+        REDO(infoArray);
+        assertEquals("Array Tree has 1 child again: ", 1, pdfTree.getChildCount("ID"));
+        // Test Table Length
+        assertEquals("Table is now 2 Cells Tall again: ", 2, infoArray.getRowCount());
     }
 
     @Test
-    public void canRedoDictAddition(){
+    public void phase2canRedoDictAddition() {
+        phase1canUndoDictAddition();
+        Table infoDict = objectPanel.getTable();
+        REDO(infoDict);
+        assertEquals("Dictionary Tree has 4 children: ",4,pdfTree.getChildCount("Info/Dictionary"));
+        assertEquals("Table is now 5 Rows tall: ", 5, infoDict.getRowCount());
+        assertEquals("New Key is equal to Test Key: ", TEST_KEY, (String) infoDict.getContentAt(3,0));
+        assertEquals("New Value is equal to Test Value: ", TEST_VALUE, (String) infoDict.getContentAt(3,1));
     }
 
     @Test
-    public void canRedoDictUpdate(){
+    public void phase2canRedoDictUpdate() {
+        fail("Test Not Implemented");
     }
 
     @Test
-    public void canRedoDictDeletion(){
+    public void phase2canRedoDictDeletion() {
+        fail("Test Not Implemented");
     }
 }

@@ -12,6 +12,7 @@ import org.uispec4j.UISpecAdapter;
 import org.uispec4j.Window;
 import org.uispec4j.assertion.Assertion;
 import org.uispec4j.assertion.UISpecAssert;
+import org.uispec4j.finder.ComponentMatcher;
 import org.uispec4j.interception.MainClassAdapter;
 import org.uispec4j.interception.toolkit.UISpecDisplay;
 
@@ -57,9 +58,10 @@ public abstract class RupsWindowTest extends TestCase {
 
     protected void setUp(String filePath) throws Exception {
         super.setUp();
+        String fileName = filePath.substring(1 + filePath.lastIndexOf('/'));
         UISpecDisplay.instance().reset();
         setAdapter(new MainClassAdapter(RupsLauncher.class, new String[]{filePath}));
-        waitUntil(getMainWindow().isVisible(), 4000);
+        waitUntil(getMainWindow().containsSwingComponent(RupsPanel.class), 8000);
     }
 
     /**
@@ -92,6 +94,7 @@ public abstract class RupsWindowTest extends TestCase {
      *                                  to a valid adapter
      */
     public Window getMainWindow() throws AdapterNotFoundException {
+        // TODO: Find a way to intercept and interact with Modal Dialogs
         return getAdapter().getMainWindow();
     }
 

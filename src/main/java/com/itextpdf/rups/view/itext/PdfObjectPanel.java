@@ -205,6 +205,8 @@ public class PdfObjectPanel extends Observable implements Observer {
             return;
         }
 
+        DictionaryTableModelButton rowButtons = new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON));
+        rowButtons.setName("rowButton");
         switch (pdfObjectClone.getType()) {
             case PdfObject.DICTIONARY:
             case PdfObject.STREAM:
@@ -212,8 +214,7 @@ public class PdfObjectPanel extends Observable implements Observer {
                         new DictionaryTableModel((PdfDictionary) pdfObjectClone, parser, panel);
                 model.addTableModelListener(new DictionaryModelListener());
                 table.setModel(model);
-                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(
-                        IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON)));
+                table.getColumn("").setCellRenderer(rowButtons);
                 layout.show(panel, TABLE);
                 panel.repaint();
                 table.revalidate();
@@ -223,8 +224,7 @@ public class PdfObjectPanel extends Observable implements Observer {
                         new PdfArrayTableModel((PdfArray) pdfObjectClone, parser, panel);
                 arrayModel.addTableModelListener(new ArrayModelListener());
                 table.setModel(arrayModel);
-                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
-                        IconFetcher.getIcon(ADD_ICON)));
+                table.getColumn("").setCellRenderer(rowButtons);
                 layout.show(panel, TABLE);
                 panel.repaint();
                 table.revalidate();
