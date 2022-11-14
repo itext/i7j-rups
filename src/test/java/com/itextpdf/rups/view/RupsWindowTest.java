@@ -42,29 +42,21 @@
  */
 package com.itextpdf.rups.view;
 
-import com.github.caciocavallosilano.cacio.ctc.junit.CacioAssertJRunner;
 import com.itextpdf.rups.RupsLauncher;
-import com.itextpdf.test.annotations.type.IntegrationTest;
-import junit.framework.TestCase;
-import org.assertj.swing.junit.runner.GUITestRunner;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.jupiter.api.Tag;
 import org.uispec4j.UISpec4J;
 import org.uispec4j.UISpecAdapter;
 import org.uispec4j.Window;
 import org.uispec4j.assertion.Assertion;
 import org.uispec4j.assertion.UISpecAssert;
-import org.uispec4j.finder.ComponentMatcher;
 import org.uispec4j.interception.MainClassAdapter;
 import org.uispec4j.interception.toolkit.UISpecDisplay;
 
-@Category(IntegrationTest.class)
-@RunWith(GUITestRunner.class)
-//@RunWith(CacioAssertJRunner.class)
-public abstract class RupsWindowTest extends TestCase {
-    //TODO: Work out what issues are that the compiler is having with the CacioTestRunner class. - Done
-    //SEE: https://github.com/UISpec4J/UISpec4J/blob/fdc0b420cabb36134dd99830434c8fd2d05d508d/uispec4j/src/main/java/org/uispec4j/UISpecTestCase.java
-    //SEE: https://github.com/CaciocavalloSilano/caciocavallo/blob/master/cacio-tta/src/test/java/com/github/caciocavallosilano/cacio/ctc/MouseInfoTest.java
+@Tag("Integration")
+@Tag("GUI")
+public abstract class RupsWindowTest{
     static final String ADAPTER_CLASS_PROPERTY = "uispec4j.adapter";
     static final String PROPERTY_NOT_DEFINED;
 
@@ -80,14 +72,13 @@ public abstract class RupsWindowTest extends TestCase {
     protected RupsWindowTest() {
     }
     protected RupsWindowTest(String testName) {
-        super(testName);
     }
 
     public void setAdapter(UISpecAdapter adapter) {
         this.adapter = adapter;
     }
 
-    @Override
+
     protected void setUp() throws Exception {
         setUp("");
     }
@@ -99,7 +90,6 @@ public abstract class RupsWindowTest extends TestCase {
 
 
     protected void setUp(String filePath) throws Exception {
-        super.setUp();
         String fileName = filePath.substring(1 + filePath.lastIndexOf('/'));
         UISpecDisplay.instance().reset();
         setAdapter(new MainClassAdapter(RupsLauncher.class, new String[]{filePath}));
@@ -113,7 +103,6 @@ public abstract class RupsWindowTest extends TestCase {
         adapter = null;
         UISpecDisplay.instance().rethrowIfNeeded();
         UISpecDisplay.instance().reset();
-        super.tearDown();
     }
 
     private void retrieveAdapter() throws AdapterNotFoundException {

@@ -99,12 +99,6 @@
       <version>17.0-rc1</version>
     </dependency>
     <dependency>
-      <groupId>com.github.caciocavallosilano</groupId>
-      <artifactId>cacio-tta</artifactId>
-      <version>1.17</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>pdftest</artifactId>
       <version>${itext.version}</version>
@@ -268,12 +262,7 @@
           <!--          <forkCount>6</forkCount>-->
           <!--          <reuseForks>true</reuseForks>-->
           <reportsDirectory>target/surefire-reports-${surefire.forkNumber}</reportsDirectory>
-          <systemPropertyVariables>
-            <java.awt.headless>false</java.awt.headless>
-            <awt.toolkit>com.github.caciocavallosilano.cacio.ctc.CTCToolkit</awt.toolkit>
-            <java.awt.graphicsenv>com.github.caciocavallosilano.cacio.ctc.CTCGraphicsEnvironment</java.awt.graphicsenv>
-            <cacio.managed.screensize>1920x1080</cacio.managed.screensize>
-          </systemPropertyVariables>
+          <systemPropertyVariables />
           <includes>
             <include>**/*Test.java</include>
           </includes>
@@ -299,11 +288,7 @@
   <profiles>
     <profile>
       <id>test</id>
-      <properties>
-        <awt.toolkit>net.java.openjdk.cacio.ctc.CTCToolkit</awt.toolkit>
-        <java.awt.graphicsenv>net.java.openjdk.cacio.ctc.CTCGraphicsEnvironment</java.awt.graphicsenv>
-        <java.awt.headless>false</java.awt.headless>
-      </properties>
+      <properties />
     </profile>
     <profile>
       <id>qa</id>
