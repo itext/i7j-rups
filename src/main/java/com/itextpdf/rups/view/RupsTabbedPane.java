@@ -42,7 +42,10 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.controller.RupsInstanceController;
+import com.itextpdf.search.ISearchHandler;
+import com.itextpdf.rups.controller.search.RupsSearchHandler;
 import com.itextpdf.rups.model.PdfFile;
 
 import java.awt.Component;
@@ -76,9 +79,12 @@ public class RupsTabbedPane {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
             }
 
+            // TODO: Handle the propagation of SearchControllers out from this class...
+
             RupsPanel rupsPanel = new RupsPanel();
             RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
+            rupsPanel.setSearchContext((RupsSearchHandler) RupsSearchHandler.getInstance(rupsPanel));
             rupsInstanceController.loadFile(file, readonly);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
             this.jTabbedPane.setSelectedComponent(rupsPanel);
@@ -88,6 +94,7 @@ public class RupsTabbedPane {
     public boolean closeCurrentFile() {
         boolean isLastTab = this.jTabbedPane.getTabCount() == 1;
 
+        //TODO: Remove any associated SearchBar Instances
         this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
 
         if (this.jTabbedPane.getTabCount() == 0) {
@@ -106,6 +113,10 @@ public class RupsTabbedPane {
     public void saveCurrentFile(File file) {
         RupsPanel currentRupsPanel = (RupsPanel) this.jTabbedPane.getSelectedComponent();
         currentRupsPanel.getRupsInstanceController().saveFile(file);
+    }
+    public RupsInstanceController getCurrentController() {
+        RupsPanel currentRupsPanel = (RupsPanel) this.jTabbedPane.getSelectedComponent();
+        return currentRupsPanel.getRupsInstanceController();
     }
 
     public Component getJTabbedPane() {

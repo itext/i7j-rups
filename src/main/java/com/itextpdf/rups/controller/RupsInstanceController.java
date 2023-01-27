@@ -46,6 +46,8 @@ import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.search.ISearchHandler;
+import com.itextpdf.rups.controller.search.PdfSearchHandler;
 import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.PostCompareEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -57,6 +59,8 @@ import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
+import com.itextpdf.rups.view.RupsPanel;
+import com.itextpdf.rups.view.RupsSearchBar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -105,6 +109,9 @@ public class RupsInstanceController extends Observable
      */
     private final PdfReaderController readerController;
 
+    private final ISearchHandler searchHandler;
+
+    private RupsSearchBar searchBar;
     /**
      * Contains all other components: the page panel, the outline tree, etc.
      */
@@ -134,6 +141,13 @@ public class RupsInstanceController extends Observable
         readerController = new PdfReaderController(this, this);
         addObserver(readerController);
 
+        searchHandler = new PdfSearchHandler();
+        searchBar = RupsSearchBar.getSearchBar(readerController.pdfTree);
+
+        //TODO: Find a neater way of identifying document section in focus.
+        readerController.getPdfTree().addTreeSelectionListener((TreeSelectionListener) searchHandler);
+        searchBar.setSearchHandler(((RupsPanel) owner).getRupsSearchHandler());
+
         // creating the master component
         masterComponent = new JSplitPane();
         masterComponent.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -158,6 +172,7 @@ public class RupsInstanceController extends Observable
         info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
         final JTabbedPane editorPane = readerController.getEditorTabs();
         final JScrollPane cons = new JScrollPane(console.getTextArea());
+
         console.getTextArea().addMouseListener(
                 new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()),
                         console.getTextArea()));
@@ -360,6 +375,10 @@ public class RupsInstanceController extends Observable
         if (selectedNode instanceof PdfObjectTreeNode) {
             readerController.update(this, new TreeNodeClickedEvent((PdfObjectTreeNode) selectedNode));
         }
+    }
+
+    public ISearchHandler getSearchHandler() {
+        return searchHandler;
     }
 
     // page navigation

@@ -40,50 +40,16 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.mock;
+package com.itextpdf.rups.view.itext.contentstream;
 
-import com.itextpdf.rups.controller.IRupsController;
-import com.itextpdf.search.ISearchHandler;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.search.model.ISearchFilter;
+import com.itextpdf.search.model.ISearchResult;
 
-import java.awt.Component;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 
-public class MockedRupsController implements IRupsController {
+final class ContentStreamSearchUtils {
+    static ISearchResult find(ByteArrayInputStream stream, ISearchFilter filter){
 
-    private int openCount = 0;
-
-    private PdfFile pdfFile;
-
-    public MockedRupsController() {
-    }
-
-    public MockedRupsController(PdfFile pdfFile) {
-        this.pdfFile = pdfFile;
-    }
-
-    @Override
-    public Component getMasterComponent() {
         return null;
-    }
-
-    @Override
-    public PdfFile getCurrentFile() {
-        return this.pdfFile;
-    }
-
-    @Override
-    public void openNewFile(File file) {
-        this.openCount++;
-    }
-
-    @Override
-    public void closeCurrentFile() {
-        this.openCount--;
-    }
-
-
-    public int getOpenedCount() {
-        return this.openCount;
     }
 }

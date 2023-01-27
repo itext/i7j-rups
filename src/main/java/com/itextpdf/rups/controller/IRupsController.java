@@ -42,6 +42,8 @@
  */
 package com.itextpdf.rups.controller;
 
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.search.ISearchHandler;
 import com.itextpdf.rups.model.PdfFile;
 
 import java.awt.Component;

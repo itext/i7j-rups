@@ -55,6 +55,7 @@ import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.view.Language;
+import com.itextpdf.rups.view.RupsSearchBar;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.models.AbstractPdfObjectPanelTableModel;
@@ -114,6 +115,7 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     public PdfObjectPanel() {
         // layout
+
         panel.setLayout(layout);
 
         // dictionary / array / stream
