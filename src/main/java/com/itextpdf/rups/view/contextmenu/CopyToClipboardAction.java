@@ -42,8 +42,14 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+
 import javax.swing.JTextPane;
 import java.awt.Component;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 
 /**
@@ -54,23 +60,32 @@ import java.awt.event.ActionEvent;
 
 public class CopyToClipboardAction extends AbstractRupsAction {
 
+    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
     public CopyToClipboardAction(String name, Component invoker) {
         super(name, invoker);
     }
 
     public void actionPerformed(ActionEvent e) {
         boolean nothingSelected = false;
-        JTextPane textPane = (JTextPane) invoker;
+        
+        if (invoker instanceof JTextPane) {
+            JTextPane textPane = (JTextPane) invoker;
 
-        if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
-            nothingSelected = true;
-            textPane.selectAll();
-        }
+            if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
+                nothingSelected = true;
+                textPane.selectAll();
+            }
 
-        textPane.copy();
+            textPane.copy();
 
-        if (nothingSelected) {
-            textPane.select(0, 0);
+            if (nothingSelected) {
+                textPane.select(0, 0);
+            }
+        } else if (invoker instanceof PdfTree) {
+            PdfTree tree = (PdfTree) invoker;
+            PdfObjectTreeNode selectionNode = (PdfObjectTreeNode) tree.getSelectionPath().getLastPathComponent();
+            clipboard.setContents(new StringSelection(selectionNode.getPdfObject().toString()), null);
         }
     }
 }

@@ -48,6 +48,7 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.shims.RupsPdfString;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
@@ -132,6 +133,8 @@ public class PdfObjectTreeNode extends IconTreeNode {
                 break;
             case PdfObject.STRING:
                 icon = IconFetcher.getIcon(STRING_ICON);
+                // Patch to normalise PdfString's toString() behaviour with the remainder of iText's serialization.
+                this.object = new RupsPdfString((PdfString) object);
                 break;
         }
     }
@@ -397,5 +400,13 @@ public class PdfObjectTreeNode extends IconTreeNode {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the Key that forms the node's final path component.
+     * @return a {@link PdfName} object or {@code null}
+     */
+    public PdfName getKey() {
+        return key;
     }
 }
