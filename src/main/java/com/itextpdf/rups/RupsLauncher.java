@@ -42,6 +42,8 @@
  */
 package com.itextpdf.rups;
 
+import com.itextpdf.rups.model.FilePathPreProcessor;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -59,8 +61,7 @@ public class RupsLauncher {
     public static void main(String[] args) {
         final File f;
         if (args.length > 0) {
-            String pathToFile = args[0];
-            f = new File(pathToFile);
+            f = new File(FilePathPreProcessor.process(args[0]));
         } else {
             f = null;
         }
