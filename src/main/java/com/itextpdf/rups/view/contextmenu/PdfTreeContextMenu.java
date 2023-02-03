@@ -68,6 +68,10 @@ public class PdfTreeContextMenu {
         ));
 
         popup.add(getJMenuItem(
+                new CopyToClipboardAction(Language.COPY_TO_CLIPBOARD.getString(), component)
+        ));
+
+        popup.add(getJMenuItem(
                 new SaveToFilePdfTreeAction(Language.SAVE_TO_FILE.getString(), component, false)
         ));
 
