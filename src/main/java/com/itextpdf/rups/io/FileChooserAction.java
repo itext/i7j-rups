@@ -44,6 +44,7 @@ package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.FilePathPreProcessor;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -51,6 +52,7 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Observer;
 
 /**
@@ -118,6 +120,9 @@ public abstract class FileChooserAction extends AbstractAction {
         int okCancel = showDialog();
         if (okCancel == JFileChooser.APPROVE_OPTION) {
             file = fileChooser.getSelectedFile();
+            if (file != null) {
+                file = new File(FilePathPreProcessor.process(file.getAbsolutePath()));
+            }
             lastSelectedFolder = fileChooser.getCurrentDirectory();
             observer.update(null, getEvent());
         }
