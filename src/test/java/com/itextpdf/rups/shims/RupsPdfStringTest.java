@@ -12,6 +12,22 @@ public class RupsPdfStringTest {
     public void toStringBasicTest() {
         RupsPdfString pdfString = new RupsPdfString("Test");
 
-        Assert.assertEquals("String is () Delimited.","(Test)", pdfString.toString());
+        Assert.assertEquals("String is () Delimited.", "(Test)", pdfString.toString());
+    }
+
+    @Test
+    public void toStringHexTest() {
+        byte[] hexArray = "Test".getBytes();
+        StringBuilder hexString = new StringBuilder("<");
+        for (byte b : hexArray) {
+            hexString.append(Integer.toHexString(b));
+        }
+        hexString.append(">");
+
+        RupsPdfString pdfString = new RupsPdfString(hexArray);
+        pdfString.setHexWriting(true);
+
+        Assert.assertEquals("String is <> Delimited.", hexString.toString(), pdfString.toString());
     }
 }
+
