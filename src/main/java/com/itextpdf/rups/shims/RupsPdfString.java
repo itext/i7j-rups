@@ -34,6 +34,6 @@ public class RupsPdfString extends PdfString {
             wrapper = "<%s>";
         else
             wrapper = "(%s)";
-        return String.format(wrapper, getValue());
+        return String.format(wrapper, new String(encodeBytes(getValueBytes())));
     }
 }
