@@ -140,7 +140,7 @@ public class RupsController extends Observable
                 return;
             }
 
-            this.rupsTabbedPane.openNewFile(file, this.dimension, false);
+            this.rupsTabbedPane.openNewFile(file, false);
             this.update(this, new OpenFileEvent(file));
         }
     }

@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-class PageEnumerator implements Enumeration<PdfPageTreeNode> {
+public class PageEnumerator implements Enumeration<PdfPageTreeNode> {
 
     protected List<PdfPageTreeNode> pages = new ArrayList<>();
     protected TreeNodeFactory factory;

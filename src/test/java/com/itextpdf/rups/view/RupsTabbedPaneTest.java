@@ -80,7 +80,7 @@ public class RupsTabbedPaneTest {
 
     @Test
     public void openNullFileTest() {
-        this.tabbedPane.openNewFile(null, this.dimension, false);
+        this.tabbedPane.openNewFile(null, false);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
         Assert.assertEquals(1, jTabbedPane.getTabCount());
         Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
@@ -89,7 +89,7 @@ public class RupsTabbedPaneTest {
     @Test
     public void openNewFileTest() {
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, false);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
         Assert.assertEquals(1, jTabbedPane.getTabCount());
         Assert.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
@@ -98,9 +98,9 @@ public class RupsTabbedPaneTest {
     @Test
     public void openTwoFiles() {
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, false);
         File file2 = new File(INPUT_2);
-        this.tabbedPane.openNewFile(file2, this.dimension, false);
+        this.tabbedPane.openNewFile(file2, false);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
         Assert.assertEquals(2, jTabbedPane.getTabCount());
         Assert.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
@@ -110,9 +110,9 @@ public class RupsTabbedPaneTest {
     @Test
     public void openTwoFilesAndCloseAllTest() {
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, false);
         File file2 = new File(INPUT_2);
-        this.tabbedPane.openNewFile(file2, this.dimension, false);
+        this.tabbedPane.openNewFile(file2, false);
         this.tabbedPane.closeCurrentFile();
         this.tabbedPane.closeCurrentFile();
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
@@ -127,7 +127,7 @@ public class RupsTabbedPaneTest {
         RupsConfiguration.INSTANCE.saveConfiguration();
 
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, false);
         boolean isAlreadyOpened = this.tabbedPane.isFileAlreadyOpen(file);
 
         RupsConfiguration.INSTANCE.setOpenDuplicateFiles(originalValue);

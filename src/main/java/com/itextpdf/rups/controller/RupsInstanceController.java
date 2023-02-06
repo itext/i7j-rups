@@ -44,41 +44,36 @@ package com.itextpdf.rups.controller;
 
 import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfReader;
-import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.event.CloseDocumentEvent;
-import com.itextpdf.rups.event.PostCompareEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.event.TreeNodeClickedEvent;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.ProgressDialog;
-import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
-import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
-import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
+import com.itextpdf.rups.view.dock.InfoDockPanel;
+import com.itextpdf.rups.view.dock.XRefTable;
+import com.itextpdf.rups.view.dock.PagesTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -108,7 +103,7 @@ public class RupsInstanceController extends Observable
     /**
      * Contains all other components: the page panel, the outline tree, etc.
      */
-    private final JSplitPane masterComponent;
+    private final JPanel masterComponent;
 
     /**
      * The Pdf file that is currently open in the application.
@@ -117,55 +112,27 @@ public class RupsInstanceController extends Observable
 
     private ObjectLoader loader;
 
+    private Map<Class, Component> dockedComponentsMap;
+
     // constructor
 
     /**
      * Constructs the GUI components of the RUPS application.
      *
-     * @param dimension the dimension
      * @param owner     the jpanel
      */
-    public RupsInstanceController(Dimension dimension, JPanel owner) {
+    public RupsInstanceController(JPanel owner) {
         // creating components and controllers
         this.ownerPanel = owner;
-        final Console console = Console.getInstance();
-        addObserver(console);
-        console.addObserver(this);
-        readerController = new PdfReaderController(this, this);
+        this.dockedComponentsMap = new HashMap<>();
+        this.readerController = new PdfReaderController(this, this);
+
         addObserver(readerController);
 
-        // creating the master component
-        masterComponent = new JSplitPane();
-        masterComponent.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        masterComponent.setDividerLocation((int) (dimension.getHeight() * .70));
-        masterComponent.setDividerSize(2);
+        this.masterComponent = new JPanel(new BorderLayout());
+        this.masterComponent.add(new JScrollPane(readerController.getPdfTree()), BorderLayout.CENTER);
 
-        final JSplitPane content = new JSplitPane();
-        masterComponent.add(content, JSplitPane.TOP);
-        final JSplitPane info = new JSplitPane();
-        masterComponent.add(info, JSplitPane.BOTTOM);
-
-        content.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-        content.setDividerLocation((int) (dimension.getWidth() * .6));
-        content.setDividerSize(1);
-        JPanel treePanel = new JPanel(new BorderLayout());
-        treePanel.add(new JScrollPane(readerController.getPdfTree()), BorderLayout.CENTER);
-        content.add(treePanel, JSplitPane.LEFT);
-        content.add(readerController.getNavigationTabs(), JSplitPane.RIGHT);
-
-        info.setDividerLocation((int) (dimension.getWidth() * .3));
-        info.setDividerSize(1);
-        info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
-        final JTabbedPane editorPane = readerController.getEditorTabs();
-        final JScrollPane cons = new JScrollPane(console.getTextArea());
-        console.getTextArea().addMouseListener(
-                new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()),
-                        console.getTextArea()));
-        editorPane.addTab(Language.CONSOLE.getString(), null, cons, Language.CONSOLE_TOOL_TIP.getString());
-        editorPane.setSelectedComponent(cons);
-        info.add(editorPane, JSplitPane.RIGHT);
-
-        ownerPanel.add(masterComponent, BorderLayout.CENTER);
+        ownerPanel.add(this.masterComponent, BorderLayout.CENTER);
     }
 
     public final void update(Observable o, Object arg) {
@@ -174,17 +141,9 @@ public class RupsInstanceController extends Observable
             final RupsEvent event = (RupsEvent) arg;
             switch (event.getType()) {
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    setChanged();
+                        setChanged();
                     super.notifyObservers(event);
                     break;
-            }
-        }
-        //Events from observable classes
-        if (o != null && arg instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) arg;
-            if (RupsEvent.CONSOLE_WRITE_EVENT == event.getType()) {
-                readerController.getEditorTabs()
-                        .setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
             }
         }
     }
@@ -200,6 +159,17 @@ public class RupsInstanceController extends Observable
             final Path filePath = Paths.get(file.toURI());
             final byte[] contents = Files.readAllBytes(filePath);
             loadRawContent(contents, file.getName(), file.getParentFile(), readOnly);
+
+            // TODO refactor this!
+            InfoDockPanel infoDockPanel = new InfoDockPanel(pdfFile);
+            this.dockedComponentsMap.put(InfoDockPanel.class, infoDockPanel);
+
+            XRefTable xRefTable = new XRefTable(readerController, loader);
+            this.dockedComponentsMap.put(XRefTable.class, xRefTable);
+
+            PagesTable pagesTable = new PagesTable(readerController, this, loader);
+            this.dockedComponentsMap.put(PagesTable.class, pagesTable);
+            this.readerController.addObserver(pagesTable);
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
                     JOptionPane.ERROR_MESSAGE);
@@ -283,59 +253,6 @@ public class RupsInstanceController extends Observable
         readerController.getParser().setDocument(null);
     }
 
-    public final CompareTool.CompareResult compareWithDocument(PdfDocument document) {
-        if (getPdfFile() == null || getPdfFile().getPdfDocument() == null) {
-            LoggerHelper.warn(Language.ERROR_NO_OPEN_DOCUMENT_COMPARE.getString(), getClass());
-        } else if (document == null) {
-            LoggerHelper.warn(Language.ERROR_COMPARED_DOCUMENT_NULL.getString(), getClass());
-        } else if (document.isClosed()) {
-            LoggerHelper.warn(Language.ERROR_COMPARED_DOCUMENT_CLOSED.getString(), getClass());
-        } else {
-            final CompareTool compareTool =
-                    new CompareTool().setCompareByContentErrorsLimit(100).disableCachedPagesComparison();
-            return compareTool.compareByCatalog(getPdfFile().getPdfDocument(), document);
-        }
-        return null;
-    }
-
-    public final CompareTool.CompareResult compareWithFile(File file) {
-        try (PdfReader readerPdf = new PdfReader(file.getAbsolutePath());
-                final PdfDocument cmpDocument = new PdfDocument(readerPdf)) {
-            return compareWithDocument(cmpDocument);
-        } catch (IOException e) {
-            LoggerHelper.warn(Language.ERROR_COMPARE_DOCUMENT_CREATION.getString(), e, getClass());
-            return null;
-        }
-    }
-
-    public final CompareTool.CompareResult compareWithStream(InputStream is) {
-        try (PdfReader reader = new PdfReader(is);
-                PdfDocument cmpDocument = new PdfDocument(reader)) {
-            reader.setCloseStream(false);
-            return compareWithDocument(cmpDocument);
-        } catch (IOException e) {
-            LoggerHelper.warn(Language.ERROR_COMPARE_DOCUMENT_CREATION.getString(), e, getClass());
-            return null;
-        }
-    }
-
-    /**
-     * Clear all previous highlights and highlights the changes from the compare result.
-     * If compare result is null will just clear all previous highlights.
-     *
-     * @param compareResult the compare result
-     */
-    public void highlightChanges(CompareTool.CompareResult compareResult) {
-        readerController.update(this, new PostCompareEvent(compareResult));
-        if (compareResult != null) {
-            if (compareResult.isOk()) {
-                LoggerHelper.info(Language.COMPARE_EQUAL.getString(), getClass());
-            } else {
-                LoggerHelper.info(compareResult.getReport(), getClass());
-            }
-        }
-    }
-
     private void startObjectLoader() {
         final ProgressDialog dialog =
                 new ProgressDialog(this.ownerPanel, Language.PDF_READING.getString(), null);
@@ -379,4 +296,7 @@ public class RupsInstanceController extends Observable
         return pdfFile;
     }
 
+    public Component getDockedComponent(Class infoDockPanelClass) {
+        return this.dockedComponentsMap.get(infoDockPanelClass);
+    }
 }

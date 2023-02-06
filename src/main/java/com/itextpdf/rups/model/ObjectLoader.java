@@ -56,18 +56,22 @@ public class ObjectLoader extends BackgroundTask {
      * This is the object that wait for task to complete.
      */
     protected Observer observer;
+
     /**
      * RUPS's PdfFile object.
      */
     protected PdfFile file;
+
     /**
      * The factory that can provide PDF objects.
      */
     protected IndirectObjectFactory objects;
+
     /**
      * The factory that can provide tree nodes.
      */
     protected TreeNodeFactory nodes;
+
     /**
      * a human readable name for this loaded
      */
@@ -91,9 +95,9 @@ public class ObjectLoader extends BackgroundTask {
     }
 
     /**
-     * Getter for the PdfReader object.
+     * Getter for the PdfFile object.
      *
-     * @return a reader object
+     * @return a PdfFile object
      */
     public PdfFile getFile() {
         return file;

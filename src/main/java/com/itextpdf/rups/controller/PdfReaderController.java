@@ -72,13 +72,11 @@ import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.rups.view.itext.FormTree;
 import com.itextpdf.rups.view.itext.OutlineTree;
-import com.itextpdf.rups.view.itext.PagesTable;
 import com.itextpdf.rups.view.itext.PdfObjectPanel;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.PlainText;
 import com.itextpdf.rups.view.itext.StructureTree;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
-import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
@@ -111,10 +109,6 @@ public class PdfReaderController extends Observable implements Observer {
      */
     protected JTabbedPane navigationTabs;
     /**
-     * JTable with all the pages and their labels.
-     */
-    protected PagesTable pages;
-    /**
      * Treeview of the outlines.
      */
     protected OutlineTree outlines;
@@ -126,10 +120,6 @@ public class PdfReaderController extends Observable implements Observer {
      * Treeview of the form.
      */
     protected FormTree form;
-    /**
-     * JTable corresponding with the CrossReference table.
-     */
-    protected XRefTable xref;
     /**
      * A panel that will show PdfObjects.
      */
@@ -174,23 +164,17 @@ public class PdfReaderController extends Observable implements Observer {
         pdfTree.setComponentPopupMenu(menu);
         pdfTree.addMouseListener(new PdfTreeContextMenuMouseListener(menu, pdfTree));
         addObserver(pdfTree);
-
-        pages = new PagesTable(this, pageSelectionListener);
-        addObserver(pages);
         outlines = new OutlineTree(this);
         addObserver(outlines);
         structure = new StructureTree(this);
         addObserver(structure);
         form = new FormTree(this);
         addObserver(form);
-        xref = new XRefTable(this);
-        addObserver(xref);
         text = new PlainText();
         addObserver(text);
 
         navigationTabs = new JTabbedPane();
         final String pagesString = Language.PAGES.getString();
-        navigationTabs.addTab(pagesString, null, new JScrollPane(pages), pagesString);
         navigationTabs.addTab(Language.OUTLINES.getString(), null, new JScrollPane(outlines),
                 Language.OUTLINES_BOOKMARKS.getString());
         navigationTabs.addTab(Language.STRUCTURE.getString(), null, new JScrollPane(structure),
@@ -199,8 +183,6 @@ public class PdfReaderController extends Observable implements Observer {
                 Language.FORM_INTERACTIVE.getString());
         navigationTabs.addTab(Language.FORM_XFA.getString(), null, new JScrollPane(form.getXfaTree()),
                 Language.FORM_XFA_DESCRIPTION.getString());
-        navigationTabs.addTab(Language.XREF.getString(), null, new JScrollPane(xref),
-                Language.XREF_DESCRIPTION.getString());
         navigationTabs.addTab(Language.PLAINTEXT.getString(), null, new JScrollPane(text),
                 Language.PLAINTEXT_DESCRIPTION.getString());
         navigationTabs.addChangeListener(new ChangeListener() {
@@ -406,7 +388,7 @@ public class PdfReaderController extends Observable implements Observer {
      * @param pageNumber the page number that needs to be selected
      */
     public void gotoPage(int pageNumber) {
-        pageNumber--;
+        /**pageNumber--;
 
         if (pages == null
                 || pages.getSelectedRow() == pageNumber) {
@@ -415,7 +397,7 @@ public class PdfReaderController extends Observable implements Observer {
 
         if (pageNumber < pages.getRowCount()) {
             pages.setRowSelectionInterval(pageNumber, pageNumber);
-        }
+        }*/
     }
 
     protected void highlightChanges(CompareTool.CompareResult compareResult) {

@@ -40,16 +40,18 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext;
+package com.itextpdf.rups.view.dock;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
+import com.itextpdf.rups.view.itext.PageEnumerator;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfPageTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
@@ -69,6 +71,7 @@ import java.util.Observer;
  */
 public class PagesTable extends JTable implements JTableAutoModelInterface, Observer {
 
+    private final ObjectLoader loader;
     /**
      * A list with page nodes.
      */
@@ -85,10 +88,12 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
      *
      * @param controller the pdf reader controller
      * @param listener   the page navigation listener
+     * @param loader
      */
-    public PagesTable(PdfReaderController controller, PageSelectionListener listener) {
+    public PagesTable(PdfReaderController controller, PageSelectionListener listener, ObjectLoader loader) {
         this.controller = controller;
         this.listener = listener;
+        this.loader = loader;
         setModel(new JTableAutoModel(this));
     }
 

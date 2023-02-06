@@ -40,11 +40,12 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext;
+package com.itextpdf.rups.view.dock;
 
 import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IndirectObjectFactory;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -77,18 +78,23 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
      * Creates a JTable visualizing xref table.
      *
      * @param controller the pdf reader controller
+     * @param loader the ObjectLoader that loads the references
      */
-    public XRefTable(PdfReaderController controller) {
+    public XRefTable(PdfReaderController controller, ObjectLoader loader) {
         super();
         this.controller = controller;
+        objects = loader.getObjects();
         setModel(new JTableAutoModel(this));
+        final TableColumn col = getColumnModel().getColumn(0);
+        col.setPreferredWidth(5);
+        repaint();
     }
 
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
+        if (observable instanceof RupsInstanceController && obj instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:

@@ -44,13 +44,15 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.view.dock.TabChangeListener;
+import org.noos.xing.mydoggy.ToolWindow;
+import org.noos.xing.mydoggy.ToolWindowAnchor;
+import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 
 /**
  * The class holding the JTabbedPane that holds the Rups tabs. This class is responsible for loading, closing, and
@@ -62,22 +64,55 @@ public class RupsTabbedPane {
 
     private final JPanel defaultTab;
     private final JTabbedPane jTabbedPane;
+    private MyDoggyToolWindowManager toolWindowManager;
 
     public RupsTabbedPane() {
+        MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager();
+        this.toolWindowManager = myDoggyToolWindowManager;
+
+        // Register a Tool.
+        toolWindowManager.registerToolWindow("Info",       // Id
+                "Info Tab",                 // Title
+                null,                         // Icon
+                new JLabel("No open file."),    // Component
+                ToolWindowAnchor.RIGHT);       // Anchor
+
+        toolWindowManager.registerToolWindow("XREF",
+                "XREF Table",
+                null,
+                new JLabel("No open file."),
+                ToolWindowAnchor.RIGHT);
+
+        toolWindowManager.registerToolWindow("Pages",
+                "Pages",
+                null,
+                new JLabel("No open file."),
+                ToolWindowAnchor.RIGHT);
+
+        // Made all tools available
+        for (ToolWindow window : toolWindowManager.getToolWindows()) {
+            window.setAvailable(true);
+            window.setActive(false);
+        }
+
         this.jTabbedPane = new JTabbedPane();
         this.defaultTab = new JPanel();
         this.defaultTab.add(new JLabel(Language.DEFAULT_TAB_TEXT.getString()));
         this.jTabbedPane.addTab(Language.DEFAULT_TAB_TITLE.getString(), defaultTab);
+        TabChangeListener l = new TabChangeListener();
+        l.setDoggy(toolWindowManager);
+        this.jTabbedPane.addChangeListener(l);
+        myDoggyToolWindowManager.setMainContent(jTabbedPane);
     }
 
-    public void openNewFile(File file, Dimension dimension, boolean readonly) {
+    public void openNewFile(File file, boolean readonly) {
         if (file != null) {
             if (this.defaultTab.equals(this.jTabbedPane.getSelectedComponent())) {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
             }
 
             RupsPanel rupsPanel = new RupsPanel();
-            RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
+            RupsInstanceController rupsInstanceController = new RupsInstanceController(rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
             rupsInstanceController.loadFile(file, readonly);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
@@ -109,7 +144,7 @@ public class RupsTabbedPane {
     }
 
     public Component getJTabbedPane() {
-        return this.jTabbedPane;
+        return this.toolWindowManager;
     }
 
     /**

@@ -106,7 +106,7 @@ public class RupsControllerTest {
         }
 
         @Override
-        public void openNewFile(File file, Dimension dimension, boolean readonly) {
+        public void openNewFile(File file, boolean readonly) {
             opened = true;
         }
     }

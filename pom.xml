@@ -97,6 +97,12 @@
       <version>${itext.version}</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.mydoggy</groupId>
+      <artifactId>mydoggy-plaf</artifactId>
+      <version>1.5.0-beta-r1389</version>
+    </dependency>
   </dependencies>
 
   <repositories>

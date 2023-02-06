@@ -45,7 +45,8 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.model.PdfFile;
 
-import java.awt.BorderLayout;
+import java.awt.*;
+import java.util.Map;
 import javax.swing.JPanel;
 
 /**
@@ -53,6 +54,8 @@ import javax.swing.JPanel;
  * and its related {@link com.itextpdf.rups.controller.RupsInstanceController RupsInstanceController}.
  */
 public class RupsPanel extends JPanel {
+
+    private Map<Class, Component> dockingMap;
 
     private RupsInstanceController rupsInstanceController;
 
