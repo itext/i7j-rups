@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-@Library('pipeline-library')_
+@Library('pipeline-library@buildresult')_
 
 def repoName = "rups"
 def dependencyRegex = "itextcore"
