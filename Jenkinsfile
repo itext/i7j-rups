@@ -1,7 +1,24 @@
 #!/usr/bin/env groovy
-@Library('pipeline-library@test')_
+@Library('pipeline-library')_
 
 def repoName = "rups"
 def dependencyRegex = "itextcore"
 
-automaticJavaBuild(repoName, dependencyRegex, 'jdk-17-openjdk')
+automaticJavaBuild(repoName, dependencyRegex, 'jdk-17-openjdk', 'windows')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
