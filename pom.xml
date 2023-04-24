@@ -94,6 +94,17 @@
       <version>${dom4j.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.uispec4j</groupId>
+      <artifactId>uispec4j</artifactId>
+      <version>17.0-rc1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.caciocavallosilano</groupId>
+      <artifactId>cacio-tta</artifactId>
+      <version>1.17</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>pdftest</artifactId>
       <version>${itext.version}</version>
@@ -239,10 +250,61 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M7</version>
+        <dependencies>
+          <!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-api -->
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-api</artifactId>
+            <version>3.0.0-M7</version>
+            <type>maven-plugin</type>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <!--          <useSystemClassLoader>false</useSystemClassLoader>-->
+          <!--          <forkCount>6</forkCount>-->
+          <!--          <reuseForks>true</reuseForks>-->
+          <reportsDirectory>target/surefire-reports-${surefire.forkNumber}</reportsDirectory>
+          <systemPropertyVariables>
+            <!--            <java.awt.headless>false</java.awt.headless>-->
+            <!--            <awt.toolkit>com.github.caciocavallosilano.cacio.ctc.CTCToolkit</awt.toolkit>-->
+            <!--            <java.awt.graphicsenv>com.github.caciocavallosilano.cacio.ctc.CTCGraphicsEnvironment</java.awt.graphicsenv>-->
+            <!--            <cacio.managed.screensize>1920x1080</cacio.managed.screensize>-->
+          </systemPropertyVariables>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <argLine>--add-exports=java.desktop/java.awt=ALL-UNNAMED
+            --add-exports=java.desktop/java.awt.peer=ALL-UNNAMED
+            --add-exports=java.desktop/sun.awt.image=ALL-UNNAMED
+            --add-exports=java.desktop/sun.java2d=ALL-UNNAMED
+            --add-exports=java.desktop/java.awt.dnd.peer=ALL-UNNAMED
+            --add-exports=java.desktop/sun.awt=ALL-UNNAMED
+            --add-exports=java.desktop/sun.awt.event=ALL-UNNAMED
+            --add-exports=java.desktop/sun.awt.datatransfer=ALL-UNNAMED
+            --add-exports=java.base/sun.security.action=ALL-UNNAMED
+            --add-opens=java.base/java.util=ALL-UNNAMED
+            --add-opens=java.desktop/java.awt=ALL-UNNAMED
+            --add-opens=java.desktop/sun.java2d=ALL-UNNAMED
+            --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+            ${argLine}</argLine>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
   <profiles>
+    <profile>
+      <id>test</id>
+      <properties>
+        <awt.toolkit>net.java.openjdk.cacio.ctc.CTCToolkit</awt.toolkit>
+        <java.awt.graphicsenv>net.java.openjdk.cacio.ctc.CTCGraphicsEnvironment</java.awt.graphicsenv>
+        <java.awt.headless>false</java.awt.headless>
+      </properties>
+    </profile>
     <profile>
       <id>qa</id>
       <build>

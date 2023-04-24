@@ -42,9 +42,13 @@
  */
 package com.itextpdf.rups.view.models;
 
+import com.itextpdf.kernel.pdf.PdfObject;
+
 import javax.swing.table.AbstractTableModel;
 
 public abstract class AbstractPdfObjectPanelTableModel extends AbstractTableModel {
+
+    public abstract PdfObject getPdfObject();
 
     public abstract void removeRow(int rowIndex);
 

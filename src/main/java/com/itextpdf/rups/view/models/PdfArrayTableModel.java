@@ -130,8 +130,9 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                 final String value = (String) aValue;
                 final PdfObject newValue = parser.parseString(value, parent);
                 if (newValue != null) {
-                    removeRow(rowIndex);
-                    addRow(rowIndex, newValue);
+                    removeRow(rowIndex, true);
+                    addRow(rowIndex, newValue, true);
+                    fireTableCellUpdated(rowIndex,columnIndex);
                 }
             }
         }
@@ -153,8 +154,15 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void removeRow(int rowIndex) {
-        fireTableRowsDeleted(rowIndex, rowIndex);
+        removeRow(rowIndex, false);
+    }
+
+    protected void removeRow(int rowIndex, boolean compoundAction) {
         array.remove(rowIndex);
+        if(compoundAction){
+            return;
+        }
+        fireTableRowsDeleted(rowIndex, rowIndex);
         fireTableDataChanged();
     }
 
@@ -189,7 +197,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                     LoggerHelper.warn(Language.ERROR_INDEX_NOT_IN_RANGE.getString(), getClass());
                 }
             }
-            addRow(index, value);
+            addRow(index, value,false);
             tempValue = "";
             fireTableDataChanged();
         }
@@ -200,10 +208,17 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
         return 1;
     }
 
-    private void addRow(int index, PdfObject value) {
+    private void addRow(int index, PdfObject value, boolean compoundAction) {
         array.add(index, value);
+        if (compoundAction){
+            return;
+        }
         fireTableRowsInserted(index, index);
     }
 
+    @Override
+    public PdfObject getPdfObject() {
+        return array;
+    }
 }
 

@@ -46,7 +46,8 @@ package com.itextpdf.rups.event;
  * Abstract Event Class that other events should extend from.
  */
 public abstract class RupsEvent {
-
+    // Does this need to remain a set of static bytes for a particular reason?
+    // It feels like it's reinventing the enum in this use-case.
     public static final byte OPEN_FILE_EVENT = 0;
     public static final byte OPEN_DOCUMENT_POST_EVENT = 1;
     public static final byte CLOSE_DOCUMENT_EVENT = 2;
@@ -65,6 +66,8 @@ public abstract class RupsEvent {
     public static final byte NEW_INDIRECT_OBJECT_EVENT = 15;
     public static final byte POST_NEW_INDIRECT_OBJECT_EVENT = 16;
     public static final byte ALL_FILES_CLOSED = 17;
+    public static final byte NODE_UPDATE_DICT_CHILD_EVENT = 18;
+    public static final byte NODE_UPDATE_ARRAY_CHILD_EVENT = 19;
 
     public abstract int getType();
 

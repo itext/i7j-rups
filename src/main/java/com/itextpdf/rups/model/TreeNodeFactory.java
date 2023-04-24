@@ -133,7 +133,8 @@ public class TreeNodeFactory {
                 break;
             case PdfObject.ARRAY:
                 final PdfArray array = (PdfArray) object;
-                for (int i = 0; i < array.size(); ++i) {
+                int arrayLength = array.size();
+                for (int i = 0; i < arrayLength; ++i) {
                     leaf = PdfObjectTreeNode.getInstance(array.get(i, false));
                     associateIfIndirect(leaf);
                     addNodes(node, leaf);

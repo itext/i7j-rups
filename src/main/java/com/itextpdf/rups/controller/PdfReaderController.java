@@ -57,6 +57,8 @@ import com.itextpdf.rups.event.NodeAddArrayChildEvent;
 import com.itextpdf.rups.event.NodeAddDictChildEvent;
 import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
 import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
+import com.itextpdf.rups.event.NodeUpdateArrayChildEvent;
+import com.itextpdf.rups.event.NodeUpdateDictChildEvent;
 import com.itextpdf.rups.event.OpenPlainTextEvent;
 import com.itextpdf.rups.event.OpenStructureEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -95,6 +97,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
 /**
@@ -167,7 +170,9 @@ public class PdfReaderController extends Observable implements Observer {
      */
     public PdfReaderController(TreeSelectionListener treeSelectionListener,
             PageSelectionListener pageSelectionListener) {
+
         pdfTree = new PdfTree();
+        pdfTree.setName("pdfTree");
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
         JPopupMenu menu = PdfTreeContextMenu.getPopupMenu(pdfTree);
@@ -189,6 +194,7 @@ public class PdfReaderController extends Observable implements Observer {
         addObserver(text);
 
         navigationTabs = new JTabbedPane();
+        navigationTabs.setName("navigationTabs");
         final String pagesString = Language.PAGES.getString();
         navigationTabs.addTab(pagesString, null, new JScrollPane(pages), pagesString);
         navigationTabs.addTab(Language.OUTLINES.getString(), null, new JScrollPane(outlines),
@@ -219,17 +225,19 @@ public class PdfReaderController extends Observable implements Observer {
             }
         });
 
-        objectPanel = new PdfObjectPanel();
+        objectPanel = new PdfObjectPanel(this);
         addObserver(objectPanel);
         objectPanel.addObserver(this);
         streamPane = new SyntaxHighlightedStreamPane(this);
         addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();
+        editorTabs.setName("editorTabs");
         editorTabs.addTab(Language.STREAM.getString(), null, streamPane, Language.STREAM.getString());
         editorTabs.addTab(Language.FORM_XFA.getString(), null, form.getXfaTextArea(),
                 Language.FORM_XFA_LONG_FORM.getString());
         editorTabs.addTab(Language.DEBUG_INFO.getString(), null, debug, Language.DEBUG_INFO_DESCRIPTION.getString());
+
     }
 
     /**
@@ -290,6 +298,7 @@ public class PdfReaderController extends Observable implements Observer {
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
+// TODO: Work out why the PDF Object appears to be updated before it even gets to this point...
     public void update(Observable observable, Object obj) {
         if (observable != null && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
@@ -343,11 +352,24 @@ public class PdfReaderController extends Observable implements Observer {
                 case RupsEvent.NODE_ADD_DICT_CHILD_EVENT:
                     addTreeNodeDictChild(((NodeAddDictChildEvent.Content) event.getContent()).parent,
                             ((NodeAddDictChildEvent.Content) event.getContent()).key,
-                            ((NodeAddDictChildEvent.Content) event.getContent()).index);
+                            ((NodeAddDictChildEvent.Content) event.getContent()).index,
+                            ((NodeAddDictChildEvent.Content) event.getContent()).value);
                     break;
                 case RupsEvent.NODE_ADD_ARRAY_CHILD_EVENT:
                     addTreeNodeArrayChild(((NodeAddArrayChildEvent.Content) event.getContent()).parent,
-                            ((NodeAddArrayChildEvent.Content) event.getContent()).index);
+                            ((NodeAddArrayChildEvent.Content) event.getContent()).index,
+                            ((NodeAddArrayChildEvent.Content) event.getContent()).value);
+                    break;
+                case RupsEvent.NODE_UPDATE_DICT_CHILD_EVENT:
+                    updateTreeNodeDictChild(((NodeUpdateDictChildEvent.Content) event.getContent()).parent,
+                            ((NodeUpdateDictChildEvent.Content) event.getContent()).key,
+                            ((NodeUpdateDictChildEvent.Content) event.getContent()).index,
+                            ((NodeUpdateDictChildEvent.Content) event.getContent()).value);
+                    break;
+                case RupsEvent.NODE_UPDATE_ARRAY_CHILD_EVENT:
+                    updateTreeNodeArrayChild(((NodeUpdateArrayChildEvent.Content) event.getContent()).parent,
+                            ((NodeUpdateArrayChildEvent.Content) event.getContent()).index,
+                            ((NodeUpdateArrayChildEvent.Content) event.getContent()).value);
                     break;
                 case RupsEvent.NODE_DELETE_ARRAY_CHILD_EVENT:
                     deleteTreeChild(((NodeDeleteArrayChildEvent.Content) event.getContent()).parent,
@@ -466,20 +488,60 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     //Returns index of the added child
-    public int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index) {
-        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary) parent.getPdfObject(), key);
+    public int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index, PdfObject childValue) {
+//        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary) parent.getPdfObject(), key);
+        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(childValue, key);
         return addTreeNodeChild(parent, child, index);
     }
 
     //Returns index of the added child
-    public int addTreeNodeArrayChild(PdfObjectTreeNode parent, int index) {
-        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(((PdfArray) parent.getPdfObject()).get(index, false));
-        return addTreeNodeChild(parent, child, index);
+    public int addTreeNodeArrayChild(PdfObjectTreeNode parent, int index, PdfObject child) {
+        PdfArray parentArray = (PdfArray) parent.getPdfObject();
+//        if(parentArray.size() > index)
+//        PdfObject childObject = parentArray.get(index, false);
+        PdfObjectTreeNode childNode = PdfObjectTreeNode.getInstance(child);
+        return addTreeNodeChild(parent, childNode, index);
+    }
+
+    //Returns index of the updated child
+    public int updateTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index, PdfObject child) {
+        //PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary) parent.getPdfObject(), key);
+        return updateTreeChild(parent, PdfObjectTreeNode.getInstance(child), index);
+    }
+
+    //Returns index of the updated child
+    public int updateTreeNodeArrayChild(PdfObjectTreeNode parent, int index, PdfObject child) {
+//        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(((PdfArray) parent.getPdfObject()).get(index, false));
+        return updateTreeChild(parent, PdfObjectTreeNode.getInstance(child), index);
     }
 
     public int deleteTreeChild(PdfObjectTreeNode parent, int index) {
+        //TODO: Move child and controller reference to common method with RupsEvent switch for remove/add?
         parent.remove(index);
-        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
+        deleteObjectChild(parent.getPdfObject(), index);
+        updateObject(parent);
+        updateView(parent);
+        return index;
+    }
+
+    //Returns index of the updated child
+    // TODO: Clean up and maybe move to the Wrapper class, propagating ObjectTreeNode to Object. - Nope, Wrapper is functioning more as a translation layer, keep transformation here...
+    public int updateTreeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
+        PdfObjectTreeNode oldChild = (PdfObjectTreeNode) parent.getChildAt(index);
+        int childrenToTransfer = oldChild.getChildCount();
+        if (childrenToTransfer > 0){
+            for (int childIndex = 0; childIndex < childrenToTransfer; childIndex++){
+                PdfObjectTreeNode childToTransfer = (PdfObjectTreeNode) oldChild.getChildAt(childIndex);
+                addObjectChild(child.getPdfObject(),childToTransfer.getPdfObject(), child.getKey(), childIndex);
+                child.add((MutableTreeNode) childToTransfer);
+            }
+        }
+        parent.remove(oldChild);
+        parent.insert(child, index);
+        updateObjectChild(parent.getPdfObject(), child.getPdfObject(), index);
+        nodes.expandNode(child);
+        updateObject(parent);
+        updateView(parent);
         return index;
     }
 
@@ -487,7 +549,54 @@ public class PdfReaderController extends Observable implements Observer {
     public int addTreeNodeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
         parent.insert(child, index);
         nodes.expandNode(child);
-        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
+        addObjectChild(parent.getPdfObject(), child.getPdfObject(), child.getKey(), index);
+        updateObject(parent);
+        updateView(parent);
         return index;
+    }
+
+    private void updateView(PdfObjectTreeNode parent) {
+        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
+        objectPanel.render(parent,getParser());
+    }
+
+    private void updateObject (PdfObjectTreeNode parent){
+        if (parent.isDictionary()) {
+            PdfDictionary parentDict = (PdfDictionary) parent.getPdfObject();
+            parentDict.keySet();
+        }else if(parent.isArray()){
+            // TODO: Is the TreeNode driven by the PdfObject or visa versa?
+            //  TreeNode drives the Object, but Object determines the table view...
+            PdfArray parentArray = (PdfArray)parent.getPdfObject();
+        }
+    }
+
+    protected void addObjectChild(PdfObject parent, PdfObject child, PdfName key, int index){
+        if (parent.isDictionary()) {
+            PdfDictionary parentDict = ((PdfDictionary) parent);
+            //TODO: Fix this for Non-existent keys or redos (Index out of Bounds)
+            //TODO: Fix this MESSY BODGE! >:0
+            parentDict.put(key, child);
+        }else if(parent.isArray()){
+            PdfArray parentArray = (PdfArray) parent;
+                parentArray.add(index, child);
+        }
+    }
+    protected void updateObjectChild(PdfObject parent, PdfObject child, int index){
+        if (parent.isDictionary()) {
+            PdfDictionary parentDict = ((PdfDictionary) parent);
+            parentDict.put((PdfName) parentDict.keySet().toArray()[index], child);
+        }else if(parent.isArray()){
+            PdfArray parentArray = (PdfArray) parent;
+            parentArray.set(index, child);
+        }
+    }
+    protected void deleteObjectChild(PdfObject parent, int index){
+        if (parent.isDictionary()) {
+            PdfDictionary parentDict = ((PdfDictionary) parent);
+            parentDict.remove((PdfName) parentDict.keySet().toArray()[index]);
+        }else if(parent.isArray()){
+            ((PdfArray)parent).remove(index);
+        }
     }
 }

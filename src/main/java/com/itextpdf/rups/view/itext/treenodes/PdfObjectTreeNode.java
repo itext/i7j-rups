@@ -192,6 +192,20 @@ public class PdfObjectTreeNode extends IconTreeNode {
         return node;
     }
 
+    //TODO: Check if this works...
+    /**
+     * Creates an instance of a tree node for the object corresponding with a key in a dictionary.
+     *
+     * @param obj the pdf object that is represented by this tree node.
+     * @param key  the dictionary key corresponding with the PDF object in this tree node.
+     * @return a PdfObjectTreeNode
+     */
+    public static PdfObjectTreeNode getInstance(PdfObject obj, PdfName key) {
+        final PdfObjectTreeNode node = getInstance(obj);
+        node.key = key;
+        return node;
+    }
+
     /**
      * Getter for the PDF Object.
      *
@@ -199,6 +213,15 @@ public class PdfObjectTreeNode extends IconTreeNode {
      */
     public PdfObject getPdfObject() {
         return object;
+    }
+
+    /**
+     * Getter for the ObjectTree's key.
+     *
+     * @return the PDF Name representing this tree node.
+     */
+    public PdfName getKey(){
+        return key;
     }
 
     /**
