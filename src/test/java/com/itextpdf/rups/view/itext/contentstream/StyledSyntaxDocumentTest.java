@@ -46,10 +46,9 @@ import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.MutableAttributeSet;
@@ -61,14 +60,14 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class StyledSyntaxDocumentTest {
 
     private static final String SRC_DIR = "./src/test/resources/com/itextpdf/rups/view/itext/contentStreamSnippets";
 
     @Test
     public void testStringifyCustomAttribute() {
-        Assert.assertEquals("binary-content", ContentStreamStyleConstants.BINARY_CONTENT.toString());
+        Assertions.assertEquals("binary-content", ContentStreamStyleConstants.BINARY_CONTENT.toString());
     }
 
     @Test
@@ -125,7 +124,7 @@ public class StyledSyntaxDocumentTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
         byte[] result = baos.toByteArray();
-        Assert.assertArrayEquals(expectedResult, result);
+        Assertions.assertArrayEquals(expectedResult, result);
     }
 
     @Test
@@ -143,7 +142,7 @@ public class StyledSyntaxDocumentTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
         byte[] result = baos.toByteArray();
-        Assert.assertArrayEquals(expectedResult, result);
+        Assertions.assertArrayEquals(expectedResult, result);
     }
 
     @Test
@@ -170,7 +169,7 @@ public class StyledSyntaxDocumentTest {
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
-        Assert.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
+        Assertions.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
     }
 
     @Test
@@ -297,7 +296,7 @@ public class StyledSyntaxDocumentTest {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "baseline.cmp"));
         StyledSyntaxDocument doc = new StyledSyntaxDocument();
         doc.setMatchingOperands(true);
-        Assert.assertTrue(doc.isMatchingOperands());
+        Assertions.assertTrue(doc.isMatchingOperands());
         doc.processContentStream(origBytes);
 
         AttributeSet expectedAttributes = doc.getStyleAttributes("Tm");
@@ -305,7 +304,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("600");
         AttributeSet actualAttributes = doc.getCharacterElement(start).getAttributes();
-        Assert.assertEquals(expectedAttributes, actualAttributes);
+        Assertions.assertEquals(expectedAttributes, actualAttributes);
     }
 
     @Test
@@ -346,7 +345,7 @@ public class StyledSyntaxDocumentTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
         byte[] result = baos.toByteArray();
-        Assert.assertArrayEquals(expectedResult, result);
+        Assertions.assertArrayEquals(expectedResult, result);
     }
 
     @Test
@@ -391,7 +390,7 @@ public class StyledSyntaxDocumentTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
         String result = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
-        Assert.assertEquals("(This\\000is\\000w31rd) Tj\n\n", result);
+        Assertions.assertEquals("(This\\000is\\000w31rd) Tj\n\n", result);
     }
 
 
@@ -416,7 +415,7 @@ public class StyledSyntaxDocumentTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
         String result = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
-        Assert.assertEquals("(This\\000is\\000w31rd\n\n", result);
+        Assertions.assertEquals("(This\\000is\\000w31rd\n\n", result);
     }
 
     @Test
@@ -500,7 +499,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("ID");
         doc.insertString(start + 3, "deadbeef", null);
-        Assert.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
+        Assertions.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
     }
 
     @Test
@@ -512,7 +511,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("ID");
         doc.remove(start + 3, 2);
-        Assert.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
+        Assertions.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
     }
 
     @Test
@@ -524,13 +523,13 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("ID");
         doc.replace(start + 3, 2, "deadbeef", null);
-        Assert.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
+        Assertions.assertTrue(Pattern.compile("ID\\s+EI").matcher(theText).find());
     }
 
     private void assertSubstring(String expectedSub, String theText) {
-        Assert.assertTrue(
-                "Text '" + theText + "' did not contain expected string '" + expectedSub + "'",
-                theText.contains(expectedSub)
+        Assertions.assertTrue(
+                theText.contains(expectedSub),
+                "Text '" + theText + "' did not contain expected string '" + expectedSub + "'"
         );
     }
 
@@ -542,7 +541,7 @@ public class StyledSyntaxDocumentTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
         byte[] result = baos.toByteArray();
-        Assert.assertArrayEquals(origBytes, result);
+        Assertions.assertArrayEquals(origBytes, result);
     }
 
     private void reserializeWithCompareTarget(String src, String cmp) throws Exception {
@@ -555,7 +554,7 @@ public class StyledSyntaxDocumentTest {
         new ContentStreamWriter(baos).write(doc);
         byte[] result = baos.toByteArray();
 
-        Assert.assertArrayEquals(expectedResult, result);
+        Assertions.assertArrayEquals(expectedResult, result);
     }
 
     private void checkDecodedDoc(String fname, String expectedSubstring) throws Exception {
@@ -587,7 +586,7 @@ public class StyledSyntaxDocumentTest {
 
         int start = doc.getText(0, doc.getLength()).indexOf("こんにちは");
         String expected = String.format(Language.TOOLTIP_ENCODING.getString(), "UnicodeBig");
-        Assert.assertEquals(expected, doc.getToolTipAt(start));
+        Assertions.assertEquals(expected, doc.getToolTipAt(start));
     }
 
     @Test
@@ -600,7 +599,7 @@ public class StyledSyntaxDocumentTest {
         int start = doc.getText(0, doc.getLength()).indexOf("({") + 3;
 
         String expected = Language.TOOLTIP_HEX.getString();
-        Assert.assertEquals(expected, doc.getToolTipAt(start));
+        Assertions.assertEquals(expected, doc.getToolTipAt(start));
     }
 
     @Test
@@ -610,6 +609,6 @@ public class StyledSyntaxDocumentTest {
         doc.processContentStream(origBytes);
 
         int start = doc.getText(0, doc.getLength()).indexOf("Tj");
-        Assert.assertNull(doc.getToolTipAt(start));
+        Assertions.assertNull(doc.getToolTipAt(start));
     }
 }

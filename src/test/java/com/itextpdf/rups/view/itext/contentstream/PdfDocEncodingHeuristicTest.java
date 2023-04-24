@@ -43,98 +43,66 @@
 package com.itextpdf.rups.view.itext.contentstream;
 
 import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 
-@RunWith(Parameterized.class)
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class PdfDocEncodingHeuristicTest {
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        Collection<Object[]> cases = new ArrayList<>();
-        String[] positiveStrings = new String[] {
-                "abccadslk fjds",
-                "abccadslk\tfjds",
-                "abccadslk\nfjds",
-                "abccadslk\rfjds",
-                "/+xy1209837a$^!@$#&#*!&dksjfao7210",
-                "/+xy120921312½",
-                "en_US", "en-US",
-                "test@example.com",
-                "© iText Software",
-                "Bär"
-        };
 
-        byte[][] positiveBytes = new byte[][] {
-                new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x68, 0x65, 0x6c, 0x6c, 0x6f },
-                new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, (byte) 0x92, 0x68, 0x65, 0x6c, 0x6c, 0x6f }
-        };
+    public static Stream<Arguments> data() {
 
-        String[] negativeStrings = new String[] {
-                "©z®z",
-                "/+xy2½",
-                "abccadslk\ffjds", // linefeed is whitespace, but undefined in PDFDocEncoding
-                "Hello\007world" // non-whitespace control character
-        };
+        return Stream.of(
+                // Positive Strings
+                Arguments.of(PdfEncodings.convertToBytes("abccadslk fjds", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("abccadslk\tfjds", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("abccadslk\nfjds", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("abccadslk\rfjds", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("/+xy1209837a$^!@$#&#*!&dksjfao7210", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("/+xy120921312½", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("en_US", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("en-US", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("test@example.com", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("© iText Software", PdfEncodings.PDF_DOC_ENCODING), true),
+                Arguments.of(PdfEncodings.convertToBytes("Bär", PdfEncodings.PDF_DOC_ENCODING), true),
 
-        byte[][] negativeBytes = new byte[][] {
+                // Positive Byte Arrays
+                Arguments.of(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x68, 0x65, 0x6c, 0x6c, 0x6f}, true),
+                Arguments.of(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, (byte) 0x92, 0x68, 0x65, 0x6c, 0x6c, 0x6f}, true),
+
+                // Negative Strings
+                Arguments.of(PdfEncodings.convertToBytes("©z®z", PdfEncodings.PDF_DOC_ENCODING), false),
+                Arguments.of(PdfEncodings.convertToBytes("/+xy2½", PdfEncodings.PDF_DOC_ENCODING), false),
+                // linefeed is whitespace, but undefined in PDFDocEncoding
+                Arguments.of(PdfEncodings.convertToBytes("abccadslk\ffjds", PdfEncodings.PDF_DOC_ENCODING), false),
+                // non-whitespace control character
+                Arguments.of(PdfEncodings.convertToBytes("Hello\007world", PdfEncodings.PDF_DOC_ENCODING), false),
+
+                // Negative Byte Arrays
                 // utf8 rendering of ä doesn't represent a letter in PDFDocEncoding
-                "Bär".getBytes(StandardCharsets.UTF_8),
+                Arguments.of("Bär".getBytes(StandardCharsets.UTF_8), false),
                 // proportion of non-letter bytes too high
-                new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, (byte) 0x92},
+                Arguments.of(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, (byte) 0x92}, false),
                 // no non-letter bytes at all
-                new byte[] { 0x01, 0x02, 0x03, 0x04 },
+                Arguments.of(new byte[]{0x01, 0x02, 0x03, 0x04}, false),
                 // contains control character that isn't whitespace
-                new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x01, 0x68, 0x65, 0x6c, 0x6c, 0x6f }
-        };
-
-        for(String s : positiveStrings) {
-            cases.add(new Object[] {
-                    PdfEncodings.convertToBytes(s, PdfEncodings.PDF_DOC_ENCODING),
-                    true
-            });
-        }
-
-        for(byte[] b : positiveBytes) {
-            cases.add(new Object[] {b, true});
-        }
-
-        for(String s : negativeStrings) {
-            cases.add(new Object[] {
-                    PdfEncodings.convertToBytes(s, PdfEncodings.PDF_DOC_ENCODING),
-                    false
-            });
-        }
-
-        for(byte[] b : negativeBytes) {
-            cases.add(new Object[] {b, false});
-        }
-
-        return cases;
+                Arguments.of(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x01, 0x68, 0x65, 0x6c, 0x6c, 0x6f}, false)
+        );
     }
 
-    private final byte[] encoded;
-    private final boolean textExpected;
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testPdfDocTextHeuristic(byte[] encoded, boolean textExpected) {
+        boolean result = ContentStreamHandlingUtils.isMaybePdfDocEncodedText(encoded);
 
-    public PdfDocEncodingHeuristicTest(byte[] encoded, boolean textExpected) {
-        this.encoded = encoded;
-        this.textExpected = textExpected;
+        String asPdfDoc = PdfEncodings.convertToString(encoded, PdfEncodings.PDF_DOC_ENCODING);
+        Assertions.assertEquals(textExpected, result, asPdfDoc);
     }
-
-    @Test
-    public void testPdfDocTextHeuristic() {
-        boolean result = ContentStreamHandlingUtils.isMaybePdfDocEncodedText(this.encoded);
-
-        String asPdfDoc = PdfEncodings.convertToString(this.encoded, PdfEncodings.PDF_DOC_ENCODING);
-        Assert.assertEquals(asPdfDoc, this.textExpected, result);
-    }
-
 }

@@ -47,13 +47,13 @@ import com.itextpdf.rups.mock.MockedRupsController;
 import com.itextpdf.rups.mock.MockedSystemViewer;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.test.annotations.type.UnitTest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+@Tag("UnitTest.class")
 public class OpenInViewerActionTest {
 
     @Test
@@ -64,7 +64,7 @@ public class OpenInViewerActionTest {
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(true);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
         openInViewerAction.actionPerformed(null);
-        Assert.assertTrue(systemViewerAction.isFileOpened());
+        Assertions.assertTrue(systemViewerAction.isFileOpened());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class OpenInViewerActionTest {
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(false);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
         openInViewerAction.actionPerformed(null);
-        Assert.assertFalse(systemViewerAction.isFileOpened());
+        Assertions.assertFalse(systemViewerAction.isFileOpened());
     }
 
     @Test
@@ -84,6 +84,6 @@ public class OpenInViewerActionTest {
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(true);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
         openInViewerAction.actionPerformed(null);
-        Assert.assertFalse(systemViewerAction.isFileOpened());
+        Assertions.assertFalse(systemViewerAction.isFileOpened());
     }
 }

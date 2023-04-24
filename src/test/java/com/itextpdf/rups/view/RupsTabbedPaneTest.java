@@ -43,18 +43,18 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsConfiguration;
-import com.itextpdf.test.annotations.type.UnitTest;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.JTabbedPane;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+@Tag("UnitTest")
 public class RupsTabbedPaneTest {
 
     private static final String EXPECTED_TAB_TITLE = "hello_world.pdf";
@@ -65,7 +65,7 @@ public class RupsTabbedPaneTest {
     private RupsTabbedPane tabbedPane;
     private Dimension dimension;
 
-    @Before
+    @BeforeEach
     public void before() {
         this.tabbedPane = new RupsTabbedPane();
         this.dimension = Toolkit.getDefaultToolkit().getScreenSize();
@@ -74,16 +74,16 @@ public class RupsTabbedPaneTest {
     @Test
     public void initializationTest() {
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
     @Test
     public void openNullFileTest() {
         this.tabbedPane.openNewFile(null, this.dimension, false);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
     @Test
@@ -91,8 +91,8 @@ public class RupsTabbedPaneTest {
         File file = new File(INPUT_1);
         this.tabbedPane.openNewFile(file, this.dimension, false);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
     }
 
     @Test
@@ -102,9 +102,9 @@ public class RupsTabbedPaneTest {
         File file2 = new File(INPUT_2);
         this.tabbedPane.openNewFile(file2, this.dimension, false);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(2, jTabbedPane.getTabCount());
-        Assert.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
-        Assert.assertEquals(EXPECTED_TAB_TITLE_2, jTabbedPane.getTitleAt(1));
+        Assertions.assertEquals(2, jTabbedPane.getTabCount());
+        Assertions.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(EXPECTED_TAB_TITLE_2, jTabbedPane.getTitleAt(1));
     }
 
     @Test
@@ -116,8 +116,8 @@ public class RupsTabbedPaneTest {
         this.tabbedPane.closeCurrentFile();
         this.tabbedPane.closeCurrentFile();
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
     @Test
@@ -133,6 +133,6 @@ public class RupsTabbedPaneTest {
         RupsConfiguration.INSTANCE.setOpenDuplicateFiles(originalValue);
         RupsConfiguration.INSTANCE.saveConfiguration();
 
-        Assert.assertTrue(isAlreadyOpened);
+        Assertions.assertTrue(isAlreadyOpened);
     }
 }

@@ -44,10 +44,9 @@ package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.swing.Action;
 import javax.swing.JMenuItem;
@@ -56,7 +55,7 @@ import javax.swing.JTextPane;
 import javax.swing.MenuElement;
 import javax.swing.text.TextAction;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class StreamPanelContextMenuTest {
     @Test
     public void jMenuLengthTest() {
@@ -64,7 +63,7 @@ public class StreamPanelContextMenuTest {
                 new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
-        Assert.assertEquals(4, subElements.length);
+        Assertions.assertEquals(4, subElements.length);
     }
 
     @Test
@@ -75,7 +74,7 @@ public class StreamPanelContextMenuTest {
         MenuElement[] subElements = popupMenu.getSubElements();
 
         for (MenuElement menuElement : subElements) {
-            Assert.assertTrue(menuElement instanceof JMenuItem);
+            Assertions.assertTrue(menuElement instanceof JMenuItem);
         }
     }
 
@@ -89,7 +88,7 @@ public class StreamPanelContextMenuTest {
         for (MenuElement menuElement : subElements) {
             Action action = ((JMenuItem) menuElement).getAction();
 
-            Assert.assertTrue(
+            Assertions.assertTrue(
                     action instanceof SaveToPdfStreamJTextPaneAction || action instanceof SaveToFileJTextPaneAction
                             || action instanceof CopyToClipboardAction || action instanceof TextAction );
         }
@@ -107,7 +106,7 @@ public class StreamPanelContextMenuTest {
             JMenuItem menuItem = ((JMenuItem) menuElement);
 
             if (Language.SAVE_TO_STREAM.getString().equals(menuItem.getText())) {
-                Assert.assertFalse(menuItem.isEnabled());
+                Assertions.assertFalse(menuItem.isEnabled());
             }
         }
     }
@@ -125,7 +124,7 @@ public class StreamPanelContextMenuTest {
             JMenuItem menuItem = ((JMenuItem) menuElement);
 
             if (Language.SAVE_TO_STREAM.getString().equals(menuItem.getText())) {
-                Assert.assertTrue(menuItem.isEnabled());
+                Assertions.assertTrue(menuItem.isEnabled());
             }
         }
     }

@@ -42,25 +42,19 @@
  */
 package com.itextpdf.rups;
 
-import com.itextpdf.test.annotations.type.UnitTest;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.util.Properties;
 import java.util.prefs.BackingStoreException;
 import javax.swing.WindowConstants;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class RupsConfigurationTest {
 
     private static Properties copy;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws BackingStoreException {
         copy = RupsConfiguration.INSTANCE.getCurrentState();
         RupsConfiguration.INSTANCE.resetToDefaultProperties();
@@ -73,7 +67,7 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.saveConfiguration();
         File homeFolder = RupsConfiguration.INSTANCE.getHomeFolder();
         File expected = new File(path);
-        Assert.assertEquals(expected, homeFolder);
+        Assertions.assertEquals(expected, homeFolder);
     }
 
     @Test
@@ -82,7 +76,7 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.saveConfiguration();
         File homeFolder = RupsConfiguration.INSTANCE.getHomeFolder();
         File expected = new File(System.getProperty("user.home"));
-        Assert.assertEquals(expected, homeFolder);
+        Assertions.assertEquals(expected, homeFolder);
     }
 
     @Test
@@ -92,7 +86,7 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.saveConfiguration();
         File homeFolder = RupsConfiguration.INSTANCE.getHomeFolder();
         File expected = new File(System.getProperty("user.home"));
-        Assert.assertEquals(expected, homeFolder);
+        Assertions.assertEquals(expected, homeFolder);
     }
 
     @Test
@@ -102,21 +96,21 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.saveConfiguration();
         File homeFolder = RupsConfiguration.INSTANCE.getHomeFolder();
         File expected = new File(System.getProperty("user.home"));
-        Assert.assertEquals(expected, homeFolder);
+        Assertions.assertEquals(expected, homeFolder);
     }
 
     @Test
     public void setDuplicateFilesTrueTest() {
         RupsConfiguration.INSTANCE.setOpenDuplicateFiles(true);
         RupsConfiguration.INSTANCE.saveConfiguration();
-        Assert.assertTrue(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        Assertions.assertTrue(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
     }
 
     @Test
     public void setDuplicateFilesFalseTest() {
         RupsConfiguration.INSTANCE.setOpenDuplicateFiles(false);
         RupsConfiguration.INSTANCE.saveConfiguration();
-        Assert.assertFalse(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        Assertions.assertFalse(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
     }
 
     @Test
@@ -125,7 +119,7 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.setLookAndFeel(laf);
         RupsConfiguration.INSTANCE.saveConfiguration();
         String lookAndFeel = RupsConfiguration.INSTANCE.getLookAndFeel();
-        Assert.assertTrue(lookAndFeel.contains("javax.swing.plaf"));
+        Assertions.assertTrue(lookAndFeel.contains("javax.swing.plaf"));
     }
 
     @Test
@@ -134,21 +128,21 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.setLookAndFeel(laf);
         RupsConfiguration.INSTANCE.saveConfiguration();
         String lookAndFeel = RupsConfiguration.INSTANCE.getLookAndFeel();
-        Assert.assertTrue(lookAndFeel.contains("javax.swing.plaf") || lookAndFeel.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"));
+        Assertions.assertTrue(lookAndFeel.contains("javax.swing.plaf") || lookAndFeel.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"));
     }
 
     @Test
     public void clearUnsavedChangesTest() {
         RupsConfiguration.INSTANCE.setLookAndFeel("system");
-        Assert.assertTrue(RupsConfiguration.INSTANCE.hasUnsavedChanges());
+        Assertions.assertTrue(RupsConfiguration.INSTANCE.hasUnsavedChanges());
         RupsConfiguration.INSTANCE.cancelTemporaryChanges();
-        Assert.assertFalse(RupsConfiguration.INSTANCE.hasUnsavedChanges());
+        Assertions.assertFalse(RupsConfiguration.INSTANCE.hasUnsavedChanges());
     }
 
     @Test
     public void closingOperationsPossibleValuesTest() {
         int closeOperation = RupsConfiguration.INSTANCE.getCloseOperation();
-        Assert.assertTrue(
+        Assertions.assertTrue(
                 closeOperation == WindowConstants.DO_NOTHING_ON_CLOSE ||
                         closeOperation == WindowConstants.HIDE_ON_CLOSE ||
                         closeOperation == WindowConstants.EXIT_ON_CLOSE ||
@@ -156,7 +150,7 @@ public class RupsConfigurationTest {
                 );
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         RupsConfiguration.INSTANCE.restore(copy);
     }

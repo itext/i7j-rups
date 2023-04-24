@@ -43,12 +43,11 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.rups.mock.MockedBackgroundTask;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class BackgroundTaskTest {
 
     @Test
@@ -56,6 +55,6 @@ public class BackgroundTaskTest {
         MockedBackgroundTask backgroundTask = new MockedBackgroundTask();
         backgroundTask.start();
         backgroundTask.join();
-        Assert.assertTrue(backgroundTask.hasTaskExecuted());
+        Assertions.assertTrue(backgroundTask.hasTaskExecuted());
     }
 }

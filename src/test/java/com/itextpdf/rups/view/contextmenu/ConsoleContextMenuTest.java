@@ -42,17 +42,16 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class ConsoleContextMenuTest {
 
     @Test
@@ -60,7 +59,7 @@ public class ConsoleContextMenuTest {
         JPopupMenu popupMenu = ConsoleContextMenu.getPopupMenu(null);
 
         MenuElement[] subElements = popupMenu.getSubElements();
-        Assert.assertEquals(2, subElements.length);
+        Assertions.assertEquals(2, subElements.length);
     }
 
     @Test
@@ -70,7 +69,7 @@ public class ConsoleContextMenuTest {
         MenuElement[] subElements = popupMenu.getSubElements();
 
         for (MenuElement menuElement : subElements) {
-            Assert.assertTrue(menuElement instanceof JMenuItem);
+            Assertions.assertTrue(menuElement instanceof JMenuItem);
         }
     }
 
@@ -83,7 +82,7 @@ public class ConsoleContextMenuTest {
         for (MenuElement menuElement : subElements) {
             Action action = ((JMenuItem) menuElement).getAction();
 
-            Assert.assertTrue(action instanceof CopyToClipboardAction || action instanceof ClearConsoleAction );
+            Assertions.assertTrue(action instanceof CopyToClipboardAction || action instanceof ClearConsoleAction );
         }
     }
 

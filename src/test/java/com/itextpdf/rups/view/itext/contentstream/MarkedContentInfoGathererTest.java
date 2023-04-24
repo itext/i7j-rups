@@ -57,18 +57,17 @@ import com.itextpdf.kernel.pdf.tagging.StandardRoles;
 import com.itextpdf.kernel.pdf.tagutils.TagTreePointer;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.IntegrationTest;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
-@Category(IntegrationTest.class)
+@Tag("IntegrationTest")
 public class MarkedContentInfoGathererTest extends ExtendedITextTest {
     @Test
     public void indexOnePageOneContentStreamMcidCountTest() throws Exception {
@@ -78,7 +77,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
              PdfDocument pdfDoc = new PdfDocument(r)) {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
-        Assert.assertEquals(2, gatherer.getMarkedContentIndex().size());
+        Assertions.assertEquals(2, gatherer.getMarkedContentIndex().size());
     }
 
     @Test
@@ -89,7 +88,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
              PdfDocument pdfDoc = new PdfDocument(r)) {
             for (int i = 1; i <= pdfDoc.getNumberOfPages(); i++) {
                 gatherer.processPageContent(pdfDoc.getPage(i));
-                Assert.assertEquals(2, gatherer.getMarkedContentIndex().size());
+                Assertions.assertEquals(2, gatherer.getMarkedContentIndex().size());
                 gatherer.reset();
             }
         }
@@ -104,7 +103,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
         for (Map.Entry<Integer, MarkedContentInfo> e : gatherer.getMarkedContentIndex().entrySet()) {
-            Assert.assertEquals((int) e.getKey(), e.getValue().getMcid());
+            Assertions.assertEquals((int) e.getKey(), e.getValue().getMcid());
         }
     }
 
@@ -119,7 +118,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                     .getFirstContentStream()
                     .getIndirectReference();
             for (MarkedContentInfo i : gatherer.getMarkedContentIndex().values()) {
-                Assert.assertEquals(contentStreamRef, i.getStreamRef());
+                Assertions.assertEquals(contentStreamRef, i.getStreamRef());
             }
         }
     }
@@ -139,7 +138,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
             for (MarkedContentInfo i : gatherer.getMarkedContentIndex().values()) {
                 actualRefs[i.getMcid()] = i.getStreamRef();
             }
-            Assert.assertArrayEquals(expectedRefs, actualRefs);
+            Assertions.assertArrayEquals(expectedRefs, actualRefs);
         }
     }
 
@@ -155,7 +154,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
         String[] extractionResult = new String[2];
         extractionResult[0] = gatherer.getMarkedContentIndex().get(0).getExtractedText();
         extractionResult[1] = gatherer.getMarkedContentIndex().get(1).getExtractedText();
-        Assert.assertArrayEquals(expectedResult, extractionResult);
+        Assertions.assertArrayEquals(expectedResult, extractionResult);
     }
 
     @Test
@@ -171,7 +170,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
         for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
             extractionResult[info.getMcid()] = info.getExtractedText();
         }
-        Assert.assertArrayEquals(expectedResult, extractionResult);
+        Assertions.assertArrayEquals(expectedResult, extractionResult);
     }
 
     @Test
@@ -187,7 +186,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
         for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
             extractionResult[info.getMcid()] = info.getExtractedText();
         }
-        Assert.assertArrayEquals(expectedResult, extractionResult);
+        Assertions.assertArrayEquals(expectedResult, extractionResult);
     }
 
     @Test
@@ -203,7 +202,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                         .getFirstContentStream()
                         .getIndirectReference();
                 for (Map.Entry<Integer, MarkedContentInfo> e : gatherer.getMarkedContentIndex().entrySet()) {
-                    Assert.assertEquals(contentStreamRef, e.getValue().getStreamRef());
+                    Assertions.assertEquals(contentStreamRef, e.getValue().getStreamRef());
                 }
                 gatherer.reset();
             }
@@ -228,7 +227,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                 for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
                     actualRefs[info.getMcid()] = info.getStreamRef();
                 }
-                Assert.assertArrayEquals(expectedRefs, actualRefs);
+                Assertions.assertArrayEquals(expectedRefs, actualRefs);
                 gatherer.reset();
             }
         }
@@ -266,7 +265,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                 for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
                     actualRefs[info.getMcid()] = info.getStreamRef();
                 }
-                Assert.assertArrayEquals(expectedRefs, actualRefs);
+                Assertions.assertArrayEquals(expectedRefs, actualRefs);
                 gatherer.reset();
             }
         }

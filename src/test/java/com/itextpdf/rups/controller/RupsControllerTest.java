@@ -46,11 +46,11 @@ import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.SaveToFileEvent;
 import com.itextpdf.rups.view.RupsTabbedPane;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.awt.Dimension;
 import java.io.File;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class RupsControllerTest {
 
@@ -60,9 +60,9 @@ public class RupsControllerTest {
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
         rupsController.update(null, new CloseDocumentEvent());
-        Assert.assertTrue(rupsTabbedPane.closed);
-        Assert.assertFalse(rupsTabbedPane.opened);
-        Assert.assertFalse(rupsTabbedPane.saved);
+        Assertions.assertTrue(rupsTabbedPane.closed);
+        Assertions.assertFalse(rupsTabbedPane.opened);
+        Assertions.assertFalse(rupsTabbedPane.saved);
     }
 
     @Test
@@ -71,9 +71,9 @@ public class RupsControllerTest {
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
         rupsController.update(null, new SaveToFileEvent(new File("")));
-        Assert.assertTrue(rupsTabbedPane.saved);
-        Assert.assertFalse(rupsTabbedPane.opened);
-        Assert.assertFalse(rupsTabbedPane.closed);
+        Assertions.assertTrue(rupsTabbedPane.saved);
+        Assertions.assertFalse(rupsTabbedPane.opened);
+        Assertions.assertFalse(rupsTabbedPane.closed);
     }
 
     @Test
@@ -82,9 +82,9 @@ public class RupsControllerTest {
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
         rupsController.update(null, new OpenFileEvent(new File("test.pdf")));
-        Assert.assertTrue(rupsTabbedPane.opened);
-        Assert.assertFalse(rupsTabbedPane.saved);
-        Assert.assertFalse(rupsTabbedPane.closed);
+        Assertions.assertTrue(rupsTabbedPane.opened);
+        Assertions.assertFalse(rupsTabbedPane.saved);
+        Assertions.assertFalse(rupsTabbedPane.closed);
     }
 
 

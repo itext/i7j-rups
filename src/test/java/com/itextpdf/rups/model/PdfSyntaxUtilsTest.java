@@ -49,32 +49,32 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.UnitTest;
 
 import java.util.Arrays;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+@Tag("UnitTest")
 public class PdfSyntaxUtilsTest extends ExtendedITextTest {
 
     @Test
     public void testSimpleString() {
-        Assert.assertEquals("(hello world)", PdfSyntaxUtils.getSyntaxString(new PdfString("hello world")));
+        Assertions.assertEquals("(hello world)", PdfSyntaxUtils.getSyntaxString(new PdfString("hello world")));
     }
 
     @Test
     public void testSimpleDictionary() {
         PdfDictionary pdfDictionary = new PdfDictionary();
         pdfDictionary.put(PdfName.ON, PdfBoolean.TRUE);
-        Assert.assertEquals("<< /ON true >>", PdfSyntaxUtils.getSyntaxString(pdfDictionary));
+        Assertions.assertEquals("<< /ON true >>", PdfSyntaxUtils.getSyntaxString(pdfDictionary));
     }
 
     @Test
     public void testSimpleArray() {
         PdfArray array = new PdfArray(Arrays.asList(new PdfNumber(1), new PdfString("hello")));
-        Assert.assertEquals("[ 1 (hello) ]", PdfSyntaxUtils.getSyntaxString(array));
+        Assertions.assertEquals("[ 1 (hello) ]", PdfSyntaxUtils.getSyntaxString(array));
     }
 
 }

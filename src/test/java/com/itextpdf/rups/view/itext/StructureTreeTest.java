@@ -49,17 +49,17 @@ import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.IntegrationTest;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 
-@Category(IntegrationTest.class)
+@Tag("IntegrationTest")
 public class StructureTreeTest extends ExtendedITextTest {
 
 
@@ -73,7 +73,7 @@ public class StructureTreeTest extends ExtendedITextTest {
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
                 .getChildAt(0).getChildAt(0);
         String nodeLabel = (String) mciChild.getUserObject();
-        Assert.assertEquals("0 [Hello ]", nodeLabel);
+        Assertions.assertEquals("0 [Hello ]", nodeLabel);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class StructureTreeTest extends ExtendedITextTest {
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
                 .getChildAt(0).getChildAt(0);
         String nodeLabel = (String) mciChild.getUserObject();
-        Assert.assertEquals("0 [Olleh ]", nodeLabel);
+        Assertions.assertEquals("0 [Olleh ]", nodeLabel);
     }
 
     private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile) {

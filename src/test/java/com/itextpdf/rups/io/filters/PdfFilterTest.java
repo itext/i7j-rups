@@ -43,14 +43,13 @@
 package com.itextpdf.rups.io.filters;
 
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class PdfFilterTest {
 
     @Test
@@ -60,7 +59,7 @@ public class PdfFilterTest {
 
         boolean actual = filter.accept(file);
 
-        Assert.assertTrue(actual);
+        Assertions.assertTrue(actual);
     }
 
     @Test
@@ -70,7 +69,7 @@ public class PdfFilterTest {
 
         boolean actual = filter.accept(file);
 
-        Assert.assertFalse(actual);
+        Assertions.assertFalse(actual);
     }
 
     @Test
@@ -80,7 +79,7 @@ public class PdfFilterTest {
 
         boolean actual = filter.accept(file);
 
-        Assert.assertFalse(actual);
+        Assertions.assertFalse(actual);
     }
 
     @Test
@@ -89,13 +88,13 @@ public class PdfFilterTest {
 
         boolean actual = filter.accept(null);
 
-        Assert.assertFalse(actual);
+        Assertions.assertFalse(actual);
     }
 
     @Test
     public void descriptionTest() {
         PdfFilter filter = new PdfFilter();
-        Assert.assertEquals(Language.FILE_FILTER_DESCRIPTION.getString(), filter.getDescription());
+        Assertions.assertEquals(Language.FILE_FILTER_DESCRIPTION.getString(), filter.getDescription());
     }
 
 }

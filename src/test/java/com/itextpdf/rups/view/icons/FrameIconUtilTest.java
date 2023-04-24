@@ -43,21 +43,21 @@
 package com.itextpdf.rups.view.icons;
 
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.UnitTest;
 
 import java.awt.Image;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+@Tag("UnitTest")
 public class FrameIconUtilTest extends ExtendedITextTest {
 
     @Test
     public void testThatIconsAreLoadedFromResources() {
         List<Image> icons = FrameIconUtil.loadFrameIcons();
-        Assert.assertTrue(icons.size() > 1);
+        Assertions.assertTrue(icons.size() > 1);
     }
 
 }

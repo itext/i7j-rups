@@ -46,7 +46,6 @@ import com.itextpdf.rups.mock.MockedDropTargetDropEvent;
 import com.itextpdf.rups.mock.MockedRupsController;
 import com.itextpdf.rups.mock.MockedTransferable;
 import com.itextpdf.test.ITextTest;
-import com.itextpdf.test.annotations.type.UnitTest;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -55,19 +54,20 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+@Tag("UnitTest")
 public class RupsDropTargetTest extends ITextTest {
 
     private RupsDropTarget dropTarget;
     private List<File> fileList;
     private MockedRupsController rupsController;
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         this.rupsController = new MockedRupsController();
         this.dropTarget = new RupsDropTarget(rupsController);
@@ -77,31 +77,31 @@ public class RupsDropTargetTest extends ITextTest {
     @Test
     public void nullTest() {
         this.dropTarget.drop(null);
-        Assert.assertEquals(0, this.rupsController.getOpenedCount());
+        Assertions.assertEquals(0, this.rupsController.getOpenedCount());
     }
 
     @Test
     public void noDataFlavorTest() {
         Transferable transferable = new MockedTransferable(null);
         List<File> files = this.dropTarget.extractFilesFromTransferable(transferable);
-        Assert.assertNotNull(files);
-        Assert.assertTrue(files.isEmpty());
+        Assertions.assertNotNull(files);
+        Assertions.assertTrue(files.isEmpty());
     }
 
     @Test
     public void noSupportedDataFlavorTest() {
         Transferable transferable = new MockedTransferable(DataFlavor.imageFlavor);
         List<File> files = this.dropTarget.extractFilesFromTransferable(transferable);
-        Assert.assertNotNull(files);
-        Assert.assertTrue(files.isEmpty());
+        Assertions.assertNotNull(files);
+        Assertions.assertTrue(files.isEmpty());
     }
 
     @Test
     public void javaFileListFlavorTest() {
         Transferable transferable = new MockedTransferable(DataFlavor.javaFileListFlavor, fileList);
         List<File> files = this.dropTarget.extractFilesFromTransferable(transferable);
-        Assert.assertNotNull(files);
-        Assert.assertEquals(this.fileList.size(), files.size());
+        Assertions.assertNotNull(files);
+        Assertions.assertEquals(this.fileList.size(), files.size());
     }
 
     @Test
@@ -115,8 +115,8 @@ public class RupsDropTargetTest extends ITextTest {
 
         Transferable transferable = new MockedTransferable(DataFlavor.stringFlavor, builder.toString());
         List<File> files = this.dropTarget.extractFilesFromTransferable(transferable);
-        Assert.assertNotNull(files);
-        Assert.assertEquals(this.fileList.size(), files.size());
+        Assertions.assertNotNull(files);
+        Assertions.assertEquals(this.fileList.size(), files.size());
     }
 
     @Test
@@ -124,6 +124,6 @@ public class RupsDropTargetTest extends ITextTest {
         MockedTransferable mockedTransferable = new MockedTransferable(DataFlavor.javaFileListFlavor, fileList);
         DropTarget dropTarget = new DropTarget();
         this.dropTarget.drop(new MockedDropTargetDropEvent(mockedTransferable, dropTarget));
-        Assert.assertEquals(fileList.size(), this.rupsController.getOpenedCount());
+        Assertions.assertEquals(fileList.size(), this.rupsController.getOpenedCount());
     }
 }

@@ -42,12 +42,11 @@
  */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class DebugViewTest {
 
     @Test
@@ -57,7 +56,7 @@ public class DebugViewTest {
         new DebugView.UpdateTextPaneTask(expected).run();
         String actual = DebugView.getInstance().getTextArea().getText();
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -72,6 +71,6 @@ public class DebugViewTest {
 
         String actual = DebugView.getInstance().getTextArea().getText();
 
-        Assert.assertTrue(actual.contains(Language.ERROR_TOO_MANY_OUTPUT.getString()));
+        Assertions.assertTrue(actual.contains(Language.ERROR_TOO_MANY_OUTPUT.getString()));
     }
 }
