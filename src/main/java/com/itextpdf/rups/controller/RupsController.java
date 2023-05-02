@@ -51,8 +51,11 @@ import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsTabbedPane;
 
+import javax.swing.event.SwingPropertyChangeSupport;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
@@ -68,6 +71,8 @@ public class RupsController extends Observable
 
     private final Dimension dimension;
 
+    private final PropertyChangeSupport propertyChangeSupport;
+
     /**
      * Constructs the GUI components of the RUPS application.
      *
@@ -78,6 +83,8 @@ public class RupsController extends Observable
         this.rupsTabbedPane = rupsTabbedPane;
 
         this.dimension = dimension;
+
+        this.propertyChangeSupport = new SwingPropertyChangeSupport(this);
     }
 
     /**
@@ -121,9 +128,10 @@ public class RupsController extends Observable
 
     @Override
     public final void closeCurrentFile() {
+        PdfFile lastFile = this.rupsTabbedPane.getCurrentFile();
         final boolean lastOne = this.rupsTabbedPane.closeCurrentFile();
         if (lastOne) {
-            this.update(this, new AllFilesClosedEvent());
+            this.propertyChangeSupport.firePropertyChange("ALL_FILES_CLOSED", lastFile, null);
         }
     }
 
@@ -142,6 +150,15 @@ public class RupsController extends Observable
 
             this.rupsTabbedPane.openNewFile(file, this.dimension, false);
             this.update(this, new OpenFileEvent(file));
+            this.propertyChangeSupport.firePropertyChange("FILE_LOADED", null, file);
         }
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+        this.propertyChangeSupport.addPropertyChangeListener(propertyChangeListener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+        this.propertyChangeSupport.removePropertyChangeListener(propertyChangeListener);
     }
 }

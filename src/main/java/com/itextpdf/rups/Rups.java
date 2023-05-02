@@ -46,10 +46,7 @@ import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.RupsDropTarget;
-import com.itextpdf.rups.view.RupsMenuBar;
-import com.itextpdf.rups.view.RupsTabbedPane;
+import com.itextpdf.rups.view.*;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
@@ -87,7 +84,7 @@ public class Rups {
             UIManager.setLookAndFeel(RupsConfiguration.INSTANCE.getLookAndFeel());
         } catch (
                 ClassNotFoundException | InstantiationException |
-                        IllegalAccessException | UnsupportedLookAndFeelException e) {
+                IllegalAccessException | UnsupportedLookAndFeelException e) {
             LoggerHelper.error(Language.ERROR_LOOK_AND_FEEL.getString(), e, Rups.class);
         }
     }
@@ -100,21 +97,27 @@ public class Rups {
 
         // title bar
         frame.setTitle(
-                String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion()));
+                String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion())
+        );
         frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(RupsConfiguration.INSTANCE.getCloseOperation());
 
         final RupsTabbedPane rupsTabbedPane = new RupsTabbedPane();
         final RupsController rupsController = new RupsController(screen, rupsTabbedPane);
-        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
-        rupsController.addObserver(rupsMenuBar);
+        configureMenuBar(rupsController, frame);
 
         frame.setDropTarget(new RupsDropTarget(rupsController));
-        frame.setJMenuBar(rupsMenuBar);
 
         frame.getContentPane().add(rupsController.getMasterComponent(), BorderLayout.CENTER);
         frame.setVisible(true);
 
         return rupsController;
+    }
+
+    private static void configureMenuBar(final RupsController rupsController, JFrame frame) {
+        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
+        final RupsMenuBarChangeListener rupsMenuBarChangeListener = new RupsMenuBarChangeListener(rupsMenuBar);
+        rupsController.addPropertyChangeListener(rupsMenuBarChangeListener);
+        frame.setJMenuBar(rupsMenuBar);
     }
 }
