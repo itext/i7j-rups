@@ -109,9 +109,9 @@ public class Rups {
         final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
         rupsController.addObserver(rupsMenuBar);
 
-        frame.setDropTarget(new RupsDropTarget(rupsController));
         frame.setJMenuBar(rupsMenuBar);
 
+        frame.getContentPane().setDropTarget(new RupsDropTarget(rupsController));
         frame.getContentPane().add(rupsController.getMasterComponent(), BorderLayout.CENTER);
         frame.setVisible(true);
 
