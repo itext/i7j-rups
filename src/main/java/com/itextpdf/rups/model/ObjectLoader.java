@@ -48,18 +48,16 @@ import com.itextpdf.rups.view.Language;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Observer;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 /**
  * Loads the necessary iText PDF objects in Background.
  */
-public class ObjectLoader extends BackgroundTask {
+public class ObjectLoader extends SwingWorker<Void, Void> {
     /**
      * This is the object that wait for task to complete.
      */
     protected Observer observer;
-
-    private PropertyChangeSupport propertyChangeSupport;
     /**
      * RUPS's PdfFile object.
      */
@@ -92,7 +90,6 @@ public class ObjectLoader extends BackgroundTask {
         this.file = file;
         this.loaderName = loaderName;
         this.progress = progress;
-        this.propertyChangeSupport = new PropertyChangeSupport(this);
     }
 
     /**
@@ -132,11 +129,8 @@ public class ObjectLoader extends BackgroundTask {
         return loaderName;
     }
 
-    /**
-     * @see BackgroundTask#doTask()
-     */
     @Override
-    public void doTask() {
+    public Void doInBackground() {
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
         SwingUtilities.invokeLater(() -> {
@@ -149,17 +143,15 @@ public class ObjectLoader extends BackgroundTask {
         SwingUtilities.invokeLater(() -> progress.setTotal(0));
         nodes = new TreeNodeFactory(objects);
         SwingUtilities.invokeLater(() -> progress.setMessage(Language.GUI_UPDATING.getString()));
-    }
 
-    public void addPropertyChangeListener(PropertyChangeListener propertyChangeListener) {
-        this.propertyChangeSupport.addPropertyChangeListener(propertyChangeListener);
+        return null;
     }
 
     @Override
-    public void finished() {
+    public void done() {
         try {
             observer.update(null, new PostOpenDocumentEvent(this));
-            this.propertyChangeSupport.firePropertyChange("FILE_OPEN_POST", null, null);
+            this.firePropertyChange("FILE_OPEN_POST", null, null);
         } catch (Exception ex) {
             progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());
