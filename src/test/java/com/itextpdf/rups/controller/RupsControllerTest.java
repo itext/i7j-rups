@@ -92,7 +92,6 @@ public class RupsControllerTest {
         FileOpenChangeListener openChangeListener = new FileOpenChangeListener(rupsController);
         openChangeListener.propertyChange(new PropertyChangeEvent(rupsController, "FILE_OPEN", null, new File("")));
 
-        rupsController.update(null, new OpenFileEvent(new File("test.pdf")));
         Assertions.assertTrue(rupsTabbedPane.opened);
         Assertions.assertFalse(rupsTabbedPane.saved);
         Assertions.assertFalse(rupsTabbedPane.closed);

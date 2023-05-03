@@ -202,7 +202,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            controller.update(null, new NewIndirectObjectEvent());
+            controller.update(new NewIndirectObjectEvent());
         }
     }
 }

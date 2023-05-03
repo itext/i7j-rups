@@ -45,6 +45,8 @@ package com.itextpdf.rups.model;
 import com.itextpdf.rups.event.PostOpenDocumentEvent;
 import com.itextpdf.rups.view.Language;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Observer;
 import javax.swing.SwingUtilities;
 
@@ -56,6 +58,8 @@ public class ObjectLoader extends BackgroundTask {
      * This is the object that wait for task to complete.
      */
     protected Observer observer;
+
+    private PropertyChangeSupport propertyChangeSupport;
     /**
      * RUPS's PdfFile object.
      */
@@ -88,6 +92,7 @@ public class ObjectLoader extends BackgroundTask {
         this.file = file;
         this.loaderName = loaderName;
         this.progress = progress;
+        this.propertyChangeSupport = new PropertyChangeSupport(this);
     }
 
     /**
@@ -146,10 +151,15 @@ public class ObjectLoader extends BackgroundTask {
         SwingUtilities.invokeLater(() -> progress.setMessage(Language.GUI_UPDATING.getString()));
     }
 
+    public void addPropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+        this.propertyChangeSupport.addPropertyChangeListener(propertyChangeListener);
+    }
+
     @Override
     public void finished() {
         try {
             observer.update(null, new PostOpenDocumentEvent(this));
+            this.propertyChangeSupport.firePropertyChange("FILE_OPEN_POST", null, null);
         } catch (Exception ex) {
             progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());

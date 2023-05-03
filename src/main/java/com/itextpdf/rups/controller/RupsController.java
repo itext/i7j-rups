@@ -65,7 +65,7 @@ import java.util.Observer;
  * the RUPS application: the menu bar, the panels,...
  */
 public class RupsController extends Observable
-        implements Observer, IRupsController {
+        implements IRupsController {
 
     private final RupsTabbedPane rupsTabbedPane;
 
@@ -97,22 +97,9 @@ public class RupsController extends Observable
         return rupsTabbedPane.getJTabbedPane();
     }
 
-    @Override
-    public final void update(Observable o, Object arg) {
-        //Events that have come from non observable classes: ObjectLoader and FileChooserAction
-        if (o == null && arg instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                default:
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
-            }
-        } else {
-            setChanged();
-            super.notifyObservers(arg);
-        }
+    public final void update(Object arg) {
+        setChanged();
+        super.notifyObservers(arg);
     }
 
     @Override
@@ -142,7 +129,7 @@ public class RupsController extends Observable
             }
 
             this.rupsTabbedPane.openNewFile(file, this.dimension, false);
-            this.update(this, new OpenFileEvent(file));
+            this.propertyChangeSupport.firePropertyChange("FILE_OPEN", null, file);
             this.propertyChangeSupport.firePropertyChange("FILE_LOADED", null, file);
         }
     }
