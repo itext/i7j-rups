@@ -253,7 +253,7 @@ public class RupsInstanceController extends Observable
 
             JOptionPane.showMessageDialog(masterComponent, Language.SAVE_SUCCESS.getString(),
                     Language.DIALOG.getString(), JOptionPane.INFORMATION_MESSAGE);
-            loadFile(file, false);
+            loadFile(localFile, false);
         } catch (PdfException | IOException | com.itextpdf.io.exceptions.IOException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), Language.DIALOG.getString(),
                     JOptionPane.ERROR_MESSAGE);
