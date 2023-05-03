@@ -63,7 +63,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-public class RupsMenuBar extends JMenuBar implements Observer {
+public class RupsMenuBar extends JMenuBar {
     /**
      * The action needed to open a file.
      */
@@ -149,26 +149,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                 new MessageAction(ITextCoreProductData.getInstance().getVersion()));
         add(help);
         enableItems(false);
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof RupsController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.ALL_FILES_CLOSED:
-                    enableItems(false);
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                case RupsEvent.OPEN_FILE_EVENT:
-                    enableItems(true);
-                    break;
-                case RupsEvent.ROOT_NODE_CLICKED_EVENT:
-                    fileOpenAction.actionPerformed(null);
-            }
-        }
     }
 
     /**
