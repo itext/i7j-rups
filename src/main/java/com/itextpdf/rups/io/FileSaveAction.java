@@ -55,12 +55,11 @@ public class FileSaveAction extends FileChooserAction {
     /**
      * Creates a new file chooser action.
      *
-     * @param observer the object waiting for you to select file
      * @param filter   a filter to apply when browsing
      * @param parent   a parent Component for chooser dialog
      */
-    public FileSaveAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, Language.MENU_BAR_SAVE_AS.getString(), filter, parent);
+    public FileSaveAction(FileFilter filter, Component parent) {
+        super(Language.MENU_BAR_SAVE_AS.getString(), filter, parent);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class FileSaveAction extends FileChooserAction {
     }
 
     @Override
-    protected RupsEvent getEvent() {
-        return new SaveToFileEvent(getFile());
+    protected String getEvent() {
+        return "FILE_SAVED";
     }
 }

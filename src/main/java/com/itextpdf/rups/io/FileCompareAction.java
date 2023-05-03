@@ -56,12 +56,11 @@ public class FileCompareAction extends FileChooserAction {
     /**
      * Creates a new file chooser action.
      *
-     * @param observer the object waiting for you to select file
      * @param filter   a filter to apply when browsing
      * @param parent   a parent Component for chooser dialog
      */
-    public FileCompareAction(Observer observer, FileFilter filter, Component parent) {
-        super(observer, Language.COMPARE_WITH.getString(), filter, parent);
+    public FileCompareAction(FileFilter filter, Component parent) {
+        super(Language.COMPARE_WITH.getString(), filter, parent);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class FileCompareAction extends FileChooserAction {
     }
 
     @Override
-    protected RupsEvent getEvent() {
-        return new CompareWithFileEvent(getFile());
+    protected String getEvent() {
+        return "FILE_COMPARE";
     }
 }

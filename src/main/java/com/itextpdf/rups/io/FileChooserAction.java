@@ -60,10 +60,6 @@ import java.util.Observer;
 public abstract class FileChooserAction extends AbstractAction {
 
     /**
-     * An object that is expecting the result of the file chooser action.
-     */
-    protected Observer observer;
-    /**
      * A file filter to apply when browsing for a file.
      */
     protected FileFilter filter;
@@ -83,14 +79,12 @@ public abstract class FileChooserAction extends AbstractAction {
     /**
      * Creates a new file chooser action.
      *
-     * @param observer the object waiting for you to select file
      * @param caption  a description for the action
      * @param filter   a filter to apply when browsing
      * @param parent   a parent Component for chooser dialog
      */
-    public FileChooserAction(Observer observer, String caption, FileFilter filter, Component parent) {
+    public FileChooserAction(String caption, FileFilter filter, Component parent) {
         super(caption);
-        this.observer = observer;
         this.filter = filter;
         this.parent = parent;
     }
@@ -119,11 +113,12 @@ public abstract class FileChooserAction extends AbstractAction {
         if (okCancel == JFileChooser.APPROVE_OPTION) {
             file = fileChooser.getSelectedFile();
             lastSelectedFolder = fileChooser.getCurrentDirectory();
-            observer.update(null, getEvent());
+//            observer.update(null, getEvent());
+            firePropertyChange(getEvent(), null, getFile());
         }
     }
 
     protected abstract int showDialog();
 
-    protected abstract RupsEvent getEvent();
+    protected abstract String getEvent();
 }

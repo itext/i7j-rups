@@ -103,17 +103,6 @@ public class RupsController extends Observable
         if (o == null && arg instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) arg;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    this.closeCurrentFile();
-                    break;
-                case RupsEvent.OPEN_FILE_EVENT:
-                    this.openNewFile((File) event.getContent());
-                    break;
-                case RupsEvent.COMPARE_WITH_FILE_EVENT:
-                    break;
-                case RupsEvent.SAVE_TO_FILE_EVENT:
-                    this.rupsTabbedPane.saveCurrentFile((File) event.getContent());
-                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                 default:
                     setChanged();
@@ -133,6 +122,10 @@ public class RupsController extends Observable
         if (lastOne) {
             this.propertyChangeSupport.firePropertyChange("ALL_FILES_CLOSED", lastFile, null);
         }
+    }
+
+    public final void saveCurrentFile(File saveLocation) {
+        this.rupsTabbedPane.saveCurrentFile(saveLocation);
     }
 
     @Override
