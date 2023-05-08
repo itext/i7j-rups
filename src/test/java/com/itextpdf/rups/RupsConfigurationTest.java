@@ -128,7 +128,7 @@ public class RupsConfigurationTest {
         RupsConfiguration.INSTANCE.setLookAndFeel(laf);
         RupsConfiguration.INSTANCE.saveConfiguration();
         String lookAndFeel = RupsConfiguration.INSTANCE.getLookAndFeel();
-        Assertions.assertTrue(lookAndFeel.contains("javax.swing.plaf") || lookAndFeel.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"));
+        Assertions.assertTrue(lookAndFeel.contains("javax.swing.plaf") || lookAndFeel.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel") || lookAndFeel.equals("com.apple.laf.AquaLookAndFeel"));
     }
 
     @Test
