@@ -244,52 +244,10 @@
           </archive>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M7</version>
-        <dependencies>
-          <!-- https://mvnrepository.com/artifact/org.apache.maven.surefire/surefire-api -->
-          <dependency>
-            <groupId>org.apache.maven.surefire</groupId>
-            <artifactId>surefire-api</artifactId>
-            <version>3.0.0-M7</version>
-            <type>maven-plugin</type>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <!--          <useSystemClassLoader>false</useSystemClassLoader>-->
-          <!--          <forkCount>6</forkCount>-->
-          <!--          <reuseForks>true</reuseForks>-->
-          <reportsDirectory>target/surefire-reports-${surefire.forkNumber}</reportsDirectory>
-          <systemPropertyVariables />
-          <includes>
-            <include>**/*Test.java</include>
-          </includes>
-          <argLine>--add-exports=java.desktop/java.awt=ALL-UNNAMED
-            --add-exports=java.desktop/java.awt.peer=ALL-UNNAMED
-            --add-exports=java.desktop/sun.awt.image=ALL-UNNAMED
-            --add-exports=java.desktop/sun.java2d=ALL-UNNAMED
-            --add-exports=java.desktop/java.awt.dnd.peer=ALL-UNNAMED
-            --add-exports=java.desktop/sun.awt=ALL-UNNAMED
-            --add-exports=java.desktop/sun.awt.event=ALL-UNNAMED
-            --add-exports=java.desktop/sun.awt.datatransfer=ALL-UNNAMED
-            --add-exports=java.base/sun.security.action=ALL-UNNAMED
-            --add-opens=java.base/java.util=ALL-UNNAMED
-            --add-opens=java.desktop/java.awt=ALL-UNNAMED
-            --add-opens=java.desktop/sun.java2d=ALL-UNNAMED
-            --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
-            ${argLine}</argLine>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
   <profiles>
-    <profile>
-      <id>test</id>
-      <properties />
-    </profile>
     <profile>
       <id>qa</id>
       <build>
