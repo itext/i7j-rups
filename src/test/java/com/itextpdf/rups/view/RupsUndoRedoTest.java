@@ -46,6 +46,7 @@ import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.uispec4j.Key;
 import org.uispec4j.Panel;
@@ -57,6 +58,8 @@ import org.uispec4j.Window;
 import org.uispec4j.interception.WindowHandler;
 import org.uispec4j.interception.WindowInterceptor;
 
+@Tag("Integration")
+@Tag("GUI")
 public class RupsUndoRedoTest extends RupsWindowTest {
 
     private static final String INPUT_FILE = "src/test/resources/com/itextpdf/rups/controller/hello_world.pdf";
@@ -68,6 +71,9 @@ public class RupsUndoRedoTest extends RupsWindowTest {
     private static final String MODIFICATION_KEY = "/Producer";
     private static final String TEST_VALUE = "(Test)";
 
+    public RupsUndoRedoTest(){
+        super("Undo/Redo interaction Test");
+    }
     private void validateInitialArray(Table infoArray) {
         Assertions.assertTrue(infoArray.getHeader().contentEquals("Array", "").isTrue(), "Table Header identifies the Content as an Array: ");
         Assertions.assertTrue(infoArray.rowCountEquals(3).isTrue(), "Table is 3 Cells Tall: ");

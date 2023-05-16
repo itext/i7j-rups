@@ -43,8 +43,6 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsLauncher;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.Tag;
 import org.uispec4j.UISpec4J;
 import org.uispec4j.UISpecAdapter;
@@ -69,9 +67,10 @@ public abstract class RupsWindowTest{
         UISpec4J.init();
     }
 
-    protected RupsWindowTest() {
+    public RupsWindowTest() {
+        this("Window Test");
     }
-    protected RupsWindowTest(String testName) {
+    public RupsWindowTest(String testName) {
     }
 
     public void setAdapter(UISpecAdapter adapter) {
