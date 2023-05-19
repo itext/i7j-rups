@@ -42,13 +42,18 @@
  */
 package com.itextpdf.rups.view.itext.treenodes;
 
+import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.kernel.pdf.PdfTextArray;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.shims.RupsPdfArray;
+import com.itextpdf.rups.shims.RupsPdfDictionary;
 import com.itextpdf.rups.shims.RupsPdfString;
+import com.itextpdf.rups.shims.RupsPdfTextArray;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
@@ -111,9 +116,15 @@ public class PdfObjectTreeNode extends IconTreeNode {
                 break;
             case PdfObject.ARRAY:
                 icon = IconFetcher.getIcon(ARRAY_ICON);
+                if (object instanceof PdfTextArray) {
+                    this.object = new RupsPdfTextArray((PdfTextArray) object);
+                } else if (object instanceof PdfArray) {
+                    this.object = new RupsPdfArray((PdfArray) object);
+                }
                 break;
             case PdfObject.DICTIONARY:
                 icon = IconFetcher.getIcon(DICTIONARY_ICON);
+                this.object = new RupsPdfDictionary((PdfDictionary) object);
                 break;
             case PdfObject.STREAM:
                 icon = IconFetcher.getIcon(STREAM_ICON);
