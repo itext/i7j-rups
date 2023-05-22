@@ -117,8 +117,10 @@ public class RupsPdfArray extends PdfArray {
         string.append("[");
         for (PdfObject entry : original) {
             string.append(RupsPdfArray.GetEntryString(entry));
+            if(entry.isIndirectReference()) {
+                string.append(" ");
+            }
         }
-        string.append(" ");
         string.append("]");
         return string.toString();
     }
