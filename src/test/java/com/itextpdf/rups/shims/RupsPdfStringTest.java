@@ -1,18 +1,19 @@
 package com.itextpdf.rups.shims;
 
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import com.itextpdf.kernel.pdf.PdfString;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
+@Tag("String")
 public class RupsPdfStringTest {
 
     @Test
     public void toStringBasicTest() {
-        RupsPdfString pdfString = new RupsPdfString("Test");
-
-        Assert.assertEquals("String is () Delimited.", "(Test)", pdfString.toString());
+        PdfString initialString = new PdfString("Test");
+        RupsPdfString pdfString = new RupsPdfString(initialString);
+        Assertions.assertEquals("(Test)", pdfString.toString(), "String is () Delimited.");
     }
 
     @Test
@@ -24,39 +25,45 @@ public class RupsPdfStringTest {
         }
         hexString.append(">");
 
-        RupsPdfString pdfString = new RupsPdfString(hexArray);
-        pdfString.setHexWriting(true);
+        PdfString initialString = new PdfString(hexArray);
+        initialString.setHexWriting(true);
 
-        Assert.assertEquals("String is <> Delimited.", hexString.toString(), pdfString.toString());
+        RupsPdfString pdfString = new RupsPdfString(initialString);
+
+        Assertions.assertEquals("<Test>", pdfString.toString(), "String is <> Delimited.");
     }
 
     @Test
     public void toStringBalancedTest(){
         String balanced = "Test (of paretheses)";
-        RupsPdfString pdfString = new RupsPdfString(balanced);
-        Assert.assertEquals("Balanced parens are escaped:", "(Test \\(of paretheses\\))", pdfString.toString());
+        PdfString initialString = new PdfString(balanced);
+        RupsPdfString pdfString = new RupsPdfString(initialString);
+        Assertions.assertEquals("(Test \\(of paretheses\\))", pdfString.toString(), "Balanced parens are escaped:");
         // Note: This is optional, but performed this way in iText to avoid too much overhead evaluating the balance of symbols.
     }
 
     @Test
     public void toStringUnbalancedTest() {
         String unbalanced = "Test :-)";
-        RupsPdfString pdfString = new RupsPdfString(unbalanced);
-        Assert.assertEquals("Unbalanced parens are escaped:", "(Test :-\\))", pdfString.toString());
+        PdfString initialString = new PdfString(unbalanced);
+        RupsPdfString pdfString = new RupsPdfString(initialString);
+        Assertions.assertEquals("(Test :-\\))", pdfString.toString(), "Unbalanced parens are escaped:");
     }
 
     @Test
     public void toStringUnbalancedTest_Two() {
         String unbalanced_two = ")Test :-(";
-        RupsPdfString pdfString_two = new RupsPdfString(unbalanced_two);
-        Assert.assertEquals("Unbalanced parens are escaped:", "(\\)Test :-\\()", pdfString_two.toString());
+        PdfString initialString = new PdfString(unbalanced_two);
+        RupsPdfString pdfString_two = new RupsPdfString(initialString);
+        Assertions.assertEquals("(\\)Test :-\\()", pdfString_two.toString(), "Unbalanced parens are escaped:");
     }
 
     @Test
     public void toStringUnbalancedTest_Three(){
         String unbalanced_three = "@<----(( Robin Hood Test";
-        RupsPdfString pdfString_three = new RupsPdfString(unbalanced_three);
-        Assert.assertEquals("Unbalanced parens are escaped:", "(@<----\\(\\( Robin Hood Test)", pdfString_three.toString());
+        PdfString initialString = new PdfString(unbalanced_three);
+        RupsPdfString pdfString_three = new RupsPdfString(initialString);
+        Assertions.assertEquals("(@<----\\(\\( Robin Hood Test)", pdfString_three.toString(), "Unbalanced parens are escaped:");
     }
 
 }
