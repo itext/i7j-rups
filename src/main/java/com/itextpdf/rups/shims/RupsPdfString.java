@@ -13,14 +13,6 @@ public class RupsPdfString extends PdfString {
         super(value, encoding);
     }
 
-    public RupsPdfString(String value) {
-        super(value);
-    }
-
-    public RupsPdfString(byte[] content) {
-        super(content);
-    }
-
     public RupsPdfString(PdfString original){
         super(original.getValueBytes());
         this.original = original;
