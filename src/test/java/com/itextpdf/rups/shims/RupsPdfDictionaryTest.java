@@ -43,6 +43,68 @@ public class RupsPdfDictionaryTest {
         Assertions.assertEquals("<</KeyOne (ValueOne)/KeyTwo (ValueTwo)>>", pdfDictionary.toString(), "PDF Dictionary fails to Serialize correctly.");
     }
     @Test
+    public void HexStringDictionaryTest(){
+        PdfDictionary initialDict = new PdfDictionary();
+        PdfName initialKeyOne = new PdfName("KeyOne");
+        byte[] hexArrayOne = "ValueOne".getBytes();
+        PdfString initialValueOne = new PdfString(hexArrayOne);
+        initialValueOne.setHexWriting(true);
+        PdfName initialKeyTwo = new PdfName("KeyTwo");
+        byte[] hexArrayTwo = "ValueTwo".getBytes();
+        PdfString initialValueTwo = new PdfString(hexArrayTwo);
+        initialValueTwo.setHexWriting(true);
+
+        initialDict.put(initialKeyOne, initialValueOne);
+        initialDict.put(initialKeyTwo, initialValueTwo);
+
+        String hexStringOne = "<";
+        for (byte b: hexArrayOne)
+            hexStringOne = hexStringOne.concat(Integer.toHexString(b));
+        hexStringOne = hexStringOne.concat(">");
+
+        String hexStringTwo = "<";
+        for (byte b: hexArrayTwo)
+            hexStringTwo = hexStringTwo.concat(Integer.toHexString(b));
+        hexStringTwo = hexStringTwo.concat(">");
+
+        RupsPdfDictionary pdfDictionary = new RupsPdfDictionary(initialDict);
+
+        Assertions.assertEquals(String.format("<</KeyOne %1$s/KeyTwo %2$s>>", hexStringOne, hexStringTwo), pdfDictionary.toString(), "PDF Dictionary fails to Serialize correctly.");
+    }
+    @Test
+    public void HexStringArrayDictionaryTest(){
+        PdfDictionary initialDict = new PdfDictionary();
+        PdfArray initialValue = new PdfArray();
+
+        PdfName initialKeyOne = new PdfName("KeyOne");
+
+        byte[] hexArrayOne = "ValueOne".getBytes();
+        PdfString hexValueOne = new PdfString(hexArrayOne);
+        hexValueOne.setHexWriting(true);
+        initialValue.add(hexValueOne);
+
+        byte[] hexArrayTwo = "ValueTwo".getBytes();
+        PdfString hexValueTwo = new PdfString(hexArrayTwo);
+        hexValueTwo.setHexWriting(true);
+        initialValue.add(hexValueTwo);
+
+
+        initialDict.put(initialKeyOne, initialValue);
+
+        String hexStringOne = "";
+        for (byte b: hexArrayOne)
+            hexStringOne = hexStringOne.concat(Integer.toHexString(b));
+
+        String hexStringTwo = "";
+        for (byte b: hexArrayTwo)
+            hexStringTwo = hexStringTwo.concat(Integer.toHexString(b));
+
+        RupsPdfDictionary pdfDictionary = new RupsPdfDictionary(initialDict);
+
+        Assertions.assertEquals(String.format("<</KeyOne [<%1$s><%2$s>]>>", hexStringOne, hexStringTwo), pdfDictionary.toString(), "PDF Dictionary fails to Serialize correctly.");
+    }
+
+    @Test
     public void NameAndNameArrayDictionaryTest(){
         PdfDictionary initialDict = new PdfDictionary();
         PdfArray subArray = new PdfArray();
