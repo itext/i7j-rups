@@ -268,10 +268,17 @@ public class RupsPdfString extends PdfString {
     @Override
     public String toString() {
         String wrapper;
-        if(isHexWriting())
+        String stringValue;
+        if(isHexWriting()) {
             wrapper = "<%s>";
-        else
+            stringValue = "";
+            for (byte b: getValueBytes()){
+                stringValue = stringValue.concat(Integer.toHexString(b));
+            }
+        } else {
             wrapper = "(%s)";
-        return String.format(wrapper, new String(encodeBytes(getValueBytes())));
+            stringValue = new String(encodeBytes(getValueBytes()));
+        }
+        return String.format(wrapper, stringValue);
     }
 }

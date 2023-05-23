@@ -30,7 +30,7 @@ public class RupsPdfStringTest {
 
         RupsPdfString pdfString = new RupsPdfString(initialString);
 
-        Assertions.assertEquals("<Test>", pdfString.toString(), "String is <> Delimited.");
+        Assertions.assertEquals(hexString.toString(), pdfString.toString(), "String is <> Delimited.");
     }
 
     @Test
