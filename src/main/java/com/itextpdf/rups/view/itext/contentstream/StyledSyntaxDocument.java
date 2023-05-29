@@ -73,6 +73,8 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
     private static final int INLINE_IMAGE_EXPECTED_TOKEN_COUNT = 2;
 
+    private static final String INDENTATION_PREFIX = "    ";
+
     /**
      * Highlight operands according to their operator.
      */
@@ -147,8 +149,22 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
         final PdfCanvasParser ps = ContentStreamHandlingUtils.createCanvasParserFor(streamContent);
         try {
+            int indentLevel = 0;
             while (!ps.parse(tokens).isEmpty()) {
+                final String operator = (tokens.get(tokens.size() - 1)).toString();
+                if (operator.equals("Q") || operator.equals("ET")) {
+                    // Do not let indentation become negative
+                    if (indentLevel > 0) {
+                        indentLevel--;
+                    }
+                }
+                // Add indent, but only to the display
+                appendText(INDENTATION_PREFIX.repeat(indentLevel),
+                        ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
                 appendGraphicsOperator(tokens);
+                if (operator.equals("q") || operator.equals("BT")) {
+                    indentLevel++;
+                }
             }
         } catch (IOException | BadLocationException e) {
             throw new ITextException(Language.ERROR_BUILDING_CONTENT_STREAM.getString(), e);

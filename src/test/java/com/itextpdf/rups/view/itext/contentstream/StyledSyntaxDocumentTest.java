@@ -282,8 +282,8 @@ public class StyledSyntaxDocumentTest {
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
-        int start = theText.indexOf("\n({486");
-        doc.replace(start, 30, "\n(Hello World!) ", null);
+        int start = theText.indexOf("({486");
+        doc.replace(start, 29, "(Hello World!) ", null);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
