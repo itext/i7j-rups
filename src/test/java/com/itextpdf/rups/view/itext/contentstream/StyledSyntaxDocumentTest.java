@@ -59,6 +59,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @Tag("UnitTest")
 public class StyledSyntaxDocumentTest {
@@ -282,8 +284,8 @@ public class StyledSyntaxDocumentTest {
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
-        int start = theText.indexOf("\n({486");
-        doc.replace(start, 30, "\n(Hello World!) ", null);
+        int start = theText.indexOf("({486");
+        doc.replace(start, 29, "(Hello World!) ", null);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new ContentStreamWriter(baos).write(doc);
@@ -610,5 +612,23 @@ public class StyledSyntaxDocumentTest {
 
         int start = doc.getText(0, doc.getLength()).indexOf("Tj");
         Assertions.assertNull(doc.getToolTipAt(start));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "baseline.cmp, baselineIndented.cmp",
+            "nested.cmp, nestedIndented.cmp",
+            "charprocWithInlineImg.cmp, charprocWithInlineImgIndented.cmp",
+            "charprocWithCorruptInlineImg.cmp, charprocWithCorruptInlineImgIndented.cmp",
+            "paths.cmp, pathsIndented.cmp",
+    })
+    void testIndentation(String inputFile, String expectedOutputFile) throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, inputFile));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = Files.readString(Paths.get(SRC_DIR, expectedOutputFile), StandardCharsets.ISO_8859_1);
+        Assertions.assertEquals(expectedResult, output);
     }
 }
