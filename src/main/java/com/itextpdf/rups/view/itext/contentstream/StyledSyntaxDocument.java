@@ -158,10 +158,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
                         indentLevel--;
                     }
                 }
-                // Add indent, but only to the display
-                appendText(INDENTATION_PREFIX.repeat(indentLevel),
-                        ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
-                appendGraphicsOperator(tokens);
+                appendGraphicsOperator(tokens, indentLevel);
                 if (operator.equals("q") || operator.equals("BT")) {
                     indentLevel++;
                 }
@@ -221,17 +218,31 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      * @param tokens the representation of the graphics operator with its operands
      * @throws BadLocationException if an error occurs while modifying the document
      */
-    protected void appendGraphicsOperator(java.util.List<PdfObject> tokens) throws BadLocationException {
+    protected  void appendGraphicsOperator(java.util.List<PdfObject> tokens) throws BadLocationException {
+        appendGraphicsOperator(tokens, 0);
+    }
 
+    /**
+     * Append graphics operators to the document, indenting by specified amount.
+     * A graphics operator is specified as a list of {@link PdfObject}s,
+     * where the last element of the list is the operator literal,
+     * and the preceding elements represent the operands.
+     *
+     * @param tokens the representation of the graphics operator with its operands
+     * @param indentLevel the number of levels to indent the operator by when displaying
+     * @throws BadLocationException if an error occurs while modifying the document
+     */
+    protected void appendGraphicsOperator(java.util.List<PdfObject> tokens, int indentLevel) throws BadLocationException {
         // operator is at the end
         final String operator = (tokens.get(tokens.size() - 1)).toString();
         // Inline images are parsed as stream + EI
         if ("EI".equals(operator)
                 && tokens.size() == INLINE_IMAGE_EXPECTED_TOKEN_COUNT
                 && tokens.get(0) instanceof PdfStream) {
-            appendInlineImage((PdfStream) tokens.get(0));
+            appendInlineImage((PdfStream) tokens.get(0), indentLevel);
             return;
         }
+        appendDisplayOnlyIndent(indentLevel);
         final AttributeSet attributes = getStyleAttributes(operator);
         for (int i = 0; i < tokens.size() - 1; i++) {
             appendPdfObject(tokens.get(i), matchingOperands ? attributes : null);
@@ -250,35 +261,44 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     }
 
     /**
-     * Append an inline image to the content stream document.
+     * Append an inline image to the content stream document, indenting relative to
+     * the provided indent level.
      *
      * @param stm the {@link PdfStream} containing the image data
+     * @param indentLevel the base indentation level to use when displaying
      */
-    protected void appendInlineImage(final PdfStream stm) throws BadLocationException {
+    protected void appendInlineImage(final PdfStream stm, int indentLevel) throws BadLocationException {
+        appendDisplayOnlyIndent(indentLevel);
         appendText("BI\n", getStyleAttributes("BI"));
 
         for (final PdfName key : stm.keySet()) {
+            appendDisplayOnlyIndent(indentLevel + 1);
             appendPdfObject(key, null);
             appendPdfObject(stm.get(key, false), null);
             appendText("\n", null);
         }
+        appendDisplayOnlyIndent(indentLevel + 1);
         appendText("ID\n", getStyleAttributes("ID"));
 
         try {
             // inline image parser takes care of expanding abbreviations
             final BufferedImage img = new PdfImageXObject(stm).getBufferedImage();
-            insertAndRenderInlineImage(img, stm.getBytes(false));
-            appendText("\nEI\n", getStyleAttributes("EI"));
+            insertAndRenderInlineImage(img, stm.getBytes(false), indentLevel + 1);
+            appendText("\n", null);
+            appendDisplayOnlyIndent(indentLevel);
+            appendText("EI\n", getStyleAttributes("EI"));
         } catch (IOException | ITextException e) {
             LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
 
             // display error message backed by raw image data
+            appendDisplayOnlyIndent(indentLevel + 1);
             final MutableAttributeSet attrs = new SimpleAttributeSet();
             attrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, stm.getBytes(false));
             appendText(Language.ERROR_PROCESSING_IMAGE.getString(), attrs);
             // in this case we don't add extra whitespace before EI
             // since iText potentially gobbled it when it attempted to parse the
             // (corrupt?) image
+            appendDisplayOnlyIndent(indentLevel);
             appendText("EI\n", getStyleAttributes("EI"));
         }
     }
@@ -384,18 +404,24 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
         insertString(getLength(), s, attr == null ? SimpleAttributeSet.EMPTY : attr);
     }
 
+    private void appendDisplayOnlyIndent(int indentLevel) throws BadLocationException {
+        appendText(INDENTATION_PREFIX.repeat(indentLevel), ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
+    }
+
     private void appendDisplayOnlyNewline() throws BadLocationException {
         insertString(getLength(), "\n", ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
     }
 
-    private void insertAndRenderInlineImage(final BufferedImage img, byte[] rawBytes) throws BadLocationException {
+    private void insertAndRenderInlineImage(final BufferedImage img, byte[] rawBytes, int indentLevel) throws BadLocationException {
         // add the image
         final AttributeSet imageAttrs = ContentStreamStyleConstants.getImageAttributes(img, rawBytes);
+        appendDisplayOnlyIndent(indentLevel);
         insertString(getLength(), " ", imageAttrs);
         appendDisplayOnlyNewline();
 
         // add the button
         final AttributeSet buttonAttrs = ContentStreamStyleConstants.getImageSaveButtonAttributes(img);
+        appendDisplayOnlyIndent(indentLevel);
         insertString(getLength(), " ", buttonAttrs);
         appendDisplayOnlyNewline();
     }
