@@ -77,6 +77,11 @@ public final class ContentStreamStyleConstants {
     public static final Attribute HEX_EDIT = new Attribute("hex-editable");
 
     /**
+     * Content used for indentation attribute marker.
+     */
+    public static final Attribute INDENT = new Attribute("indent");
+
+    /**
      * Syntax highlight attributes for operators.
      */
     static final Map<String, AttributeSet> ATTRIBUTE_MAP = initAttributes();
@@ -97,6 +102,13 @@ public final class ContentStreamStyleConstants {
      */
     static final AttributeSet DISPLAY_ONLY_ATTRS;
 
+    /**
+     * Attribute set for content that is used to indent other content.
+     * Not reflected in the reserialised (binary) output, but
+     * unlike {@link #DISPLAY_ONLY_ATTRS} it is editable.
+     */
+    static final AttributeSet INDENT_ATTRS;
+
     static {
         final MutableAttributeSet mas = new SimpleAttributeSet();
         mas.addAttribute(StyleConstants.Foreground, Color.BLACK);
@@ -112,6 +124,11 @@ public final class ContentStreamStyleConstants {
         final MutableAttributeSet attrs = new SimpleAttributeSet();
         attrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, new byte[0]);
         DISPLAY_ONLY_ATTRS = attrs;
+
+        final MutableAttributeSet indentWhitespace = new SimpleAttributeSet();
+        indentWhitespace.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, new byte[0]);
+        indentWhitespace.addAttribute(ContentStreamStyleConstants.INDENT, Boolean.TRUE);
+        INDENT_ATTRS = indentWhitespace;
     }
 
     private ContentStreamStyleConstants() {
