@@ -611,4 +611,48 @@ public class StyledSyntaxDocumentTest {
         int start = doc.getText(0, doc.getLength()).indexOf("Tj");
         Assertions.assertNull(doc.getToolTipAt(start));
     }
+
+    @Test
+    public void testIndent() throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "baseline.cmp"));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = new String(Files.readAllBytes(Paths.get(SRC_DIR, "baselineIndented.cmp")));
+        Assertions.assertEquals(expectedResult, output);
+    }
+
+    @Test
+    public void testIndentNested() throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "nested.cmp"));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = new String(Files.readAllBytes(Paths.get(SRC_DIR, "nestedIndented.cmp")));
+        Assertions.assertEquals(expectedResult, output);
+    }
+
+    @Test
+    public void testIndentInlineImage() throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithInlineImg.cmp"));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = new String(Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithInlineImgIndented.cmp")));
+        Assertions.assertEquals(expectedResult, output);
+    }
+
+    @Test
+    public void testIndentCorruptInlineImage() throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithCorruptInlineImg.cmp"));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = new String(Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithCorruptInlineImgIndented.cmp")));
+        Assertions.assertEquals(expectedResult, output);
+    }
 }

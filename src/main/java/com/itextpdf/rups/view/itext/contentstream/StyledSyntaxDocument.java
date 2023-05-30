@@ -56,6 +56,7 @@ import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
 
+import java.util.Set;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -74,6 +75,8 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     private static final int INLINE_IMAGE_EXPECTED_TOKEN_COUNT = 2;
 
     private static final String INDENTATION_PREFIX = "    ";
+    private static final Set<String> INDENTING_OPERATORS = Set.of("BT", "q", "BMC", "BDC", "BX");
+    private static final Set<String> UNINDENTING_OPERATORS = Set.of("ET", "Q", "EMC", "EX");
 
     /**
      * Highlight operands according to their operator.
@@ -148,18 +151,16 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
         final ArrayList<PdfObject> tokens = new ArrayList<>();
 
         final PdfCanvasParser ps = ContentStreamHandlingUtils.createCanvasParserFor(streamContent);
+        int indentLevel = 0;
         try {
-            int indentLevel = 0;
             while (!ps.parse(tokens).isEmpty()) {
-                final String operator = (tokens.get(tokens.size() - 1)).toString();
-                if (operator.equals("Q") || operator.equals("ET")) {
+                String operator = (tokens.get(tokens.size() - 1)).toString();
+                if (indentLevel > 0 && UNINDENTING_OPERATORS.contains(operator)) {
                     // Do not let indentation become negative
-                    if (indentLevel > 0) {
-                        indentLevel--;
-                    }
+                    indentLevel--;
                 }
                 appendGraphicsOperator(tokens, indentLevel);
-                if (operator.equals("q") || operator.equals("BT")) {
+                if (INDENTING_OPERATORS.contains(operator)) {
                     indentLevel++;
                 }
             }
@@ -405,7 +406,8 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     }
 
     private void appendDisplayOnlyIndent(int indentLevel) throws BadLocationException {
-        appendText(INDENTATION_PREFIX.repeat(indentLevel), ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
+        insertString(getLength(), INDENTATION_PREFIX.repeat(indentLevel),
+                ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
     }
 
     private void appendDisplayOnlyNewline() throws BadLocationException {
