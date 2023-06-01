@@ -117,9 +117,9 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      * @return {@code false} if binary stream content, {@code true} otherwise
      */
     public boolean isTextual(int pos) {
-        return getCharacterElement(pos)
-                .getAttributes()
-                .getAttribute(ContentStreamStyleConstants.BINARY_CONTENT) == null;
+        AttributeSet attributes = getCharacterElement(pos).getAttributes();
+        return attributes.getAttribute(ContentStreamStyleConstants.BINARY_CONTENT) == null ||
+                attributes.getAttribute(ContentStreamStyleConstants.INDENT) != null;
     }
 
     /**
@@ -407,7 +407,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
     private void appendDisplayOnlyIndent(int indentLevel) throws BadLocationException {
         insertString(getLength(), INDENTATION_PREFIX.repeat(indentLevel),
-                ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
+                ContentStreamStyleConstants.INDENT_ATTRS);
     }
 
     private void appendDisplayOnlyNewline() throws BadLocationException {
