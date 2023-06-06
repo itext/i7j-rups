@@ -75,8 +75,9 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     private static final int INLINE_IMAGE_EXPECTED_TOKEN_COUNT = 2;
 
     private static final String INDENTATION_PREFIX = "    ";
-    private static final Set<String> INDENTING_OPERATORS = Set.of("BT", "q", "BMC", "BDC", "BX");
-    private static final Set<String> UNINDENTING_OPERATORS = Set.of("ET", "Q", "EMC", "EX");
+    private static final Set<String> INDENTING_OPERATORS = Set.of("BT", "q", "BMC", "BDC", "BX", "m", "re");
+    private static final Set<String> UNINDENTING_OPERATORS = Set.of("ET", "Q", "EMC", "EX", "b", "B", "f", "f*", "F",
+            "B*", "b*", "n", "s", "S");
 
     /**
      * Highlight operands according to their operator.
@@ -118,8 +119,8 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      */
     public boolean isTextual(int pos) {
         AttributeSet attributes = getCharacterElement(pos).getAttributes();
-        return attributes.getAttribute(ContentStreamStyleConstants.BINARY_CONTENT) == null ||
-                attributes.getAttribute(ContentStreamStyleConstants.INDENT) != null;
+        return attributes.getAttribute(ContentStreamStyleConstants.BINARY_CONTENT) == null
+                || attributes.getAttribute(ContentStreamStyleConstants.INDENT) != null;
     }
 
     /**

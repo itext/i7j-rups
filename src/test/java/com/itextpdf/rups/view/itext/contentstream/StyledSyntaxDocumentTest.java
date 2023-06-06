@@ -613,7 +613,7 @@ public class StyledSyntaxDocumentTest {
     }
 
     @Test
-    public void testIndent() throws Exception {
+    public void testIndentBaseline() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "baseline.cmp"));
         StyledSyntaxDocument doc = new StyledSyntaxDocument();
         doc.processContentStream(origBytes);
@@ -653,6 +653,17 @@ public class StyledSyntaxDocumentTest {
 
         String output = doc.getText(0, doc.getLength());
         String expectedResult = new String(Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithCorruptInlineImgIndented.cmp")));
+        Assertions.assertEquals(expectedResult, output);
+    }
+
+    @Test
+    public void testIndentPathOperators() throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "paths.cmp"));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = new String(Files.readAllBytes(Paths.get(SRC_DIR, "pathsIndented.cmp")));
         Assertions.assertEquals(expectedResult, output);
     }
 }
