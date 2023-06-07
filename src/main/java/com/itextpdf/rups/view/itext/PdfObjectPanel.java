@@ -158,7 +158,6 @@ public class PdfObjectPanel extends Observable implements Observer {
         this.undoManager = new UndoManager();
         this.undoManager.setLimit(8192);
 
-        //text.getDocument().addUndoableEditListener(undoManager);
         //TODO: Check if WHEN_IN_FOCUSED_WINDOW bleeds across open docs
         panel.registerKeyboardAction(new UndoAction(undoManager),
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -194,8 +193,6 @@ public class PdfObjectPanel extends Observable implements Observer {
      * @param node   the node's content that needs to be shown.
      * @param parser the pdf syntax parser
      */
-    // TODO: work out how to trigger this method from the controller... - Done
-    // TODO: Work out why object here, retrieves the unmodified PDFObject without the Undo updates.
     public void render(PdfObjectTreeNode node, PdfSyntaxParser parser) {
         target = node;
         final PdfObject pdfObjectClone = node.getPdfObject().clone();
@@ -243,7 +240,6 @@ public class PdfObjectPanel extends Observable implements Observer {
     }
 
     private class JTableButtonMouseListener extends MouseAdapter {
-        // TODO: Extract Table Manipulation to Method in Parent.
         public void mouseClicked(MouseEvent e) {
             final int selectedColumn = table.getSelectedColumn();
 
@@ -312,7 +308,6 @@ public class PdfObjectPanel extends Observable implements Observer {
                 return;
             }
             // TODO: Maybe abstract the PDF object used for backing the UI elements from those backing the document tree.
-//            final PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);
             RupsEvent notification = null;
             final PdfObject value;
             switch (e.getType()) {

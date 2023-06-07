@@ -50,8 +50,6 @@ import java.io.FileNotFoundException;
  * of a PDF file.
  */
 public class RupsLauncher {
-//TODO: Find out why Dependency-Check is failing after writing tests...
-//TODO: Find out why maven runs from within the IDE fail to find this class...
     /**
      * Main method. Starts the RUPS application.
      *

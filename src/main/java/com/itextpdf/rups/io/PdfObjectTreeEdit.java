@@ -76,7 +76,6 @@ public class PdfObjectTreeEdit implements UndoableEdit {
     ObjectType objectType;
     ActionType actionType;
     PdfReaderController controller;
-//    PdfObjectPanel objectPanel;
     int editType; // The type of edit, as defined by the static bytes within RupsEvent.java (Refactor to Enum?)
     PdfObjectTreeNode parent; // Parent Node
     PdfObjectTreeNode oldChild; // Child Node
@@ -86,8 +85,6 @@ public class PdfObjectTreeEdit implements UndoableEdit {
     List<UndoableEdit> addedEdits;
     boolean dead;
 
-    // TODO: Change this to fire NodeUpdateDictChildEvents instead
-    // TODO: Abstract this into separate Array and Dict subclasses? - seems messy though..
     public PdfObjectTreeEdit(PdfReaderController controller, RupsEvent editEvent) {
         this.controller = controller;
         this.addedEdits = new LinkedList<>();
@@ -193,17 +190,10 @@ public class PdfObjectTreeEdit implements UndoableEdit {
     private void updateController(RupsEvent newChild, Class<? extends Exception> exceptionClass) {
         try {
             controller.update(controller, newChild);
-            // TODO: Work out why Tree view is repainted but table view is not. <<<<<<<<< This!
-            // TODO: Work out why Tree re-rendering doesn't update the table data.
-            // TODO: Work out why Update changes aren't reflected in the tree data.
             controller.render(parent);
-//            controller.getObjectPanel().repaint();
         } catch (Exception ex) {
             ErrorDialogPane.showErrorDialog(controller.getEditorTabs().getParent(), ex);
             System.err.print(ex.getLocalizedMessage());
-//            if( ex instanceof exceptionClass.getDeclaringClass()){
-//                throw ex;
-//            }
             try {
                 throw exceptionClass.getDeclaredConstructor().newInstance(ex.getLocalizedMessage());
             } catch (Exception e) {
@@ -252,12 +242,10 @@ public class PdfObjectTreeEdit implements UndoableEdit {
                 addedEdits.get(i).redo();
             }
         } catch (CannotRedoException ex) {
-            // ErrorDialogPane.showErrorDialog( mainWindow, ex);
             ErrorDialogPane.showErrorDialog( controller.getEditorTabs().getParent(), ex);
             System.err.print(ex.getLocalizedMessage());
             throw ex;
         } catch (Exception ex) {
-            // ErrorDialogPane.showErrorDialog( mainWindow, ex);
             ErrorDialogPane.showErrorDialog( controller.getEditorTabs().getParent(), ex);
             System.err.print(ex.getLocalizedMessage());
             throw new CannotRedoException();
@@ -275,25 +263,9 @@ public class PdfObjectTreeEdit implements UndoableEdit {
         this.dead = true;
     }
 
-    // TODO: if self is Add event, accept Update eventsto the same key or index.
     @Override
     public boolean addEdit(UndoableEdit anEdit) {
         return false;
-//
-//        if (!(anEdit instanceof PdfObjectTreeEdit)) {
-//            return false;
-//        }
-//        PdfObjectTreeEdit objectTreeEdit = (PdfObjectTreeEdit) anEdit;
-//
-//        if(objectTreeEdit.parent == child){
-//            return true;
-//        }
-//
-//        if (!checkParity(objectTreeEdit)){
-//            return false;
-//        }
-//
-//        return addedEdits.add(anEdit);
     }
 
     @Override
@@ -314,13 +286,8 @@ public class PdfObjectTreeEdit implements UndoableEdit {
         return true;
     }
 
-    // TODO: Make updates significant.
     @Override
     public boolean isSignificant() {
-//        boolean significant = (!addedEdits.isEmpty())
-//                || (actionType == ActionType.ADD)
-//                || (actionType == ActionType.DELETE);
-//
         return true;
     }
 
@@ -382,10 +349,6 @@ public class PdfObjectTreeEdit implements UndoableEdit {
         if(objectTreeEdit.controller != controller){
             return false;
         }
-
-//        if(objectTreeEdit.objectPanel != objectPanel){
-//            return false;
-//        }
 
         if(objectTreeEdit.objectType != objectType){
             return false;

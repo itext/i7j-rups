@@ -176,9 +176,6 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         // Store Original Value
         Assertions.assertEquals(String.class, infoArray.getContentAt(0, 0).getClass(), "Value is a String: ");
         String originalValue = (String) infoArray.getContentAt(0, 0);
-        // Double-Click Table
-        //        infoArray.doubleClick(0, 0);
-        //        infoArray.selectCell(0, 0);
         // Change Value to "(Test)"
         infoArray.editCell(0, 0, TEST_VALUE, true);
         // Press Enter Key
@@ -271,7 +268,6 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         UNDO(infoDict);
         Assertions.assertEquals(3,pdfTree.getChildCount("Info/Dictionary"), "Dictionary Tree has 3 children: ");
         Assertions.assertEquals(4, infoDict.getRowCount(), "Table is now 4 Rows tall: ");
-//        fail("Test Not Implemented");
     }
 
     @Test
@@ -339,7 +335,6 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         Assertions.assertEquals(4, infoDict.getRowCount(), "Table is still 4 Rows tall: ");
         Assertions.assertEquals(MODIFICATION_KEY, (String) infoDict.getContentAt(2,0), "Modification Key is unchanged: ");
         Assertions.assertEquals(TEST_VALUE, (String) infoDict.getContentAt(2,1), "New Value is equal to Test Value: ");
-//        fail("Test Not Implemented");
     }
 
     @Test
@@ -350,6 +345,5 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         REDO(infoDict);
         Assertions.assertEquals(2,pdfTree.getChildCount("Info/Dictionary"), "Dictionary Tree has 2 children: ");
         Assertions.assertEquals(3, infoDict.getRowCount(), "Table is now 3 Rows tall: ");
-//        fail("Test Not Implemented");
     }
 }

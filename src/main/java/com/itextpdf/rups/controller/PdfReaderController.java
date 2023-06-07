@@ -298,7 +298,6 @@ public class PdfReaderController extends Observable implements Observer {
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
-// TODO: Work out why the PDF Object appears to be updated before it even gets to this point...
     public void update(Observable observable, Object obj) {
         if (observable != null && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
@@ -489,7 +488,6 @@ public class PdfReaderController extends Observable implements Observer {
 
     //Returns index of the added child
     public int addTreeNodeDictChild(PdfObjectTreeNode parent, PdfName key, int index, PdfObject childValue) {
-//        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance((PdfDictionary) parent.getPdfObject(), key);
         PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(childValue, key);
         return addTreeNodeChild(parent, child, index);
     }
@@ -497,8 +495,6 @@ public class PdfReaderController extends Observable implements Observer {
     //Returns index of the added child
     public int addTreeNodeArrayChild(PdfObjectTreeNode parent, int index, PdfObject child) {
         PdfArray parentArray = (PdfArray) parent.getPdfObject();
-//        if(parentArray.size() > index)
-//        PdfObject childObject = parentArray.get(index, false);
         PdfObjectTreeNode childNode = PdfObjectTreeNode.getInstance(child);
         return addTreeNodeChild(parent, childNode, index);
     }
@@ -511,12 +507,10 @@ public class PdfReaderController extends Observable implements Observer {
 
     //Returns index of the updated child
     public int updateTreeNodeArrayChild(PdfObjectTreeNode parent, int index, PdfObject child) {
-//        PdfObjectTreeNode child = PdfObjectTreeNode.getInstance(((PdfArray) parent.getPdfObject()).get(index, false));
         return updateTreeChild(parent, PdfObjectTreeNode.getInstance(child), index);
     }
 
     public int deleteTreeChild(PdfObjectTreeNode parent, int index) {
-        //TODO: Move child and controller reference to common method with RupsEvent switch for remove/add?
         parent.remove(index);
         deleteObjectChild(parent.getPdfObject(), index);
         updateObject(parent);
@@ -525,7 +519,6 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     //Returns index of the updated child
-    // TODO: Clean up and maybe move to the Wrapper class, propagating ObjectTreeNode to Object. - Nope, Wrapper is functioning more as a translation layer, keep transformation here...
     public int updateTreeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
         PdfObjectTreeNode oldChild = (PdfObjectTreeNode) parent.getChildAt(index);
         int childrenToTransfer = oldChild.getChildCount();
@@ -565,8 +558,6 @@ public class PdfReaderController extends Observable implements Observer {
             PdfDictionary parentDict = (PdfDictionary) parent.getPdfObject();
             parentDict.keySet();
         }else if(parent.isArray()){
-            // TODO: Is the TreeNode driven by the PdfObject or visa versa?
-            //  TreeNode drives the Object, but Object determines the table view...
             PdfArray parentArray = (PdfArray)parent.getPdfObject();
         }
     }
@@ -574,8 +565,6 @@ public class PdfReaderController extends Observable implements Observer {
     protected void addObjectChild(PdfObject parent, PdfObject child, PdfName key, int index){
         if (parent.isDictionary()) {
             PdfDictionary parentDict = ((PdfDictionary) parent);
-            //TODO: Fix this for Non-existent keys or redos (Index out of Bounds)
-            //TODO: Fix this MESSY BODGE! >:0
             parentDict.put(key, child);
         }else if(parent.isArray()){
             PdfArray parentArray = (PdfArray) parent;
