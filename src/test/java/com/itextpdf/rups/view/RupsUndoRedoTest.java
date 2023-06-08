@@ -124,10 +124,10 @@ public class RupsUndoRedoTest extends RupsWindowTest {
         }
         MAIN_WINDOW = getMainWindow();
 
-        // TODO: Change this to match the Maven defined Snapshot name.
-        waitUntil(MAIN_WINDOW.titleEquals(String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion())), 8000);
-        // TODO: Change this to test the panel name.
-        waitUntil(MAIN_WINDOW.getPanel(INPUT_FILE.substring(1 + INPUT_FILE.lastIndexOf('/'))).isEnabled(), 8000);
+        String windowTitle = String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion());
+        waitUntil(MAIN_WINDOW.titleEquals(windowTitle), 8000);
+        String documentPanelName = INPUT_FILE.substring(1 + INPUT_FILE.lastIndexOf('/'));
+        waitUntil(MAIN_WINDOW.getPanel(documentPanelName).isEnabled(), 8000);
         pdfTree = MAIN_WINDOW.getTree("pdfTree");
         objectPanel = MAIN_WINDOW.getPanel("PdfObjectPanel");
     }
