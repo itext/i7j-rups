@@ -254,8 +254,7 @@ public class PdfObjectTreeEdit implements UndoableEdit {
 
     @Override
     public boolean canRedo() {
-        if(!validateSelf()) return false;
-        return true;
+        return validateSelf();
     }
 
     @Override
@@ -293,29 +292,28 @@ public class PdfObjectTreeEdit implements UndoableEdit {
 
     @Override
     public String getPresentationName() {
-        String returnString;
+        StringBuilder returnString = new StringBuilder();
         switch(actionType){
             case ADD:
-                returnString = "Addition";
+                returnString.append("Addition");
             break;
             case DELETE:
-                returnString = "Removal";
+                returnString.append("Removal");
                 break;
             case UPDATE:
-                returnString = "Update";
+                returnString.append("Update");
                 break;
             default:
                 return "Error";
         }
-        returnString.concat(" of");
         switch (objectType){
             case DICT:
-                returnString.concat(" a Dict value");
+                returnString.append(" of a Dict value");
                 break;
             case ARRAY:
-                returnString.concat(" an Array value");
+                returnString.append(" of an Array value");
         }
-        return returnString;
+        return returnString.toString();
     }
 
     @Override
