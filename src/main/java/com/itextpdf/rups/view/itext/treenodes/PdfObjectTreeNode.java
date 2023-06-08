@@ -192,7 +192,6 @@ public class PdfObjectTreeNode extends IconTreeNode {
         return node;
     }
 
-    //TODO: Check if this works...
     /**
      * Creates an instance of a tree node for the object corresponding with a key in a dictionary.
      *
