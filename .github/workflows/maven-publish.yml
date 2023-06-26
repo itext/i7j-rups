@@ -28,7 +28,5 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml -Dmaven.test.skip=true # skip tests for now until I figure out how to get them to pass
 
-      - name: Publish to GitHub Packages Apache Maven
-        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Create EXE wrapper using Warp
+        run: ls;wget https://github.com/dgiagio/warp/releases/download/v0.3.0/linux-x64.warp-packer
