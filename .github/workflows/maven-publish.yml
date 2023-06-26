@@ -4,7 +4,7 @@
 name: Maven Package
 
 on:
-  commit:
+  push:
     types: [created]
 
 jobs:
