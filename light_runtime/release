@@ -1,0 +1,2 @@
+JAVA_VERSION="20.0.1"
+MODULES="java.base java.datatransfer java.xml java.prefs java.desktop java.logging java.management java.security.sasl java.naming java.transaction.xa java.sql"
