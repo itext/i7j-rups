@@ -37,8 +37,15 @@ jobs:
           ./warp-packer --arch macos-x64 --input_dir mac_bundle --exec run.sh --output "RupsLauncher";
           chmod +x "RupsLauncher";
           cp -r release/rups_app_shell.app "iText RUPS.app";
-          ls "iText RUPS.app/Contents";
           cp "RupsLauncher" "iText RUPS.app/Contents/MacOS";
           rm -rf mac_bundle;
           rm RupsLauncher;
-          ls;
+      - name: Publish to GitHub releases
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: iText\ RUPS.app
+          asset_name: iText\ RUPS.app
+          asset_content_type: application/zip
