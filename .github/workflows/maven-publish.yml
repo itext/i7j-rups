@@ -21,7 +21,6 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
       - name: Build with Maven
         run: mvn -B package --file pom.xml -Dmaven.test.skip=true # skip tests for now until I figure out how to get them to pass
@@ -35,11 +34,10 @@ jobs:
           ./warp-packer --arch macos-x64 --input_dir mac_bundle --exec run.sh --output "RupsLauncher";
           chmod +x "RupsLauncher";
           cp -r release/rups_app_shell.app "iText RUPS.app";
-          cp "RupsLauncher" "iText RUPS.app/Contents/MacOS";
+          mv "RupsLauncher" "iText RUPS.app/Contents/MacOS/RupsLauncher";
           zip -r "iText RUPS.zip" "iText RUPS.app";
           rm -rf mac_bundle;
           rm -rf "iText RUPS.app";
-          rm RupsLauncher
 
       - name: Set Release version env variable
         run: |
