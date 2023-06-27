@@ -29,12 +29,12 @@ jobs:
         run: mvn -B package --file pom.xml -Dmaven.test.skip=true # skip tests for now until I figure out how to get them to pass
 
       - name: Create EXE wrapper using Warp
-        run:
-          chmod -x release/linux-x64.warp-packer;
+        run: wget -O warp-packer https://github.com/dgiagio/warp/releases/download/v0.3.0/linux-x64.warp-packer;
+          chmod +x warp-packer;
           cp -r release/light_runtime mac_bundle/jre;
           jarfile="$(ls target/itext-rups-*SNAPSHOT.jar)";
           cp $jarfile mac_bundle/app.jar;
-          ./release/linux-x64.warp-packer --arch macos-x64 --input_dir mac_bundle --exec run.sh --output "RupsLauncher";
+          ./warp-packer --arch macos-x64 --input_dir mac_bundle --exec run.sh --output "RupsLauncher";
           chmod +x "RupsLauncher";
           cp -r release/rups_app_shell.app "iText RUPS.app";
           mv "RupsLauncher" "iText RUPS.app/Contents/MacOS/RupsLauncher";
