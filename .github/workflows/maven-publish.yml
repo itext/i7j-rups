@@ -37,6 +37,8 @@ jobs:
           ./warp-packer --arch macos-x64 --input_dir mac_bundle --exec run.sh --output "RupsLauncher";
           chmod +x "RupsLauncher";
           cp -r release/rups_app_shell.app "iText RUPS.app";
-          mv "RupsLauncher" "rups_app_shell.app/Contents/MacOS";
+          ls;
+          cp "RupsLauncher" "rups_app_shell.app/Contents/MacOS/RupsLauncher";
           rm -rf mac_bundle;
+          rm RupsLauncher;
           ls;
