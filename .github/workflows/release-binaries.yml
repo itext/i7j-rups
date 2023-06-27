@@ -1,0 +1,77 @@
+name: Standalone RUPS Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: 
+      - "**"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install WINE
+        run: sudo apt-get install wine -y
+        
+      - name: Set up Xvfb
+        run: Xvfb :0 -screen 0 1024x768x16 &
+      - run: export DISPLAY=:0.0
+
+      - name: Build with Maven
+        run: xvfb-run -a mvn -B package --file pom.xml
+          
+      - name: Download Warp packer
+        run: wget -O release/warp-packer https://github.com/fintermobilityas/warp/releases/download/v0.4.5/linux-x64.warp-packer;
+          chmod +x release/warp-packer;
+          jarfile="$(ls target/itext-rups-*SNAPSHOT.jar)";
+          cp $jarfile release/bundle_mac/app.jar;
+          cp $jarfile release/bundle_linux/app.jar;
+          cp $jarfile release/bundle_win/app.jar;
+
+      - name: Create Mac .app wrapper using Warp
+        run: ./release/warp-packer --arch macos-x64 --input_dir release/bundle_mac --exec run.sh --output "RupsLauncher";
+          chmod +x "RupsLauncher";
+          cp -r release/rups_app_shell.app "iText RUPS.app";
+          mkdir "iText RUPS.app/Contents/MacOS";
+          cp "RupsLauncher" "iText RUPS.app/Contents/MacOS/RupsLauncher";
+          zip -r "iText RUPS (Mac).zip" "iText RUPS.app";
+          rm -rf "iText RUPS.app";
+          rm RupsLauncher;
+
+      - name: Creat Linux .bin wrapper using Warp
+        run: ./release/warp-packer --arch linux-x64 --input_dir release/bundle_linux --exec run.sh --output "iText RUPS.bin";
+          chmod +x "iText RUPS.bin";
+          zip -r "iText RUPS (Linux).zip" "iText RUPS.bin";
+          rm "iText RUPS.bin";
+
+      - name: Creat Windows .exe wrapper using Warp
+        run: ./release/warp-packer --arch windows-x64 --input_dir release/bundle_win --exec run.bat --output "iText RUPS.exe";
+          
+      - name: Set Release version env variable
+        run: |
+          echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+      
+      - name: Update .exe properties
+        run: wine release/rcedit-x64.exe "iText RUPS.exe" --set-version-string "LegalCopyright" "Copyright (c) 1998-2023 Apryse Group NV" 
+          --set-icon "release/application.ico" --set-version-string "FileVersion" $RELEASE_VERSION --set-version-string "CompanyName" "Apryse Group NV"
+          --set-version-string "ProductName" "iText RUPS" --set-version-string "ProductVersion" $RELEASE_VERSION --set-file-version "0.0"
+
+      - name: Compress .exe
+        run: zip -r "iText RUPS (Windows).zip" "iText RUPS.exe";
+          rm "iText RUPS.exe";
+          
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: Release ${{ env.RELEASE_VERSION }}
+          files: "*.zip"
