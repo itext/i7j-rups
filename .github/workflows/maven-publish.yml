@@ -38,9 +38,22 @@ jobs:
           chmod +x "RupsLauncher";
           cp -r release/rups_app_shell.app "iText RUPS.app";
           cp "RupsLauncher" "iText RUPS.app/Contents/MacOS";
+          zip -r "iText RUPS.zip" "iText RUPS.app";
           rm -rf mac_bundle;
+          rm -rf "iText RUPS.app";
           rm RupsLauncher;
-      - name: Publish to GitHub releases
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
