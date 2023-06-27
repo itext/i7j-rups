@@ -30,7 +30,7 @@ jobs:
 
       - name: Create EXE wrapper using Warp
         run:
-          chmod -x release/linux-x64.warp-packer
+          chmod -x release/linux-x64.warp-packer;
           cp -r release/light_runtime mac_bundle/jre;
           jarfile="$(ls target/itext-rups-*SNAPSHOT.jar)";
           cp $jarfile mac_bundle/app.jar;
