@@ -5,16 +5,12 @@ name: Maven Package
 
 on:
   workflow_dispatch:
-  release:
-    types: [created]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    permissions: write-all
 
     steps:
       - uses: actions/checkout@v3
@@ -23,17 +19,45 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
       - name: Build with Maven
         run: mvn -B package --file pom.xml -Dmaven.test.skip=true # skip tests for now until I figure out how to get them to pass
 
       - name: Create EXE wrapper using Warp
         run: wget -O warp-packer https://github.com/dgiagio/warp/releases/download/v0.3.0/linux-x64.warp-packer;
-            chmod +x warp-packer;
-            cp -r light_runtime exe_bundle/jre;
-            jarfile="$(ls target/itext-rups-*SNAPSHOT.jar)";
-            cp $jarfile ./exe_bundle/app.jar;
-            ./warp-packer --arch windows-x64 --input_dir bundle --exec run.bat --output "iText RUPS.exe";
-            chmod +x "iText RUPS.exe";
-            ls
+          chmod +x warp-packer;
+          cp -r release/light_runtime mac_bundle/jre;
+          jarfile="$(ls target/itext-rups-*SNAPSHOT.jar)";
+          cp $jarfile mac_bundle/app.jar;
+          ./warp-packer --arch macos-x64 --input_dir mac_bundle --exec run.sh --output "RupsLauncher";
+          chmod +x "RupsLauncher";
+          cp -r release/rups_app_shell.app "iText RUPS.app";
+          mv "RupsLauncher" "iText RUPS.app/Contents/MacOS/RupsLauncher";
+          zip -r "iText RUPS.zip" "iText RUPS.app";
+          rm -rf mac_bundle;
+          rm -rf "iText RUPS.app";
+
+      - name: Set Release version env variable
+        run: |
+          echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          release_name: Release ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: "iText RUPS.zip"
+          asset_name: "iText RUPS.zip"
+          asset_content_type: application/zip
