@@ -46,7 +46,6 @@ import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.FileCompareAction;
 import com.itextpdf.rups.io.FileOpenAction;
 import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
@@ -81,10 +80,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     protected FileSaveAction fileSaverAction;
     /**
-     * The action needed to compare files.
-     */
-    protected FileCompareAction fileCompareAction;
-    /**
      * The HashMap with all the actions.
      */
     protected HashMap<String, JMenuItem> items;
@@ -105,8 +100,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         fileCloseAction = new FileCloseAction(controller);
         openInViewerAction = new OpenInViewerAction(controller);
         fileSaverAction = new FileSaveAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
-        fileCompareAction =
-                new FileCompareAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
@@ -115,13 +108,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                 KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_SAVE_AS.getString(), fileSaverAction,
                 KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
-        addItem(file, Language.MENU_BAR_COMPARE_WITH.getString(), fileCompareAction,
-                KeyStroke.getKeyStroke('Q', InputEvent.CTRL_DOWN_MASK));
         file.addSeparator();
         addItem(file, Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), openInViewerAction, KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
-        addItem(file, Language.MENU_BAR_NEW_INDIRECT.getString(),
-                new NewIndirectPdfObjectDialog.AddNewIndirectAction(controller),
-                KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
         add(file);
 
         final JMenu edit = new JMenu(Language.MENU_BAR_EDIT.getString());
@@ -192,8 +180,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         enableItem(Language.MENU_BAR_CLOSE.getString(), enabled);
         enableItem(Language.MENU_BAR_SAVE_AS.getString(), enabled);
         enableItem(Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), enabled);
-        enableItem(Language.MENU_BAR_COMPARE_WITH.getString(), enabled);
-        enableItem(Language.MENU_BAR_NEW_INDIRECT.getString(), enabled);
     }
 
     /**
