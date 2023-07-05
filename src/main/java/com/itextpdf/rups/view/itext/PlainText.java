@@ -48,13 +48,12 @@ import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.Language;
 
-import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 
-public class PlainText extends JTextArea implements Observer {
+public class PlainText extends ReadOnlyTextArea implements Observer {
 
     protected boolean loaded = false;
 
