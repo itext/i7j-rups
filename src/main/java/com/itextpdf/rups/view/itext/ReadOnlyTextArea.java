@@ -42,38 +42,44 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.io.OutputStreamResource;
-import com.itextpdf.rups.io.TextAreaOutputStream;
-
-import javax.swing.JScrollPane;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import javax.swing.JTextArea;
-import java.io.IOException;
+import javax.swing.text.Caret;
 
 /**
- * TextArea that visualizes the XFA XML file.
+ * A small JTextArea wrapper, which makes the text area read-only by default.
  */
-public class XfaTextArea extends JScrollPane {
-
+public class ReadOnlyTextArea extends JTextArea {
     /**
-     * The text area with the content stream.
+     * Constructs a new ReadOnlyTextArea. A default model is set, the initial
+     * string is null, and rows/columns are set to 0.
      */
-    protected JTextArea text;
-
-    /**
-     * Constructs a XFATextArea.
-     */
-    public XfaTextArea() {
-        super();
-        text = new ReadOnlyTextArea();
-        setViewportView(text);
+    public ReadOnlyTextArea() {
+        setUp();
     }
 
-    public void clear() {
-        text.setText("");
-    }
+    private void setUp() {
+        setEditable(false);
+        /*
+         * If you make the text area non-editable, then the cursor becomes
+         * invisible even when in focus. So we are adding a hacky focus
+         * listener, which will make the caret visible, when we need it.
+         */
+        addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent focusEvent) {
+                Caret caret = getCaret();
+                caret.setVisible(true);
+                caret.setSelectionVisible(true);
+            }
 
-    public void load(OutputStreamResource xml) throws IOException {
-        TextAreaOutputStream stream = new TextAreaOutputStream(text);
-        xml.writeTo(stream);
+            @Override
+            public void focusLost(FocusEvent focusEvent) {
+                Caret caret = getCaret();
+                caret.setVisible(false);
+                caret.setSelectionVisible(true);
+            }
+        });
     }
 }
