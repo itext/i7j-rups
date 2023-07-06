@@ -46,8 +46,8 @@ import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.AllFilesClosedEvent;
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsTabbedPane;
 
@@ -128,7 +128,7 @@ public class RupsController extends Observable
     }
 
     @Override
-    public final PdfFile getCurrentFile() {
+    public final IPdfFile getCurrentFile() {
         return this.rupsTabbedPane.getCurrentFile();
     }
 
@@ -140,7 +140,7 @@ public class RupsController extends Observable
                 return;
             }
 
-            this.rupsTabbedPane.openNewFile(file, this.dimension, false);
+            this.rupsTabbedPane.openNewFile(file, this.dimension);
             this.update(this, new OpenFileEvent(file));
         }
     }

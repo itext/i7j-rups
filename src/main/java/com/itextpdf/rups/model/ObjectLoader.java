@@ -59,7 +59,7 @@ public class ObjectLoader extends BackgroundTask {
     /**
      * RUPS's PdfFile object.
      */
-    protected PdfFile file;
+    protected IPdfFile file;
     /**
      * The factory that can provide PDF objects.
      */
@@ -83,7 +83,7 @@ public class ObjectLoader extends BackgroundTask {
      * @param observer   the object that will forward the changes.
      * @param file       the PdfFile from which the objects will be read.
      */
-    public ObjectLoader(Observer observer, PdfFile file, String loaderName, IProgressDialog progress) {
+    public ObjectLoader(Observer observer, IPdfFile file, String loaderName, IProgressDialog progress) {
         this.observer = observer;
         this.file = file;
         this.loaderName = loaderName;
@@ -95,7 +95,7 @@ public class ObjectLoader extends BackgroundTask {
      *
      * @return a reader object
      */
-    public PdfFile getFile() {
+    public IPdfFile getFile() {
         return file;
     }
 

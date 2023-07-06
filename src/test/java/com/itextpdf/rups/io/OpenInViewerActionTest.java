@@ -45,20 +45,17 @@ package com.itextpdf.rups.io;
 import com.itextpdf.rups.mock.MockedPdfFile;
 import com.itextpdf.rups.mock.MockedRupsController;
 import com.itextpdf.rups.mock.MockedSystemViewer;
-import com.itextpdf.rups.model.PdfFile;
-import com.itextpdf.test.annotations.type.UnitTest;
+import com.itextpdf.rups.model.IPdfFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 @Tag("UnitTest.class")
-public class OpenInViewerActionTest {
+class OpenInViewerActionTest {
 
     @Test
-    public void normalTest() throws IOException {
-        PdfFile pdfFile = new MockedPdfFile(new byte[] {}, false);
+    void normalTest() {
+        IPdfFile pdfFile = new MockedPdfFile();
 
         MockedRupsController mockedRupsController = new MockedRupsController(pdfFile);
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(true);
@@ -68,8 +65,8 @@ public class OpenInViewerActionTest {
     }
 
     @Test
-    public void viewingNotSupportedTest() throws IOException {
-        PdfFile pdfFile = new MockedPdfFile(new byte[] {}, false);
+    void viewingNotSupportedTest() {
+        IPdfFile pdfFile = new MockedPdfFile();
 
         MockedRupsController mockedRupsController = new MockedRupsController(pdfFile);
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(false);
@@ -79,7 +76,7 @@ public class OpenInViewerActionTest {
     }
 
     @Test
-    public void viewingNullFileTest() throws IOException {
+    void viewingNullFileTest() {
         MockedRupsController mockedRupsController = new MockedRupsController(null);
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(true);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
