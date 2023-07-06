@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsInstanceController;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -70,7 +70,7 @@ public class RupsTabbedPane {
         this.jTabbedPane.addTab(Language.DEFAULT_TAB_TITLE.getString(), defaultTab);
     }
 
-    public void openNewFile(File file, Dimension dimension, boolean readonly) {
+    public void openNewFile(File file, Dimension dimension) {
         if (file != null) {
             if (this.defaultTab.equals(this.jTabbedPane.getSelectedComponent())) {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
@@ -79,7 +79,7 @@ public class RupsTabbedPane {
             RupsPanel rupsPanel = new RupsPanel();
             RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
-            rupsInstanceController.loadFile(file, readonly);
+            rupsInstanceController.loadFile(file);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
             this.jTabbedPane.setSelectedComponent(rupsPanel);
         }
@@ -97,7 +97,7 @@ public class RupsTabbedPane {
         return isLastTab;
     }
 
-    public PdfFile getCurrentFile() {
+    public IPdfFile getCurrentFile() {
         Component currentComponent = this.jTabbedPane.getSelectedComponent();
         RupsPanel currentRupsPanel = (RupsPanel) currentComponent;
         return currentRupsPanel.getPdfFile();
@@ -125,13 +125,8 @@ public class RupsTabbedPane {
 
             if ( component instanceof RupsPanel ) {
                 RupsPanel rupsPanel = (RupsPanel) component;
-                PdfFile pdfFile = rupsPanel.getPdfFile();
-                File directory = pdfFile.getDirectory();
-                String fileName = pdfFile.getFilename();
-
-                File openedFile = new File(directory, fileName);
-
-                if (openedFile.equals(file)) {
+                IPdfFile pdfFile = rupsPanel.getPdfFile();
+                if (pdfFile != null && pdfFile.getOriginalFile().equals(file)) {
                     return true;
                 }
             }

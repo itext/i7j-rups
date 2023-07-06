@@ -50,9 +50,9 @@ import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
 import com.itextpdf.test.ExtendedITextTest;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -60,14 +60,15 @@ import org.junit.jupiter.api.Test;
 
 
 @Tag("IntegrationTest")
-public class StructureTreeTest extends ExtendedITextTest {
+class StructureTreeTest extends ExtendedITextTest {
 
 
     private static final String sourceFolder = "./src/test/resources/com/itextpdf/rups/controller/";
 
     @Test
-    public void extractMcidContentInStructureTreeTest() throws IOException {
-        PdfFile pdfFile = new PdfFile(Files.readAllBytes(Paths.get(sourceFolder + "hello_world_tagged.pdf")), true);
+    void extractMcidContentInStructureTreeTest() throws IOException {
+        File file = new File(sourceFolder + "hello_world_tagged.pdf");
+        PdfFile pdfFile = PdfFile.open(file, Files.readAllBytes(file.toPath()));
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
@@ -77,8 +78,9 @@ public class StructureTreeTest extends ExtendedITextTest {
     }
 
     @Test
-    public void extractMcidContentInStructureTreeWithActualTextTest() throws IOException {
-        PdfFile pdfFile = new PdfFile(Files.readAllBytes(Paths.get(sourceFolder + "hello_world_tagged_actualtext.pdf")), true);
+    void extractMcidContentInStructureTreeWithActualTextTest() throws IOException {
+        File file = new File(sourceFolder + "hello_world_tagged_actualtext.pdf");
+        PdfFile pdfFile = PdfFile.open(file, Files.readAllBytes(file.toPath()));
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
@@ -90,7 +92,9 @@ public class StructureTreeTest extends ExtendedITextTest {
     private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile) {
 
         PdfReaderController controller = new PdfReaderController(null, null);
-        ObjectLoader loader = new ObjectLoader(controller, pdfFile, pdfFile.getFilename(), new DummyProgressDialog());
+        ObjectLoader loader = new ObjectLoader(
+                controller, pdfFile, "Test loader", new DummyProgressDialog()
+        );
         // preload everything
         loader.doTask();
 

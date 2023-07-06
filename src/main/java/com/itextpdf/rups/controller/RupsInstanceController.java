@@ -50,6 +50,7 @@ import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.PostCompareEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.event.TreeNodeClickedEvent;
+import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
@@ -113,7 +114,7 @@ public class RupsInstanceController extends Observable
     /**
      * The Pdf file that is currently open in the application.
      */
-    private PdfFile pdfFile;
+    private IPdfFile pdfFile;
 
     private ObjectLoader loader;
 
@@ -193,25 +194,22 @@ public class RupsInstanceController extends Observable
      * Load a file into memory and start processing it.
      *
      * @param file     the file to load
-     * @param readOnly open the file read only or not
      */
-    public void loadFile(File file, boolean readOnly) {
+    public void loadFile(File file) {
         try {
             final Path filePath = Paths.get(file.toURI());
             final byte[] contents = Files.readAllBytes(filePath);
-            loadRawContent(contents, file.getName(), file.getParentFile(), readOnly);
+            loadRawContent(contents, file.getName(), file.getParentFile());
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public final void loadRawContent(byte[] contents, String fileName, File directory, boolean readOnly) {
+    public final void loadRawContent(byte[] contents, String fileName, File directory) {
         closeRoutine();
         try {
-            pdfFile = new PdfFile(contents, readOnly);
-            pdfFile.setFilename(fileName);
-            pdfFile.setDirectory(directory);
+            pdfFile = PdfFile.open(new File(directory, fileName), contents);
             startObjectLoader();
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
@@ -253,7 +251,7 @@ public class RupsInstanceController extends Observable
 
             JOptionPane.showMessageDialog(masterComponent, Language.SAVE_SUCCESS.getString(),
                     Language.DIALOG.getString(), JOptionPane.INFORMATION_MESSAGE);
-            loadFile(localFile, false);
+            loadFile(localFile);
         } catch (PdfException | IOException | com.itextpdf.io.exceptions.IOException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), Language.DIALOG.getString(),
                     JOptionPane.ERROR_MESSAGE);
@@ -344,7 +342,9 @@ public class RupsInstanceController extends Observable
                 dialog.setVisible(true);
             }
         });
-        loader = new ObjectLoader(this, pdfFile, pdfFile.getFilename(), dialog);
+        loader = new ObjectLoader(
+                this, pdfFile, pdfFile.getOriginalFile().getName(), dialog
+        );
         loader.start();
     }
 
@@ -375,7 +375,7 @@ public class RupsInstanceController extends Observable
      *
      * @return pdfFile
      */
-    public PdfFile getPdfFile() {
+    public IPdfFile getPdfFile() {
         return pdfFile;
     }
 

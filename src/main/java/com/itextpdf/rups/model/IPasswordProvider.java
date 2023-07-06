@@ -40,55 +40,29 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.io;
+package com.itextpdf.rups.model;
 
-import com.itextpdf.rups.controller.IRupsController;
-import com.itextpdf.rups.model.IPdfFile;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
- * An action used to open a PDF file in the system viewer.
+ * Interface for providing password for encrypted PDF documents on-demand.
  */
-public class OpenInViewerAction implements ActionListener {
-
-    private final IRupsController controller;
-
-    private final ISystemViewerAction systemViewerAction;
+public interface IPasswordProvider {
+    /**
+     * Returns whether the password provider is interactive or not.
+     *
+     * @return {@code true} if the password provider is interactive;
+     *         {@code false} otherwise
+     */
+    boolean isInteractive();
 
     /**
-     * Creates an OpenInViewerAction with the DefaultSystemViewerAction.
+     * Returns password to be used with the corresponding PDF document. If the
+     * password retrieving operation is aborted, then {@code null} is returned.
      *
-     * @param controller RupsController
-     */
-    public OpenInViewerAction(IRupsController controller) {
-        this(controller, new DefaultSystemViewerAction());
-    }
-
-    /**
-     * Creates an OpenInViewerAction.
+     * @param originalFile path to the PDF document, that password is needed for
      *
-     * @param controller         RupsController
-     * @param systemViewerAction the action to open PDF files in the system viewer
+     * @return password to be used with the document; {@code null} if aborted
      */
-    public OpenInViewerAction(IRupsController controller, ISystemViewerAction systemViewerAction) {
-        this.controller = controller;
-        this.systemViewerAction = systemViewerAction;
-    }
-
-    @Override
-    public final void actionPerformed(ActionEvent e) {
-        if (!this.systemViewerAction.isViewingSupported()) {
-            return;
-        }
-
-        final IPdfFile pdfFile = this.controller.getCurrentFile();
-
-        if (pdfFile == null || pdfFile.getOriginalFile() == null) {
-            return;
-        }
-
-        this.systemViewerAction.openFile(pdfFile.getOriginalFile());
-    }
+    byte[] get(File originalFile);
 }

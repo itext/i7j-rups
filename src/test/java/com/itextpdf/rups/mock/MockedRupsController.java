@@ -43,7 +43,7 @@
 package com.itextpdf.rups.mock;
 
 import com.itextpdf.rups.controller.IRupsController;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.Component;
 import java.io.File;
@@ -52,12 +52,12 @@ public class MockedRupsController implements IRupsController {
 
     private int openCount = 0;
 
-    private PdfFile pdfFile;
+    private IPdfFile pdfFile;
 
     public MockedRupsController() {
     }
 
-    public MockedRupsController(PdfFile pdfFile) {
+    public MockedRupsController(IPdfFile pdfFile) {
         this.pdfFile = pdfFile;
     }
 
@@ -67,7 +67,7 @@ public class MockedRupsController implements IRupsController {
     }
 
     @Override
-    public PdfFile getCurrentFile() {
+    public IPdfFile getCurrentFile() {
         return this.pdfFile;
     }
 

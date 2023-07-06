@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsInstanceController;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
@@ -64,7 +64,7 @@ public class RupsPanel extends JPanel {
         this.rupsInstanceController = rupsInstanceController;
     }
 
-    public PdfFile getPdfFile() {
+    public IPdfFile getPdfFile() {
         return this.rupsInstanceController.getPdfFile();
     }
 

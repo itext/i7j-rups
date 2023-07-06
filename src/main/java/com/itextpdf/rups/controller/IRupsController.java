@@ -42,7 +42,7 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.Component;
 import java.io.File;
@@ -65,7 +65,7 @@ public interface IRupsController {
      *
      * @return PdfFile
      */
-    PdfFile getCurrentFile();
+    IPdfFile getCurrentFile();
 
     /**
      * Opens a new File in RUPS.

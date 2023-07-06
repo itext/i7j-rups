@@ -44,10 +44,11 @@ package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.ObjectLoader;
-import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.Language;
 
+import java.io.UnsupportedEncodingException;
 import javax.swing.SwingWorker;
 import java.util.Observable;
 import java.util.Observer;
@@ -57,7 +58,7 @@ public class PlainText extends ReadOnlyTextArea implements Observer {
 
     protected boolean loaded = false;
 
-    private PdfFile file;
+    private IPdfFile file;
 
     private SwingWorker<String, Object> worker;
 
@@ -91,7 +92,7 @@ public class PlainText extends ReadOnlyTextArea implements Observer {
                     worker = new SwingWorker<String, Object>() {
                         @Override
                         protected String doInBackground() {
-                            return file.getRawContent();
+                            return getFileContentAsString(file);
                         }
 
                         @Override
@@ -113,6 +114,14 @@ public class PlainText extends ReadOnlyTextArea implements Observer {
                     worker.execute();
                     break;
             }
+        }
+    }
+
+    private static String getFileContentAsString(IPdfFile file) {
+        try {
+            return new String(file.getOriginalContent(), "cp1252");
+        } catch (UnsupportedEncodingException e) {
+            return Language.ERROR_WRONG_ENCODING.getString();
         }
     }
 }

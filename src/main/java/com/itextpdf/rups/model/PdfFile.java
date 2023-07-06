@@ -43,206 +43,205 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.kernel.exceptions.BadPasswordException;
-import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
 import com.itextpdf.rups.view.Language;
 
-import com.ibm.icu.text.StringPrep;
-import com.ibm.icu.text.StringPrepParseException;
-
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * Wrapper for both iText's PdfReader (referring to a PDF file to read)
  * and SUN's PDFFile (referring to the same PDF file to render).
  */
-public class PdfFile {
-
+public class PdfFile implements IPdfFile {
     /**
-     * The directory where the file can be found (if the PDF was passed as a file).
+     * The original PDF document location.
      */
-    protected File directory = null;
-
-    /**
-     * The original filename.
-     */
-    protected String filename = null;
-
-    /**
-     * The PdfDocument object.
-     */
-    protected PdfDocument document = null;
-
-    /**
-     * The file permissions
-     */
-    protected Permissions permissions = null;
+    private final File originalFile;
 
     /**
      * Raw content
      */
-    protected byte[] rawContent = null;
-
-    protected ByteArrayOutputStream baos = null;
-
-    public static final int MAX_PASSWORD_BYTE_LENGTH = 127;
+    private final byte[] originalContent;
 
     /**
-     * Constructs a PdfFile object.
-     *
-     * @param file     the byte[] to read
-     * @param readOnly read only
-     * @throws IOException  an I/O exception
-     * @throws PdfException a PDF exception
+     * The PdfDocument object.
      */
-    public PdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
-        rawContent = file;
+    private PdfDocument document = null;
 
-        try {
-            readFile(new ByteArrayInputStream(file), false, readOnly);
-        } catch (BadPasswordException bpe) {
-            readFile(new ByteArrayInputStream(file), true, readOnly);
-        }
+    private ByteArrayOutputStream writerOutputStream = null;
+
+    private PdfFile(File file, byte[] content) {
+        this.originalFile = file;
+        this.originalContent = content;
     }
 
-    private static byte[] preparePasswordForOpen(String inputPassword) {
-        final StringPrep prep = StringPrep.getInstance(StringPrep.RFC4013_SASLPREP);
-        final String prepped;
-        try {
-            // we're invoking StringPrep to open a document -> pass ALLOW_UNASSIGNED
-            prepped = prep.prepare(inputPassword, StringPrep.ALLOW_UNASSIGNED);
-        } catch (StringPrepParseException e) {
-            throw new PdfException(Language.ERROR_PASSWORD.getString(), e);
-        }
-        byte[] resultingBytes = prepped.getBytes(StandardCharsets.UTF_8);
-        if (resultingBytes.length <= MAX_PASSWORD_BYTE_LENGTH) {
-            return resultingBytes;
-        } else {
-            byte[] trimmed = new byte[MAX_PASSWORD_BYTE_LENGTH];
-            System.arraycopy(resultingBytes, 0, trimmed, 0, trimmed.length);
-            return trimmed;
-        }
+    public static PdfFile open(File file) throws IOException {
+        return open(file, Files.readAllBytes(file.toPath()), new DialogPasswordProvider());
     }
 
-    private static byte[] requestPassword() {
-        final JPasswordField passwordField = new JPasswordField(32);
-
-        final JOptionPane pane =
-                new JOptionPane(passwordField, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-                    @Override
-                    public void selectInitialValue() {
-                        passwordField.requestFocusInWindow();
-                    }
-                };
-
-        pane.createDialog(null, Language.ENTER_PASSWORD.getString()).setVisible(true);
-
-        final String passwordString = new String(passwordField.getPassword());
-        return preparePasswordForOpen(passwordString);
+    public static PdfFile open(File file, IPasswordProvider passwordProvider) throws IOException {
+        return open(file, Files.readAllBytes(file.toPath()), passwordProvider);
     }
 
-    /**
-     * Does the actual reading of the file into PdfReader and PDFFile.
-     *
-     * @param fis       inputstream
-     * @param checkPass check password
-     * @param readOnly  read only
-     * @throws IOException  an I/O exception
-     * @throws PdfException a PDF exception
-     */
-    protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
-        // reading the file into PdfReader
-        final PdfReader reader;
-        final PdfWriter writer;
-        permissions = new Permissions();
-        final ReaderProperties readerProps = new ReaderProperties();
-        final byte[] password;
-        if (checkPass) {
-            password = requestPassword();
-            readerProps.setPassword(password);
-        } else {
-            password = null;
-        }
-        reader = new PdfReader(fis, readerProps);
-        baos = new ByteArrayOutputStream();
-        if (readOnly) {
-            document = new PdfDocument(reader);
-        } else {
-            writer = new PdfWriter(baos);
-            document = new PdfDocument(reader, writer);
-        }
-        // we have some extra work to do if the document was encrypted
-        if (reader.isEncrypted()) {
-            permissions.setEncrypted(true);
-            permissions.setCryptoMode(reader.getCryptoMode());
-            permissions.setPermissions((int) reader.getPermissions());
-            if (password != null) {
-                if (reader.isOpenedWithFullPermission()) {
-                    permissions.setOwnerPassword(password);
-                    permissions.setUserPassword(reader.computeUserPassword());
-                } else {
-                    JOptionPane.showMessageDialog(
-                            null,
-                            Language.ERROR_WRONG_PASSWORD.getString());
-                }
-            }
-        } else {
-            permissions.setEncrypted(false);
-        }
-
+    public static PdfFile open(File file, byte[] content) throws IOException {
+        return open(file, content, new DialogPasswordProvider());
     }
 
-    /**
-     * Getter for iText's PdfDocument object.
-     *
-     * @return a PdfDocument object
-     */
+    public static PdfFile open(File file, byte[] content, IPasswordProvider passwordProvider) throws IOException {
+        PdfFile pdfFile = new PdfFile(file, content);
+        pdfFile.openDocument(passwordProvider);
+        return pdfFile;
+    }
+
+    @Override
+    public File getOriginalFile() {
+        return originalFile;
+    }
+
+    @Override
     public PdfDocument getPdfDocument() {
         return document;
     }
 
+    @Override
+    public byte[] getOriginalContent() {
+        return originalContent;
+    }
+
+    @Override
+    public ByteArrayOutputStream getByteArrayOutputStream() {
+        return writerOutputStream;
+    }
+
     /**
-     * Getter for the filename
-     *
-     * @return the original filename
-     * @since 5.0.3
+     * Opens the document, using the file and content stored in the current
+     * object. If password is required, then the password provider will be
+     * called.
      */
-    public String getFilename() {
-        return filename;
-    }
+    private void openDocument(IPasswordProvider passwordProvider) throws IOException {
+        /*
+         * This should pass in the majority of cases (i.e. if the document is
+         * non-encrypted).
+         */
+        if (openDocumentReadWrite()) {
+            return;
+        }
 
-    public File getDirectory() {
-        return directory;
-    }
+        /*
+         * If it is, actually, protected, we will try to open it in a read-only
+         * mode. This should pass, if the document is protected, but there is no
+         * user password.
+         *
+         * In this case any editing operations in RUPS should be disabled.
+         */
+        if (openDocumentReadOnly()) {
+            return;
+        }
 
-    public String getRawContent() {
-        try {
-            return new String(rawContent, "Cp1252");
-        } catch (UnsupportedEncodingException e) {
-            return Language.ERROR_WRONG_ENCODING.getString();
+        /*
+         * If it, actually, has a user password set, then we will use the
+         * password provider to get the password and will try to use it to open
+         * the document.
+         *
+         * Since user can provide any of the two password, we will try first to
+         * open as an owner (read/write) and then, if failed, as a user
+         * (read-only). If both failed, we will keep asking for the correct
+         * password until password provider signals cancellation.
+         */
+        while (true) {
+            byte[] password = passwordProvider.get(getOriginalFile());
+            if (password == null) {
+                throw new BadPasswordException(Language.ERROR_MISSING_PASSWORD.getString());
+            }
+            if (openDocumentReadWrite(password)) {
+                return;
+            }
+            if (openDocumentReadOnly(password)) {
+                return;
+            }
+            /*
+             * If the password provider is not interactive and the password is
+             * incorrect, then there is no point in trying again.
+             */
+            if (!passwordProvider.isInteractive()) {
+                throw new BadPasswordException(Language.ERROR_WRONG_PASSWORD.getString());
+            }
         }
     }
 
-    public void setDirectory(File directory) {
-        this.directory = directory;
+    /**
+     * Tries to open the PDF document in a read/write mode without a password.
+     * If the document is encrypted, returns {@code false}.
+     *
+     * @return {@code true} on success; {@code false} if encrypted
+     */
+    private boolean openDocumentReadWrite() throws IOException {
+        return openDocumentReadWrite(new byte[0]);
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    /**
+     * Tries to open the PDF document in a read/write mode with the provided
+     * password. If the password is incorrect, returns {@code false}.
+     *
+     * @param password password to use, when decrypting
+     *
+     * @return {@code true} on success; {@code false} if invalid password
+     */
+    private boolean openDocumentReadWrite(byte[] password) throws IOException {
+        try {
+            ReaderProperties readerProperties = new ReaderProperties().setPassword(password);
+            PdfReader reader = new PdfReader(
+                    new ByteArrayInputStream(getOriginalContent()),
+                    readerProperties
+            );
+            ByteArrayOutputStream tempWriterOutputStream = new ByteArrayOutputStream();
+            PdfWriter writer = new PdfWriter(tempWriterOutputStream);
+            document = new PdfDocument(reader, writer);
+            writerOutputStream = tempWriterOutputStream;
+            return true;
+        } catch (BadPasswordException e) {
+            return false;
+        }
     }
 
-    public ByteArrayOutputStream getByteArrayOutputStream() {
-        return baos;
+    /**
+     * Tries to open the PDF document in a read-only mode without a password.
+     * If the document is encrypted, returns {@code false}.
+     *
+     * @return {@code true} on success; {@code false} if encrypted
+     */
+    private boolean openDocumentReadOnly() throws IOException {
+        return openDocumentReadOnly(new byte[0]);
+    }
+
+    /**
+     * Tries to open the PDF document in a read-only mode with the provided
+     * password. If the password is incorrect, returns {@code false}.
+     *
+     * @param password password to use, when decrypting
+     *
+     * @return {@code true} on success; {@code false} if invalid password
+     */
+    private boolean openDocumentReadOnly(byte[] password) throws IOException {
+        try {
+            ReaderProperties readerProperties = new ReaderProperties();
+            readerProperties.setPassword(password);
+            PdfReader reader = new PdfReader(
+                    new ByteArrayInputStream(getOriginalContent()),
+                    readerProperties
+            );
+            document = new PdfDocument(reader);
+            writerOutputStream = null;
+            return true;
+        } catch (BadPasswordException e) {
+            return false;
+        }
     }
 }
