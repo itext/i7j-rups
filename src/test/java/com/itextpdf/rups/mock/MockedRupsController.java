@@ -89,4 +89,8 @@ public class MockedRupsController implements IRupsController {
     public int getOpenedCount() {
         return this.openCount;
     }
+
+    @Override
+    public void reopenAsOwner() {
+    }
 }

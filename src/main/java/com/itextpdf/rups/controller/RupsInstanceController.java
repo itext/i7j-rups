@@ -196,20 +196,17 @@ public class RupsInstanceController extends Observable
      * @param file     the file to load
      */
     public void loadFile(File file) {
-        try {
-            final Path filePath = Paths.get(file.toURI());
-            final byte[] contents = Files.readAllBytes(filePath);
-            loadRawContent(contents, file.getName(), file.getParentFile());
-        } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
-                    JOptionPane.ERROR_MESSAGE);
-        }
+        loadFile(file, false);
     }
 
-    public final void loadRawContent(byte[] contents, String fileName, File directory) {
+    public void loadFile(File file, boolean requireEditable) {
         closeRoutine();
         try {
-            pdfFile = PdfFile.open(new File(directory, fileName), contents);
+            if (requireEditable) {
+                pdfFile = PdfFile.openAsOwner(file);
+            } else {
+                pdfFile = PdfFile.open(file);
+            }
             startObjectLoader();
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {

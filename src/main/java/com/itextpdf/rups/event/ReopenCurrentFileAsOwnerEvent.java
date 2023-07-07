@@ -42,33 +42,15 @@
  */
 package com.itextpdf.rups.event;
 
-/**
- * Abstract Event Class that other events should extend from.
- */
-public abstract class RupsEvent {
 
-    public static final byte OPEN_FILE_EVENT = 0;
-    public static final byte OPEN_DOCUMENT_POST_EVENT = 1;
-    public static final byte CLOSE_DOCUMENT_EVENT = 2;
-    public static final byte SAVE_TO_FILE_EVENT = 3;
-    public static final byte COMPARE_WITH_FILE_EVENT = 4;
-    public static final byte COMPARE_POST_EVENT = 5;
-    public static final byte ROOT_NODE_CLICKED_EVENT = 6;
-    public static final byte TREE_NODE_CLICKED_EVENT = 7;
-    public static final byte OPEN_STRUCTURE_EVENT = 8;
-    public static final byte OPEN_PLAIN_TEXT_EVENT = 9;
-    public static final byte CONSOLE_WRITE_EVENT = 10;
-    public static final byte NODE_ADD_DICT_CHILD_EVENT = 11;
-    public static final byte NODE_DELETE_DICT_CHILD_EVENT = 12;
-    public static final byte NODE_ADD_ARRAY_CHILD_EVENT = 13;
-    public static final byte NODE_DELETE_ARRAY_CHILD_EVENT = 14;
-    public static final byte NEW_INDIRECT_OBJECT_EVENT = 15;
-    public static final byte POST_NEW_INDIRECT_OBJECT_EVENT = 16;
-    public static final byte ALL_FILES_CLOSED = 17;
-    public static final byte DISPLAYED_TAB_CHANGED = 19;
-    public static final byte REOPEN_CURRENT_FILE_AS_OWNER = 20;
+public class ReopenCurrentFileAsOwnerEvent extends RupsEvent {
+    @Override
+    public int getType() {
+        return REOPEN_CURRENT_FILE_AS_OWNER;
+    }
 
-    public abstract int getType();
-
-    public abstract Object getContent();
+    @Override
+    public Object getContent() {
+        return null;
+    }
 }

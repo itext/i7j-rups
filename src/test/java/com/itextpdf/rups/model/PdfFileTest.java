@@ -61,14 +61,13 @@ class PdfFileTest {
     private static final String OWNER_PASSWORD = "password-owner";
 
     @Test
-    void openRegularFileTest() throws IOException {
+    void open_RegularFileTest() throws IOException {
         PdfFile openedFile = openTestFile("regular.pdf", "");
         /*
          * Should be opened as owner (i.e. read/write), as it is not encrypted.
          */
         Assertions.assertTrue(openedFile.isOpenedAsOwner());
         Assertions.assertNotNull(openedFile.getByteArrayOutputStream());
-        Assertions.assertNotNull(openedFile.getPdfDocument());
         // Sanity check, that it opened the document properly
         Assertions.assertEquals(
                 "REGULAR",
@@ -77,7 +76,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openOwnerProtectedFileWithoutPasswordTest() throws IOException {
+    void open_OwnerProtectedFileWithoutPasswordTest() throws IOException {
         PdfFile openedFile = openTestFile("protected_with_owner_password.pdf", null);
         /*
          * Should be opened as user (i.e. read-only), as it is protected, and
@@ -93,7 +92,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openOwnerProtectedFileWithIncorrectPasswordTest() throws IOException {
+    void open_OwnerProtectedFileWithIncorrectPasswordTest() throws IOException {
         PdfFile openedFile = openTestFile("protected_with_owner_password.pdf", "incorrect");
         /*
          * Should be opened as user (i.e. read-only), as it is protected, and
@@ -109,7 +108,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openOwnerProtectedFileWithCorrectPasswordTest() throws IOException {
+    void open_OwnerProtectedFileWithCorrectPasswordTest() throws IOException {
         PdfFile openedFile = openTestFile("protected_with_owner_password.pdf", OWNER_PASSWORD);
         /*
          * Should still be opened as user (i.e. read-only), as it is protected,
@@ -126,7 +125,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openUserProtectedFileWithoutPasswordTest() {
+    void open_UserProtectedFileWithoutPasswordTest() {
         /*
          * Here it should throw a bad password error, since we need at least a
          * correct user password to open this file.
@@ -138,7 +137,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openUserProtectedFileWithIncorrectPasswordTest() {
+    void open_UserProtectedFileWithIncorrectPasswordTest() {
         /*
          * Here it should throw a bad password error, since we need at least a
          * correct user password to open this file.
@@ -150,7 +149,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openUserProtectedFileWithUserPasswordTest() throws IOException {
+    void open_UserProtectedFileWithUserPasswordTest() throws IOException {
         PdfFile openedFile = openTestFile("protected_with_both_passwords.pdf", USER_PASSWORD);
         /*
          * Should be opened as user (i.e. read-only), as it is protected, and
@@ -166,7 +165,7 @@ class PdfFileTest {
     }
 
     @Test
-    void openUserProtectedFileWithOwnerPasswordTest() throws IOException {
+    void open_UserProtectedFileWithOwnerPasswordTest() throws IOException {
         PdfFile openedFile = openTestFile("protected_with_both_passwords.pdf", OWNER_PASSWORD);
         /*
          * Should be opened as owner (i.e. read/write), as it is protected, and
@@ -174,6 +173,96 @@ class PdfFileTest {
          */
         Assertions.assertTrue(openedFile.isOpenedAsOwner());
         Assertions.assertNotNull(openedFile.getByteArrayOutputStream());
+        // Sanity check, that it opened the document properly
+        Assertions.assertEquals(
+                "DIFFERENT USER AND OWNER PASSWORDS",
+                PdfTextExtractor.getTextFromPage(openedFile.getPdfDocument().getFirstPage())
+        );
+    }
+
+    @Test
+    void openAsOwner_RegularFileTest() throws IOException {
+        PdfFile openedFile = openTestFileAsOwner("regular.pdf", "");
+        // Sanity check, that it opened the document properly
+        Assertions.assertEquals(
+                "REGULAR",
+                PdfTextExtractor.getTextFromPage(openedFile.getPdfDocument().getFirstPage())
+        );
+    }
+
+    @Test
+    void openAsOwner_OwnerProtectedFileWithoutPasswordTest() throws IOException {
+        /*
+         * Here it should throw a bad password error, as it won't get opened as
+         * an owner without a password.
+         */
+        Assertions.assertThrows(
+                BadPasswordException.class,
+                () -> openTestFileAsOwner("protected_with_owner_password.pdf", null)
+        );
+    }
+
+    @Test
+    void openAsOwner_OwnerProtectedFileWithIncorrectPasswordTest() throws IOException {
+        /*
+         * Here it should throw a bad password error, as it won't get opened as
+         * an owner with an incorrect password.
+         */
+        Assertions.assertThrows(
+                BadPasswordException.class,
+                () -> openTestFileAsOwner("protected_with_owner_password.pdf", "incorrect")
+        );
+    }
+
+    @Test
+    void openAsOwner_OwnerProtectedFileWithCorrectPasswordTest() throws IOException {
+        PdfFile openedFile = openTestFileAsOwner("protected_with_owner_password.pdf", OWNER_PASSWORD);
+        // Sanity check, that it opened the document properly
+        Assertions.assertEquals(
+                "ONLY OWNER PASSWORD",
+                PdfTextExtractor.getTextFromPage(openedFile.getPdfDocument().getFirstPage())
+        );
+    }
+
+    @Test
+    void openAsOwner_UserProtectedFileWithoutPasswordTest() {
+        /*
+         * Here it should throw a bad password error, since we need at least a
+         * correct user password to just open this file.
+         */
+        Assertions.assertThrows(
+                BadPasswordException.class,
+                () -> openTestFileAsOwner("protected_with_both_passwords.pdf", null)
+        );
+    }
+
+    @Test
+    void openAsOwner_UserProtectedFileWithIncorrectPasswordTest() {
+        /*
+         * Here it should throw a bad password error, since we need at least a
+         * correct user password to just open this file.
+         */
+        Assertions.assertThrows(
+                BadPasswordException.class,
+                () -> openTestFileAsOwner("protected_with_both_passwords.pdf", "incorrect")
+        );
+    }
+
+    @Test
+    void openAsOwner_UserProtectedFileWithUserPasswordTest() {
+        /*
+         * Here it should throw a bad password error, as it won't get opened as
+         * an owner without an owner password.
+         */
+        Assertions.assertThrows(
+                BadPasswordException.class,
+                () -> openTestFileAsOwner("protected_with_both_passwords.pdf", USER_PASSWORD)
+        );
+    }
+
+    @Test
+    void openAsOwner_UserProtectedFileWithOwnerPasswordTest() throws IOException {
+        PdfFile openedFile = openTestFileAsOwner("protected_with_both_passwords.pdf", OWNER_PASSWORD);
         // Sanity check, that it opened the document properly
         Assertions.assertEquals(
                 "DIFFERENT USER AND OWNER PASSWORDS",
@@ -190,6 +279,23 @@ class PdfFileTest {
         Assertions.assertEquals(testFile, openedFile.getOriginalFile());
         Assertions.assertArrayEquals(testFileBytes, openedFile.getOriginalContent());
         Assertions.assertNotNull(openedFile.getPdfDocument());
+        return openedFile;
+    }
+
+    private PdfFile openTestFileAsOwner(String fileName, String password) throws IOException {
+        File testFile = new File(RESOURCES_DIR, fileName);
+        byte[] testFileBytes = Files.readAllBytes(testFile.toPath());
+        PdfFile openedFile = PdfFile.openAsOwner(
+                testFile, testFileBytes, new StaticPasswordProvider(testFile, password)
+        );
+
+        // These assertions should be valid on any properly opened file
+        Assertions.assertEquals(testFile, openedFile.getOriginalFile());
+        Assertions.assertArrayEquals(testFileBytes, openedFile.getOriginalContent());
+        Assertions.assertNotNull(openedFile.getPdfDocument());
+        // Should be opened as owner, as we are forcing it here
+        Assertions.assertTrue(openedFile.isOpenedAsOwner());
+        Assertions.assertNotNull(openedFile.getByteArrayOutputStream());
         return openedFile;
     }
 
