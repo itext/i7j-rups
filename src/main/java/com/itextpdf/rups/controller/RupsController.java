@@ -44,6 +44,7 @@ package com.itextpdf.rups.controller;
 
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.AllFilesClosedEvent;
+import com.itextpdf.rups.event.DisplayedTabChanged;
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IPdfFile;
@@ -56,6 +57,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.event.ChangeEvent;
 
 /**
  * This class controls all the GUI components that are shown in
@@ -76,6 +78,7 @@ public class RupsController extends Observable
      */
     public RupsController(Dimension dimension, RupsTabbedPane rupsTabbedPane) {
         this.rupsTabbedPane = rupsTabbedPane;
+        this.rupsTabbedPane.addChangeListener(this::onTabChanged);
 
         this.dimension = dimension;
     }
@@ -133,6 +136,11 @@ public class RupsController extends Observable
     }
 
     @Override
+    public boolean isDefaultTabShown() {
+        return this.rupsTabbedPane.isDefaultTabShown();
+    }
+
+    @Override
     public final void openNewFile(File file) {
         if (file != null) {
             if (!RupsConfiguration.INSTANCE.canOpenDuplicateFiles() && this.rupsTabbedPane.isFileAlreadyOpen(file)) {
@@ -143,5 +151,10 @@ public class RupsController extends Observable
             this.rupsTabbedPane.openNewFile(file, this.dimension);
             this.update(this, new OpenFileEvent(file));
         }
+    }
+
+    private void onTabChanged(ChangeEvent e) {
+        setChanged();
+        notifyObservers(new DisplayedTabChanged(getCurrentFile()));
     }
 }

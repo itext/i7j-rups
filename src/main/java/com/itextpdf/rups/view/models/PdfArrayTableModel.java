@@ -85,26 +85,43 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex < 1;
+        return isEditable() && columnIndex < 1;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        if (columnIndex == 3) {
+            return DictionaryTableModelButton.class;
+        }
+        return super.getColumnClass(columnIndex);
     }
 
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
+    @Override
     public int getColumnCount() {
-        return 2;
+        if (isEditable()) {
+            return 2;
+        }
+        return 1;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
+    @Override
     public int getRowCount() {
-        return array.size() + 1;
+        if (isEditable()) {
+            return array.size() + 1;
+        }
+        return array.size();
     }
 
     /**
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
             if (rowIndex == array.size()) return tempValue;
@@ -140,6 +157,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     /**
      * @see javax.swing.table.AbstractTableModel#getColumnName(int)
      */
+    @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:

@@ -61,6 +61,7 @@ import com.itextpdf.rups.event.OpenPlainTextEvent;
 import com.itextpdf.rups.event.OpenStructureEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
+import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -305,12 +306,15 @@ public class PdfReaderController extends Observable implements Observer {
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     ObjectLoader loader = (ObjectLoader) event.getContent();
+                    IPdfFile pdfFile = loader.getFile();
                     nodes = loader.getNodes();
                     PdfTrailerTreeNode root = pdfTree.getRoot();
-                    root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
+                    root.setTrailer(pdfFile.getPdfDocument().getTrailer());
                     root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
                     nodes.expandNode(root);
                     navigationTabs.setSelectedIndex(0);
+                    streamPane.setEditable(pdfFile.isOpenedAsOwner());
+                    objectPanel.setEditable(pdfFile.isOpenedAsOwner());
                     setChanged();
                     super.notifyObservers(event);
                     break;

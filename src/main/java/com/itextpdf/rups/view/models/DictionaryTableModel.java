@@ -89,26 +89,35 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
+    @Override
     public int getColumnCount() {
-        return 3;
+        if (isEditable()) {
+            return 3;
+        }
+        return 2;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
+    @Override
     public int getRowCount() {
-        return dictionary.size() + 1;
+        if (isEditable()) {
+            return dictionary.size() + 1;
+        }
+        return dictionary.size();
     }
 
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex < 2;
+        return isEditable() && columnIndex < 2;
     }
 
     /**
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         final int lastRow = keys.size();
 
