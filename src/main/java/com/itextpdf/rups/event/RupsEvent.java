@@ -65,6 +65,7 @@ public abstract class RupsEvent {
     public static final byte NEW_INDIRECT_OBJECT_EVENT = 15;
     public static final byte POST_NEW_INDIRECT_OBJECT_EVENT = 16;
     public static final byte ALL_FILES_CLOSED = 17;
+    public static final byte DISPLAYED_TAB_CHANGED = 19;
 
     public abstract int getType();
 

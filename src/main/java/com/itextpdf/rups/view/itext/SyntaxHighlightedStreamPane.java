@@ -106,6 +106,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     //Todo: Remove that field after proper application structure will be implemented.
     private final PdfReaderController controller;
 
+    private boolean editable = false;
+
     static {
         try {
             pdfStreamGetInputStreamMethod = PdfStream.class.getDeclaredMethod("getInputStream");
@@ -122,7 +124,6 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
      * @param controller the pdf reader controller
      */
     public SyntaxHighlightedStreamPane(PdfReaderController controller) {
-        super();
         this.text = new JSyntaxPane();
         ToolTipManager.sharedInstance().registerComponent(text);
         setViewportView(text);
@@ -232,7 +233,18 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         manager.setLimit(MAX_NUMBER_OF_EDITS);
     }
 
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+        setTextEditableRoutine(editable);
+    }
+
     private void setTextEditableRoutine(boolean editable) {
+        if (!this.editable) {
+            text.setEditable(false);
+            popupMenu.setSaveToStreamEnabled(false);
+            return;
+        }
+
         text.setEditable(editable);
         if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) &&
                 (target.getPdfObject() instanceof PdfStream)) {

@@ -73,6 +73,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 public class PdfObjectPanel extends Observable implements Observer {
 
@@ -107,6 +108,8 @@ public class PdfObjectPanel extends Observable implements Observer {
     private final JPanel panel = new JPanel();
 
     private PdfObjectTreeNode target;
+
+    private boolean editable = false;
 
 
     /**
@@ -143,6 +146,16 @@ public class PdfObjectPanel extends Observable implements Observer {
         return panel;
     }
 
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+
+        // Update the state of an existing model
+        AbstractPdfObjectPanelTableModel model = getTableModel();
+        if (model != null) {
+            model.setEditable(editable);
+        }
+    }
+
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
@@ -174,10 +187,13 @@ public class PdfObjectPanel extends Observable implements Observer {
             case PdfObject.STREAM:
                 final DictionaryTableModel model =
                         new DictionaryTableModel((PdfDictionary) object, parser, panel);
+                model.setEditable(editable);
                 model.addTableModelListener(new DictionaryModelListener());
                 table.setModel(model);
-                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(
-                        IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON)));
+                table.setDefaultRenderer(
+                        DictionaryTableModelButton.class,
+                        new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON))
+                );
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;
@@ -185,9 +201,12 @@ public class PdfObjectPanel extends Observable implements Observer {
                 final PdfArrayTableModel arrayModel =
                         new PdfArrayTableModel((PdfArray) object, parser, panel);
                 arrayModel.addTableModelListener(new ArrayModelListener());
+                arrayModel.setEditable(editable);
                 table.setModel(arrayModel);
-                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
-                        IconFetcher.getIcon(ADD_ICON)));
+                table.setDefaultRenderer(
+                        DictionaryTableModelButton.class,
+                        new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON))
+                );
                 layout.show(panel, TABLE);
                 panel.repaint();
                 break;
@@ -200,6 +219,14 @@ public class PdfObjectPanel extends Observable implements Observer {
                 layout.show(panel, TEXT);
                 break;
         }
+    }
+
+    private AbstractPdfObjectPanelTableModel getTableModel() {
+        TableModel model = table.getModel();
+        if (model instanceof AbstractPdfObjectPanelTableModel) {
+            return (AbstractPdfObjectPanelTableModel) model;
+        }
+        return null;
     }
 
     private class JTableButtonMouseListener extends MouseAdapter {
@@ -259,7 +286,7 @@ public class PdfObjectPanel extends Observable implements Observer {
         @Override
         public void tableChanged(TableModelEvent e) {
             final int row = e.getFirstRow();
-            if (row != e.getLastRow()) {
+            if (row < 0 || row != e.getLastRow()) {
                 return;
             }
             final PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);

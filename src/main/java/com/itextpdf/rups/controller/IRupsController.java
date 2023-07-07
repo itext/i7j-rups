@@ -68,6 +68,14 @@ public interface IRupsController {
     IPdfFile getCurrentFile();
 
     /**
+     * Returns whether the default tab is shown. Default tab is the tab shown,
+     * when no files are opened.
+     *
+     * @return {@code true} if default tab is shown; {@code false} otherwise
+     */
+    boolean isDefaultTabShown();
+
+    /**
      * Opens a new File in RUPS.
      *
      * @param file the file to be opened.

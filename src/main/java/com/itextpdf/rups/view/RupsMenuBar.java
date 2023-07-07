@@ -50,6 +50,7 @@ import com.itextpdf.rups.io.FileOpenAction;
 import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -126,7 +127,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         addItem(help, Language.MENU_BAR_VERSION.getString(),
                 new MessageAction(ITextCoreProductData.getInstance().getVersion()));
         add(help);
-        enableItems(false);
+        onDisplayedFileChanged(controller);
     }
 
     /**
@@ -134,14 +135,14 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof RupsController && obj instanceof RupsEvent) {
+            RupsController controller = (RupsController) observable;
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.ALL_FILES_CLOSED:
-                    enableItems(false);
-                    break;
+                case RupsEvent.DISPLAYED_TAB_CHANGED:
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                 case RupsEvent.OPEN_FILE_EVENT:
-                    enableItems(true);
+                    onDisplayedFileChanged(controller);
                     break;
                 case RupsEvent.ROOT_NODE_CLICKED_EVENT:
                     fileOpenAction.actionPerformed(null);
@@ -172,17 +173,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
     }
 
     /**
-     * Enables/Disables a series of menu items.
-     *
-     * @param enabled true for enabling; false for disabling
-     */
-    public void enableItems(boolean enabled) {
-        enableItem(Language.MENU_BAR_CLOSE.getString(), enabled);
-        enableItem(Language.MENU_BAR_SAVE_AS.getString(), enabled);
-        enableItem(Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), enabled);
-    }
-
-    /**
      * Enables/disables a specific menu item
      *
      * @param caption the caption of the item that needs to be enabled/disabled
@@ -190,5 +180,21 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     protected void enableItem(String caption, boolean enabled) {
         items.get(caption).setEnabled(enabled);
+    }
+
+    private void onDisplayedFileChanged(RupsController controller) {
+        IPdfFile currentFile = controller.getCurrentFile();
+        enableItem(
+                Language.MENU_BAR_CLOSE.getString(),
+                !controller.isDefaultTabShown()
+        );
+        enableItem(
+                Language.MENU_BAR_SAVE_AS.getString(),
+                currentFile != null && currentFile.isOpenedAsOwner()
+        );
+        enableItem(
+                Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(),
+                currentFile != null
+        );
     }
 }

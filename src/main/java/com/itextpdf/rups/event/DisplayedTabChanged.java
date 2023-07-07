@@ -40,53 +40,24 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.mock;
+package com.itextpdf.rups.event;
 
-import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.model.IPdfFile;
 
-import java.awt.Component;
-import java.io.File;
+public class DisplayedTabChanged extends RupsEvent {
+    private final IPdfFile displayedFile;
 
-public class MockedRupsController implements IRupsController {
-
-    private int openCount = 0;
-
-    private IPdfFile pdfFile;
-
-    public MockedRupsController() {
-    }
-
-    public MockedRupsController(IPdfFile pdfFile) {
-        this.pdfFile = pdfFile;
+    public DisplayedTabChanged(IPdfFile displayedFile) {
+        this.displayedFile = displayedFile;
     }
 
     @Override
-    public Component getMasterComponent() {
-        return null;
+    public int getType() {
+        return RupsEvent.DISPLAYED_TAB_CHANGED;
     }
 
     @Override
-    public IPdfFile getCurrentFile() {
-        return this.pdfFile;
-    }
-
-    @Override
-    public boolean isDefaultTabShown() {
-        return false;
-    }
-
-    @Override
-    public void openNewFile(File file) {
-        this.openCount++;
-    }
-
-    @Override
-    public void closeCurrentFile() {
-        this.openCount--;
-    }
-
-    public int getOpenedCount() {
-        return this.openCount;
+    public Object getContent() {
+        return displayedFile;
     }
 }

@@ -45,10 +45,29 @@ package com.itextpdf.rups.view.models;
 import javax.swing.table.AbstractTableModel;
 
 public abstract class AbstractPdfObjectPanelTableModel extends AbstractTableModel {
+    private boolean editable = false;
 
     public abstract void removeRow(int rowIndex);
 
     public abstract void validateTempRow();
 
     public abstract int getButtonColumn();
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable)
+    {
+        this.editable = editable;
+        this.fireTableStructureChanged();
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        if (columnIndex == getButtonColumn()) {
+            return DictionaryTableModelButton.class;
+        }
+        return super.getColumnClass(columnIndex);
+    }
 }

@@ -51,6 +51,8 @@ import java.io.File;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * The class holding the JTabbedPane that holds the Rups tabs. This class is responsible for loading, closing, and
@@ -72,7 +74,7 @@ public class RupsTabbedPane {
 
     public void openNewFile(File file, Dimension dimension) {
         if (file != null) {
-            if (this.defaultTab.equals(this.jTabbedPane.getSelectedComponent())) {
+            if (isDefaultTabShown()) {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
             }
 
@@ -99,8 +101,10 @@ public class RupsTabbedPane {
 
     public IPdfFile getCurrentFile() {
         Component currentComponent = this.jTabbedPane.getSelectedComponent();
-        RupsPanel currentRupsPanel = (RupsPanel) currentComponent;
-        return currentRupsPanel.getPdfFile();
+        if (currentComponent instanceof RupsPanel) {
+            return ((RupsPanel) currentComponent).getPdfFile();
+        }
+        return null;
     }
 
     public void saveCurrentFile(File file) {
@@ -110,6 +114,10 @@ public class RupsTabbedPane {
 
     public Component getJTabbedPane() {
         return this.jTabbedPane;
+    }
+
+    public boolean isDefaultTabShown() {
+        return this.defaultTab == this.jTabbedPane.getSelectedComponent();
     }
 
     /**
@@ -133,5 +141,9 @@ public class RupsTabbedPane {
         }
 
         return false;
+    }
+
+    public void addChangeListener(ChangeListener l) {
+        this.jTabbedPane.addChangeListener(e -> l.stateChanged(new ChangeEvent(this)));
     }
 }
