@@ -44,6 +44,7 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.controller.RupsController;
+import com.itextpdf.rups.event.ReopenCurrentFileAsOwnerEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileOpenAction;
@@ -105,6 +106,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
+        addItem(file, Language.MENU_BAR_REOPEN_AS_OWNER.getString(),
+                e -> controller.update(null, new ReopenCurrentFileAsOwnerEvent()));
         addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(controller),
                 KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_SAVE_AS.getString(), fileSaverAction,
@@ -184,14 +187,24 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 
     private void onDisplayedFileChanged(RupsController controller) {
         IPdfFile currentFile = controller.getCurrentFile();
+        // "Reopen As Owner" makes sense only if the selected file was opened
+        // in a restricted mode
+        enableItem(
+                Language.MENU_BAR_REOPEN_AS_OWNER.getString(),
+                currentFile != null && !currentFile.isOpenedAsOwner()
+        );
+        // "Close" should be enabled, when there is a "closeable" tab present
         enableItem(
                 Language.MENU_BAR_CLOSE.getString(),
                 !controller.isDefaultTabShown()
         );
+        // "Save As" should be enabled only if there is an "editable" file
+        // currently selected
         enableItem(
                 Language.MENU_BAR_SAVE_AS.getString(),
                 currentFile != null && currentFile.isOpenedAsOwner()
         );
+        // "Open In PDF Viewer" should be enabled for any opened file
         enableItem(
                 Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(),
                 currentFile != null

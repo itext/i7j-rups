@@ -56,6 +56,20 @@ import javax.swing.JPasswordField;
 public class DialogPasswordProvider implements IPasswordProvider {
     public static final int MAX_PASSWORD_BYTE_LENGTH = 127;
 
+    private final String title;
+
+    public DialogPasswordProvider(String title) {
+        this.title = title;
+    }
+
+    public static DialogPasswordProvider anyPassword() {
+        return new DialogPasswordProvider(Language.ENTER_ANY_PASSWORD.getString());
+    }
+
+    public static DialogPasswordProvider ownerPassword() {
+        return new DialogPasswordProvider(Language.ENTER_OWNER_PASSWORD.getString());
+    }
+
     @Override
     public boolean isInteractive() {
         return true;
@@ -81,7 +95,7 @@ public class DialogPasswordProvider implements IPasswordProvider {
                     }
                 };
 
-        JDialog dialog = pane.createDialog(Language.ENTER_PASSWORD.getString());
+        JDialog dialog = pane.createDialog(this.title);
         dialog.setVisible(true);
         dialog.dispose();
 

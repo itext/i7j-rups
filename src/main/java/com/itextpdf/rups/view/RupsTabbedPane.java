@@ -73,6 +73,10 @@ public class RupsTabbedPane {
     }
 
     public void openNewFile(File file, Dimension dimension) {
+        openNewFile(file, dimension, false);
+    }
+
+    public void openNewFile(File file, Dimension dimension, boolean requireEditable) {
         if (file != null) {
             if (isDefaultTabShown()) {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
@@ -81,7 +85,7 @@ public class RupsTabbedPane {
             RupsPanel rupsPanel = new RupsPanel();
             RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
-            rupsInstanceController.loadFile(file);
+            rupsInstanceController.loadFile(file, requireEditable);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
             this.jTabbedPane.setSelectedComponent(rupsPanel);
         }
@@ -97,6 +101,16 @@ public class RupsTabbedPane {
         }
 
         return isLastTab;
+    }
+
+    public void closeFile(IPdfFile file) {
+        for (int i = 0; i < this.jTabbedPane.getTabCount(); i++) {
+            Component comp = this.jTabbedPane.getComponentAt(i);
+            if ((comp instanceof RupsPanel) && ((RupsPanel) comp).getPdfFile() == file) {
+                this.jTabbedPane.removeTabAt(i);
+                return;
+            }
+        }
     }
 
     public IPdfFile getCurrentFile() {

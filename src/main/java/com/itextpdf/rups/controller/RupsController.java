@@ -110,6 +110,9 @@ public class RupsController extends Observable
                 case RupsEvent.SAVE_TO_FILE_EVENT:
                     this.rupsTabbedPane.saveCurrentFile((File) event.getContent());
                     break;
+                case RupsEvent.REOPEN_CURRENT_FILE_AS_OWNER:
+                    this.reopenAsOwner();
+                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                 default:
                     setChanged();
@@ -127,6 +130,21 @@ public class RupsController extends Observable
         final boolean lastOne = this.rupsTabbedPane.closeCurrentFile();
         if (lastOne) {
             this.update(this, new AllFilesClosedEvent());
+        }
+    }
+
+    @Override
+    public void reopenAsOwner() {
+        IPdfFile file = this.getCurrentFile();
+        // Should not happen (i.e. UI should not allow it), will silently ignore
+        if (file == null) {
+            return;
+        }
+
+        openNewFileAsOwner(file.getOriginalFile());
+        // Close the read-only file only if opening as owner was successful
+        if (getCurrentFile() != null) {
+            closeFile(file);
         }
     }
 
@@ -151,6 +169,20 @@ public class RupsController extends Observable
             this.rupsTabbedPane.openNewFile(file, this.dimension);
             this.update(this, new OpenFileEvent(file));
         }
+    }
+
+    private void openNewFileAsOwner(File file) {
+        assert file != null;
+
+        // We don't check here for duplicate files, as we don't want to close
+        // the already opened file, if we fail here
+
+        this.rupsTabbedPane.openNewFile(file, this.dimension, true);
+        this.update(this, new OpenFileEvent(file));
+    }
+
+    private void closeFile(IPdfFile file) {
+        this.rupsTabbedPane.closeFile(file);
     }
 
     private void onTabChanged(ChangeEvent e) {

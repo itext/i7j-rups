@@ -83,7 +83,7 @@ public class PdfFile implements IPdfFile {
     }
 
     public static PdfFile open(File file) throws IOException {
-        return open(file, Files.readAllBytes(file.toPath()), new DialogPasswordProvider());
+        return open(file, Files.readAllBytes(file.toPath()), DialogPasswordProvider.anyPassword());
     }
 
     public static PdfFile open(File file, IPasswordProvider passwordProvider) throws IOException {
@@ -91,12 +91,32 @@ public class PdfFile implements IPdfFile {
     }
 
     public static PdfFile open(File file, byte[] content) throws IOException {
-        return open(file, content, new DialogPasswordProvider());
+        return open(file, content, DialogPasswordProvider.anyPassword());
     }
 
     public static PdfFile open(File file, byte[] content, IPasswordProvider passwordProvider) throws IOException {
         PdfFile pdfFile = new PdfFile(file, content);
-        pdfFile.openDocument(passwordProvider);
+        pdfFile.openDocument(passwordProvider, false);
+        return pdfFile;
+    }
+
+    public static PdfFile openAsOwner(File file) throws IOException {
+        return openAsOwner(file, Files.readAllBytes(file.toPath()), DialogPasswordProvider.ownerPassword());
+    }
+
+    public static PdfFile openAsOwner(File file, IPasswordProvider passwordProvider) throws IOException {
+        return openAsOwner(file, Files.readAllBytes(file.toPath()), passwordProvider);
+    }
+
+    public static PdfFile openAsOwner(File file, byte[] content) throws IOException {
+        return openAsOwner(file, content, DialogPasswordProvider.ownerPassword());
+    }
+
+
+    public static PdfFile openAsOwner(File file, byte[] content, IPasswordProvider passwordProvider)
+            throws IOException {
+        PdfFile pdfFile = new PdfFile(file, content);
+        pdfFile.openDocument(passwordProvider, true);
         return pdfFile;
     }
 
@@ -125,7 +145,8 @@ public class PdfFile implements IPdfFile {
      * object. If password is required, then the password provider will be
      * called.
      */
-    private void openDocument(IPasswordProvider passwordProvider) throws IOException {
+    private void openDocument(IPasswordProvider passwordProvider, boolean requireEditable)
+            throws IOException {
         /*
          * This should pass in the majority of cases (i.e. if the document is
          * non-encrypted).
@@ -140,8 +161,11 @@ public class PdfFile implements IPdfFile {
          * user password.
          *
          * In this case any editing operations in RUPS should be disabled.
+         *
+         * If the requireEditable flag is set to true, we skip trying to open
+         * the document in a read-only mode.
          */
-        if (openDocumentReadOnly()) {
+        if (!requireEditable && openDocumentReadOnly()) {
             return;
         }
 
@@ -154,6 +178,9 @@ public class PdfFile implements IPdfFile {
          * open as an owner (read/write) and then, if failed, as a user
          * (read-only). If both failed, we will keep asking for the correct
          * password until password provider signals cancellation.
+         *
+         * If the requireEditable flag is set to true, we skip trying to open
+         * the document in a read-only mode.
          */
         while (true) {
             byte[] password = passwordProvider.get(getOriginalFile());
@@ -163,7 +190,7 @@ public class PdfFile implements IPdfFile {
             if (openDocumentReadWrite(password)) {
                 return;
             }
-            if (openDocumentReadOnly(password)) {
+            if (!requireEditable && openDocumentReadOnly(password)) {
                 return;
             }
             /*
