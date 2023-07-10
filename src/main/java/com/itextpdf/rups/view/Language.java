@@ -229,6 +229,7 @@ public enum Language {
     TOOLTIP_HEX,
 
     WARNING,
+    WARNING_OPENED_IN_READ_ONLY_MODE,
 
     XREF,
     XREF_DESCRIPTION,

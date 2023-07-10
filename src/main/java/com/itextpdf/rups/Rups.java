@@ -62,6 +62,13 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public class Rups {
+    private Rups() {
+    }
+
+    private static JFrame mainFrame = null;
+    public static JFrame getMainFrame() {
+        return mainFrame;
+    }
 
     /**
      * Initializes the main components of the Rups application.
@@ -93,6 +100,8 @@ public class Rups {
     }
 
     static IRupsController initApplication(JFrame frame) {
+        mainFrame = frame;
+
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) (screen.getWidth() * .90), (int) (screen.getHeight() * .90));
         frame.setLocation((int) (screen.getWidth() * .05), (int) (screen.getHeight() * .05));
