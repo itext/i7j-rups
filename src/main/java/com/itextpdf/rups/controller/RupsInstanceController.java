@@ -46,6 +46,7 @@ import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.PostCompareEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -58,6 +59,7 @@ import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
+import com.itextpdf.rups.view.Snackbar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -71,8 +73,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JOptionPane;
@@ -210,8 +210,7 @@ public class RupsInstanceController extends Observable
             startObjectLoader();
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
-            JOptionPane.showMessageDialog(masterComponent, ioe.getMessage(), Language.DIALOG.getString(),
-                    JOptionPane.ERROR_MESSAGE);
+            Snackbar.make(Rups.getMainFrame(), ioe.getMessage()).show();
         }
     }
 

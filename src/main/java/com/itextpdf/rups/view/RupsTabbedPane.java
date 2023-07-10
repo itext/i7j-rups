@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.model.IPdfFile;
 
@@ -88,6 +89,7 @@ public class RupsTabbedPane {
             rupsInstanceController.loadFile(file, requireEditable);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
             this.jTabbedPane.setSelectedComponent(rupsPanel);
+            showReadOnlyWarning();
         }
     }
 
@@ -159,5 +161,12 @@ public class RupsTabbedPane {
 
     public void addChangeListener(ChangeListener l) {
         this.jTabbedPane.addChangeListener(e -> l.stateChanged(new ChangeEvent(this)));
+    }
+
+    private void showReadOnlyWarning() {
+        IPdfFile currentFile = getCurrentFile();
+        if (currentFile != null && !currentFile.isOpenedAsOwner()) {
+            Snackbar.make(Rups.getMainFrame(), Language.WARNING_OPENED_IN_READ_ONLY_MODE.getString()).show();
+        }
     }
 }
