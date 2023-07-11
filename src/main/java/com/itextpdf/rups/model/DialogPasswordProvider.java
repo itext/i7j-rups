@@ -95,11 +95,11 @@ public class DialogPasswordProvider implements IPasswordProvider {
                     }
                 };
 
-        JDialog dialog = pane.createDialog(this.title);
+        final JDialog dialog = pane.createDialog(this.title);
         dialog.setVisible(true);
         dialog.dispose();
 
-        Object selectedValue = pane.getValue();
+        final Object selectedValue = pane.getValue();
         // If user didn't click OK in the dialog
         if (!(selectedValue instanceof Integer) || (Integer) selectedValue != JOptionPane.OK_OPTION) {
             return null;
@@ -116,11 +116,11 @@ public class DialogPasswordProvider implements IPasswordProvider {
         } catch (StringPrepParseException e) {
             throw new PdfException(Language.ERROR_PASSWORD.getString(), e);
         }
-        byte[] resultingBytes = prepped.getBytes(StandardCharsets.UTF_8);
+        final byte[] resultingBytes = prepped.getBytes(StandardCharsets.UTF_8);
         if (resultingBytes.length <= MAX_PASSWORD_BYTE_LENGTH) {
             return resultingBytes;
         } else {
-            byte[] trimmed = new byte[MAX_PASSWORD_BYTE_LENGTH];
+            final byte[] trimmed = new byte[MAX_PASSWORD_BYTE_LENGTH];
             System.arraycopy(resultingBytes, 0, trimmed, 0, trimmed.length);
             return trimmed;
         }

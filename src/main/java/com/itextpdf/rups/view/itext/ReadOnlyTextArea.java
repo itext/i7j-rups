@@ -69,14 +69,14 @@ public class ReadOnlyTextArea extends JTextArea {
         addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent focusEvent) {
-                Caret caret = getCaret();
+                final Caret caret = getCaret();
                 caret.setVisible(true);
                 caret.setSelectionVisible(true);
             }
 
             @Override
             public void focusLost(FocusEvent focusEvent) {
-                Caret caret = getCaret();
+                final Caret caret = getCaret();
                 caret.setVisible(false);
                 caret.setSelectionVisible(true);
             }

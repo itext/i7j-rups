@@ -150,7 +150,7 @@ public class PdfObjectPanel extends Observable implements Observer {
         this.editable = editable;
 
         // Update the state of an existing model
-        AbstractPdfObjectPanelTableModel model = getTableModel();
+        final AbstractPdfObjectPanelTableModel model = getTableModel();
         if (model != null) {
             model.setEditable(editable);
         }
@@ -222,7 +222,7 @@ public class PdfObjectPanel extends Observable implements Observer {
     }
 
     private AbstractPdfObjectPanelTableModel getTableModel() {
-        TableModel model = table.getModel();
+        final TableModel model = table.getModel();
         if (model instanceof AbstractPdfObjectPanelTableModel) {
             return (AbstractPdfObjectPanelTableModel) model;
         }

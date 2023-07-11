@@ -49,13 +49,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
 class PdfFileTest {
-    private static final File RESOURCES_DIR = new File("./src/test/resources/com/itextpdf/rups/model/pdfFile");
+    private static final Path RESOURCES_DIR_PATH = Paths.get(
+            "./src/test/resources/com/itextpdf/rups/model/pdfFile"
+    );
 
     private static final String USER_PASSWORD = "password-user";
     private static final String OWNER_PASSWORD = "password-owner";
@@ -271,32 +275,34 @@ class PdfFileTest {
     }
 
     private PdfFile openTestFile(String fileName, String password) throws IOException {
-        File testFile = new File(RESOURCES_DIR, fileName);
-        byte[] testFileBytes = Files.readAllBytes(testFile.toPath());
-        PdfFile openedFile = PdfFile.open(testFile, testFileBytes, new StaticPasswordProvider(testFile, password));
+        final File testFile = RESOURCES_DIR_PATH.resolve(fileName).toFile();
+        final PdfFile openedFile = PdfFile.open(testFile, new StaticPasswordProvider(testFile, password));
 
         // These assertions should be valid on any properly opened file
         Assertions.assertEquals(testFile, openedFile.getOriginalFile());
-        Assertions.assertArrayEquals(testFileBytes, openedFile.getOriginalContent());
+        Assertions.assertArrayEquals(readTestFileBytes(fileName), openedFile.getOriginalContent());
         Assertions.assertNotNull(openedFile.getPdfDocument());
         return openedFile;
     }
 
     private PdfFile openTestFileAsOwner(String fileName, String password) throws IOException {
-        File testFile = new File(RESOURCES_DIR, fileName);
-        byte[] testFileBytes = Files.readAllBytes(testFile.toPath());
-        PdfFile openedFile = PdfFile.openAsOwner(
-                testFile, testFileBytes, new StaticPasswordProvider(testFile, password)
+        final File testFile = RESOURCES_DIR_PATH.resolve(fileName).toFile();
+        final PdfFile openedFile = PdfFile.openAsOwner(
+                testFile, new StaticPasswordProvider(testFile, password)
         );
 
         // These assertions should be valid on any properly opened file
         Assertions.assertEquals(testFile, openedFile.getOriginalFile());
-        Assertions.assertArrayEquals(testFileBytes, openedFile.getOriginalContent());
+        Assertions.assertArrayEquals(readTestFileBytes(fileName), openedFile.getOriginalContent());
         Assertions.assertNotNull(openedFile.getPdfDocument());
         // Should be opened as owner, as we are forcing it here
         Assertions.assertTrue(openedFile.isOpenedAsOwner());
         Assertions.assertNotNull(openedFile.getByteArrayOutputStream());
         return openedFile;
+    }
+
+    private byte[] readTestFileBytes(String filename) throws IOException {
+        return Files.readAllBytes(RESOURCES_DIR_PATH.resolve(filename));
     }
 
     private static class StaticPasswordProvider implements IPasswordProvider {

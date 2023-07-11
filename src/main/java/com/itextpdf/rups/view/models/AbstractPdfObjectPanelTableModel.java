@@ -57,8 +57,7 @@ public abstract class AbstractPdfObjectPanelTableModel extends AbstractTableMode
         return editable;
     }
 
-    public void setEditable(boolean editable)
-    {
+    public void setEditable(boolean editable) {
         this.editable = editable;
         this.fireTableStructureChanged();
     }

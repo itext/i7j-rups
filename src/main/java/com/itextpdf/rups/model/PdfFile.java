@@ -59,7 +59,7 @@ import java.nio.file.Files;
  * Wrapper for both iText's PdfReader (referring to a PDF file to read)
  * and SUN's PDFFile (referring to the same PDF file to render).
  */
-public class PdfFile implements IPdfFile {
+public final class PdfFile implements IPdfFile {
     /**
      * The original PDF document location.
      */
@@ -95,7 +95,7 @@ public class PdfFile implements IPdfFile {
     }
 
     public static PdfFile open(File file, byte[] content, IPasswordProvider passwordProvider) throws IOException {
-        PdfFile pdfFile = new PdfFile(file, content);
+        final PdfFile pdfFile = new PdfFile(file, content);
         pdfFile.openDocument(passwordProvider, false);
         return pdfFile;
     }
@@ -115,7 +115,7 @@ public class PdfFile implements IPdfFile {
 
     public static PdfFile openAsOwner(File file, byte[] content, IPasswordProvider passwordProvider)
             throws IOException {
-        PdfFile pdfFile = new PdfFile(file, content);
+        final PdfFile pdfFile = new PdfFile(file, content);
         pdfFile.openDocument(passwordProvider, true);
         return pdfFile;
     }
@@ -183,7 +183,7 @@ public class PdfFile implements IPdfFile {
          * the document in a read-only mode.
          */
         while (true) {
-            byte[] password = passwordProvider.get(getOriginalFile());
+            final byte[] password = passwordProvider.get(getOriginalFile());
             if (password == null) {
                 throw new BadPasswordException(Language.ERROR_MISSING_PASSWORD.getString());
             }
@@ -221,15 +221,21 @@ public class PdfFile implements IPdfFile {
      *
      * @return {@code true} on success; {@code false} if invalid password
      */
+    /*
+     * "Either log or rethrow this exception." warning is ignored, as the whole
+     * contract of the method is to return false on a "bad password" (i.e. this
+     * is not an exceptional case here).
+     */
+    @SuppressWarnings("java:S1166")
     private boolean openDocumentReadWrite(byte[] password) throws IOException {
         try {
-            ReaderProperties readerProperties = new ReaderProperties().setPassword(password);
-            PdfReader reader = new PdfReader(
+            final ReaderProperties readerProperties = new ReaderProperties().setPassword(password);
+            final PdfReader reader = new PdfReader(
                     new ByteArrayInputStream(getOriginalContent()),
                     readerProperties
             );
-            ByteArrayOutputStream tempWriterOutputStream = new ByteArrayOutputStream();
-            PdfWriter writer = new PdfWriter(tempWriterOutputStream);
+            final ByteArrayOutputStream tempWriterOutputStream = new ByteArrayOutputStream();
+            final PdfWriter writer = new PdfWriter(tempWriterOutputStream);
             document = new PdfDocument(reader, writer);
             writerOutputStream = tempWriterOutputStream;
             return true;
@@ -256,11 +262,17 @@ public class PdfFile implements IPdfFile {
      *
      * @return {@code true} on success; {@code false} if invalid password
      */
+    /*
+     * "Either log or rethrow this exception." warning is ignored, as the whole
+     * contract of the method is to return false on a "bad password" (i.e. this
+     * is not an exceptional case here).
+     */
+    @SuppressWarnings("java:S1166")
     private boolean openDocumentReadOnly(byte[] password) throws IOException {
         try {
-            ReaderProperties readerProperties = new ReaderProperties();
+            final ReaderProperties readerProperties = new ReaderProperties();
             readerProperties.setPassword(password);
-            PdfReader reader = new PdfReader(
+            final PdfReader reader = new PdfReader(
                     new ByteArrayInputStream(getOriginalContent()),
                     readerProperties
             );

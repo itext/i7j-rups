@@ -83,8 +83,9 @@ public class RupsTabbedPane {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
             }
 
-            RupsPanel rupsPanel = new RupsPanel();
-            RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
+            final RupsPanel rupsPanel = new RupsPanel();
+            final RupsInstanceController rupsInstanceController =
+                    new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
             rupsInstanceController.loadFile(file, requireEditable);
             this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
@@ -107,7 +108,7 @@ public class RupsTabbedPane {
 
     public void closeFile(IPdfFile file) {
         for (int i = 0; i < this.jTabbedPane.getTabCount(); i++) {
-            Component comp = this.jTabbedPane.getComponentAt(i);
+            final Component comp = this.jTabbedPane.getComponentAt(i);
             if ((comp instanceof RupsPanel) && ((RupsPanel) comp).getPdfFile() == file) {
                 this.jTabbedPane.removeTabAt(i);
                 return;
@@ -116,7 +117,7 @@ public class RupsTabbedPane {
     }
 
     public IPdfFile getCurrentFile() {
-        Component currentComponent = this.jTabbedPane.getSelectedComponent();
+        final Component currentComponent = this.jTabbedPane.getSelectedComponent();
         if (currentComponent instanceof RupsPanel) {
             return ((RupsPanel) currentComponent).getPdfFile();
         }
@@ -124,7 +125,7 @@ public class RupsTabbedPane {
     }
 
     public void saveCurrentFile(File file) {
-        RupsPanel currentRupsPanel = (RupsPanel) this.jTabbedPane.getSelectedComponent();
+        final RupsPanel currentRupsPanel = (RupsPanel) this.jTabbedPane.getSelectedComponent();
         currentRupsPanel.getRupsInstanceController().saveFile(file);
     }
 
@@ -145,11 +146,11 @@ public class RupsTabbedPane {
      */
     public boolean isFileAlreadyOpen(File file) {
         for (int tabIndex = 0; tabIndex < this.jTabbedPane.getTabCount(); tabIndex++) {
-            Component component = this.jTabbedPane.getComponentAt(tabIndex);
+            final Component component = this.jTabbedPane.getComponentAt(tabIndex);
 
             if ( component instanceof RupsPanel ) {
-                RupsPanel rupsPanel = (RupsPanel) component;
-                IPdfFile pdfFile = rupsPanel.getPdfFile();
+                final RupsPanel rupsPanel = (RupsPanel) component;
+                final IPdfFile pdfFile = rupsPanel.getPdfFile();
                 if (pdfFile != null && pdfFile.getOriginalFile().equals(file)) {
                     return true;
                 }
@@ -164,7 +165,7 @@ public class RupsTabbedPane {
     }
 
     private void showReadOnlyWarning() {
-        IPdfFile currentFile = getCurrentFile();
+        final IPdfFile currentFile = getCurrentFile();
         if (currentFile != null && !currentFile.isOpenedAsOwner()) {
             Snackbar.make(Rups.getMainFrame(), Language.WARNING_OPENED_IN_READ_ONLY_MODE.getString()).show();
         }

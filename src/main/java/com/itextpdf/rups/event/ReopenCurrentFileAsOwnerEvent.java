@@ -44,6 +44,10 @@ package com.itextpdf.rups.event;
 
 
 public class ReopenCurrentFileAsOwnerEvent extends RupsEvent {
+    public ReopenCurrentFileAsOwnerEvent() {
+        // Nothing to initialize
+    }
+
     @Override
     public int getType() {
         return REOPEN_CURRENT_FILE_AS_OWNER;

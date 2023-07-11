@@ -56,6 +56,7 @@ import java.awt.Component;
  * A TableModel in case we want to show a PDF array in a JTable.
  */
 public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
+    private static final int DATA_COLUMN_COUNT = 1;
 
     /**
      * The PDF array.
@@ -88,23 +89,16 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
         return isEditable() && columnIndex < 1;
     }
 
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 3) {
-            return DictionaryTableModelButton.class;
-        }
-        return super.getColumnClass(columnIndex);
-    }
-
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
     @Override
     public int getColumnCount() {
         if (isEditable()) {
-            return 2;
+            // +1 is for the add/remove buttons column
+            return DATA_COLUMN_COUNT + 1;
         }
-        return 1;
+        return DATA_COLUMN_COUNT;
     }
 
     /**
@@ -113,6 +107,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public int getRowCount() {
         if (isEditable()) {
+            // +1 is for the "add new row" row
             return array.size() + 1;
         }
         return array.size();
