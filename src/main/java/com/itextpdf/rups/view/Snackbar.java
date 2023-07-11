@@ -51,6 +51,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.BorderFactory;
@@ -66,7 +67,10 @@ import javax.swing.Timer;
  * <a href="https://m3.material.io/components/snackbar/overview">Snackbar</a>
  * from Android.
  */
-public class Snackbar {
+public final class Snackbar {
+    public static final int DURATION_SHORT = 4000;
+    public static final int DURATION_LONG = 10000;
+
     private static final Color COLOR_INVERSE_ON_SURFACE = new Color(0xF4EFF4);
     private static final Color COLOR_INVERSE_SURFACE = new Color(0x313033);
 
@@ -92,7 +96,7 @@ public class Snackbar {
     }
 
     public static Snackbar make(Window owner, String text) {
-        return new Snackbar(owner, text, 4000);
+        return new Snackbar(owner, text, DURATION_SHORT);
     }
 
     public static Snackbar make(Window owner, String text, int durationInMs) {
@@ -107,7 +111,7 @@ public class Snackbar {
         // Show
         dialog.setVisible(true);
         // Start timer for hiding the dialog and disposing
-        Timer timer = new Timer(durationInMs, e -> {
+        final Timer timer = new Timer(durationInMs, (ActionEvent e) -> {
             dialog.setVisible(false);
             dialog.dispose();
         });
@@ -116,7 +120,7 @@ public class Snackbar {
     }
 
     private static JDialog createDialog(Window window, String text) {
-        JDialog dialog = new JDialog(window, ModalityType.MODELESS);
+        final JDialog dialog = new JDialog(window, ModalityType.MODELESS);
         dialog.setUndecorated(true);
         /*
          * Dialog should be transparent. The content pane is responsible for
@@ -144,12 +148,18 @@ public class Snackbar {
             }
         });
 
-        SnackbarPanel panel = new SnackbarPanel(ARC_SIZE, ARC_SIZE);
+        final SnackbarPanel panel = new SnackbarPanel(ARC_SIZE, ARC_SIZE);
         panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(0, X_PADDING, SHADOW_HEIGHT, X_PADDING));
         panel.setBackground(COLOR_INVERSE_SURFACE);
 
-        JLabel label = new JLabel(text);
+        final JLabel label = new JLabel(text);
+        /*
+         * SpotBugs expects, that we explicitly specify, that this is just text
+         * and it not a label for some control component. So we are calling this
+         * explicitly with null to make it happy.
+         */
+        label.setLabelFor(null);
         label.setForeground(COLOR_INVERSE_ON_SURFACE);
         label.setFont(new Font(label.getFont().getName(), Font.PLAIN, FONT_SIZE));
         panel.add(label);
@@ -171,7 +181,7 @@ public class Snackbar {
     /**
      * A small panel with rounded corners and a basic shadow.
      */
-    private static class SnackbarPanel extends JPanel {
+    private static final class SnackbarPanel extends JPanel {
         private final int arcWidth;
         private final int arcHeight;
 
@@ -194,7 +204,7 @@ public class Snackbar {
                 );
                 // Drawing the panel shadow
                 // Which is pretty basic...
-                GradientPaint paint = new GradientPaint(
+                final GradientPaint paint = new GradientPaint(
                         0,
                         (getHeight() - SHADOW_HEIGHT),
                         new Color(0x33000000, true),

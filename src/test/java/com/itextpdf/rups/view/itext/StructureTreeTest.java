@@ -67,8 +67,9 @@ class StructureTreeTest extends ExtendedITextTest {
 
     @Test
     void extractMcidContentInStructureTreeTest() throws IOException {
-        File file = new File(sourceFolder + "hello_world_tagged.pdf");
-        PdfFile pdfFile = PdfFile.open(file, Files.readAllBytes(file.toPath()));
+        final PdfFile pdfFile = PdfFile.open(
+                new File(sourceFolder + "hello_world_tagged.pdf")
+        );
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
@@ -79,8 +80,9 @@ class StructureTreeTest extends ExtendedITextTest {
 
     @Test
     void extractMcidContentInStructureTreeWithActualTextTest() throws IOException {
-        File file = new File(sourceFolder + "hello_world_tagged_actualtext.pdf");
-        PdfFile pdfFile = PdfFile.open(file, Files.readAllBytes(file.toPath()));
+        final PdfFile pdfFile = PdfFile.open(
+                new File(sourceFolder + "hello_world_tagged_actualtext.pdf")
+        );
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)

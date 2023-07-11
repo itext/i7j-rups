@@ -97,7 +97,7 @@ public class RupsController extends Observable
     public final void update(Observable o, Object arg) {
         //Events that have come from non observable classes: ObjectLoader and FileChooserAction
         if (o == null && arg instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) arg;
+            final RupsEvent event = (RupsEvent) arg;
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
                     this.closeCurrentFile();
@@ -135,7 +135,7 @@ public class RupsController extends Observable
 
     @Override
     public void reopenAsOwner() {
-        IPdfFile file = this.getCurrentFile();
+        final IPdfFile file = this.getCurrentFile();
         // Should not happen (i.e. UI should not allow it), will silently ignore
         if (file == null) {
             return;

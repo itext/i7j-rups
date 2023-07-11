@@ -43,6 +43,7 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
+import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.ReopenCurrentFileAsOwnerEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -138,8 +139,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof RupsController && obj instanceof RupsEvent) {
-            RupsController controller = (RupsController) observable;
-            RupsEvent event = (RupsEvent) obj;
+            final RupsController controller = (RupsController) observable;
+            final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.ALL_FILES_CLOSED:
                 case RupsEvent.DISPLAYED_TAB_CHANGED:
@@ -166,7 +167,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
     }
 
     protected final void addItem(JMenu menu, String caption, ActionListener action, KeyStroke keyStroke) {
-        JMenuItem item = new JMenuItem(caption);
+        final JMenuItem item = new JMenuItem(caption);
         item.addActionListener(action);
         if (keyStroke != null) {
             item.setAccelerator(keyStroke);
@@ -185,8 +186,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         items.get(caption).setEnabled(enabled);
     }
 
-    private void onDisplayedFileChanged(RupsController controller) {
-        IPdfFile currentFile = controller.getCurrentFile();
+    private void onDisplayedFileChanged(IRupsController controller) {
+        final IPdfFile currentFile = controller.getCurrentFile();
         // "Reopen As Owner" makes sense only if the selected file was opened
         // in a restricted mode
         enableItem(

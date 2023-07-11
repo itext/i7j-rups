@@ -305,10 +305,10 @@ public class PdfReaderController extends Observable implements Observer {
                     pdfTree.repaint();
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
-                    IPdfFile pdfFile = loader.getFile();
+                    final ObjectLoader loader = (ObjectLoader) event.getContent();
+                    final IPdfFile pdfFile = loader.getFile();
                     nodes = loader.getNodes();
-                    PdfTrailerTreeNode root = pdfTree.getRoot();
+                    final PdfTrailerTreeNode root = pdfTree.getRoot();
                     root.setTrailer(pdfFile.getPdfDocument().getTrailer());
                     root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
                     nodes.expandNode(root);

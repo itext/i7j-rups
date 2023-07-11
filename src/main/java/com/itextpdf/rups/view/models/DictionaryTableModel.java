@@ -57,6 +57,7 @@ import java.util.ArrayList;
  * A TableModel in case we want to show a PDF dictionary in a JTable.
  */
 public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
+    private static final int DATA_COLUMN_COUNT = 2;
 
     private final PdfSyntaxParser parser;
     /**
@@ -92,9 +93,10 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public int getColumnCount() {
         if (isEditable()) {
-            return 3;
+            // +1 is for the add/remove buttons column
+            return DATA_COLUMN_COUNT + 1;
         }
-        return 2;
+        return DATA_COLUMN_COUNT;
     }
 
     /**
@@ -103,6 +105,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public int getRowCount() {
         if (isEditable()) {
+            // +1 is for the "add new row" row
             return dictionary.size() + 1;
         }
         return dictionary.size();
@@ -111,7 +114,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return isEditable() && columnIndex < 2;
+        return isEditable() && columnIndex < DATA_COLUMN_COUNT;
     }
 
     /**
