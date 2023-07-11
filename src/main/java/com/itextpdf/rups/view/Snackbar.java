@@ -101,10 +101,9 @@ public class Snackbar {
 
     public void show() {
         // Creating a new dialog to show
-        JDialog dialog = createDialog(owner, text);
-        // Make sure the dimensions are correct first
-        onParentResized(dialog);
-        onParentMoved(dialog);
+        final JDialog dialog = createDialog(owner, text);
+        // Make sure the dimensions and location are correct first
+        updateDialogBounds(dialog);
         // Show
         dialog.setVisible(true);
         // Start timer for hiding the dialog and disposing
@@ -136,12 +135,12 @@ public class Snackbar {
         dialog.getParent().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                onParentResized(dialog);
+                updateDialogBounds(dialog);
             }
 
             @Override
             public void componentMoved(ComponentEvent e) {
-                onParentMoved(dialog);
+                updateDialogBounds(dialog);
             }
         });
 
@@ -160,20 +159,13 @@ public class Snackbar {
         return dialog;
     }
 
-    private static void onParentResized(JDialog dialog) {
-        Container parent = dialog.getParent();
-        dialog.setSize(
-                parent.getWidth() - 2 * MARGIN,
-                PANEL_HEIGHT + SHADOW_HEIGHT
-        );
-    }
-
-    private static void onParentMoved(JDialog dialog) {
-        Container parent = dialog.getParent();
-        dialog.setLocation(
-                parent.getX() + MARGIN,
-                parent.getY() + parent.getHeight() - dialog.getHeight() - MARGIN
-        );
+    private static void updateDialogBounds(JDialog dialog) {
+        final Container parent = dialog.getParent();
+        final int width = parent.getWidth() - 2 * MARGIN;
+        final int height = PANEL_HEIGHT + SHADOW_HEIGHT;
+        final int x = parent.getX() + MARGIN;
+        final int y = parent.getY() + parent.getHeight() - height - MARGIN;
+        dialog.setBounds(x, y, width, height);
     }
 
     /**
