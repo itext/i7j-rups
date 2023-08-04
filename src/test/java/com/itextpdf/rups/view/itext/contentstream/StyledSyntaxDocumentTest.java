@@ -621,6 +621,8 @@ public class StyledSyntaxDocumentTest {
             "charprocWithInlineImg.cmp, charprocWithInlineImgIndented.cmp",
             "charprocWithCorruptInlineImg.cmp, charprocWithCorruptInlineImgIndented.cmp",
             "paths.cmp, pathsIndented.cmp",
+            "nestedPaths.cmp, nestedPathsIndented.cmp",
+            "nestedPathsEmbedded.cmp, nestedPathsEmbeddedIndented.cmp",
     })
     void testIndentation(String inputFile, String expectedOutputFile) throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, inputFile));

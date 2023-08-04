@@ -58,6 +58,18 @@ import com.itextpdf.rups.view.itext.contentstream.ContentStreamWriter;
 import com.itextpdf.rups.view.itext.contentstream.StyledSyntaxDocument;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.util.Observable;
+import java.util.Observer;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -73,18 +85,6 @@ import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.util.Observable;
-import java.util.Observer;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
@@ -287,6 +287,12 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         public String getToolTipText(MouseEvent ev) {
             final String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
             return toolTip == null ? super.getToolTipText(ev) : toolTip;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            // Disable line wrapping by ensuring the text pane is never resized smaller than its preferred width
+            return getParent().getSize().width > getUI().getPreferredSize(this).width;
         }
     }
 
