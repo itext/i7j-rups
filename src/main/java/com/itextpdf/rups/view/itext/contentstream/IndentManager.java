@@ -53,14 +53,19 @@ public class IndentManager {
     private static final Set<String> INDENTING_OPERATORS = Set.of("BT", "q", "BMC", "BDC", "BX", "m", "re");
     private static final Set<String> UNINDENTING_OPERATORS = Set.of("ET", "Q", "EMC", "EX", "b", "B", "f", "f*", "F",
             "B*", "b*", "n", "s", "S");
+    private static final Set<String> SUBPATH_CREATION_OPERATORS = Set.of("m", "re");
+    private static final Set<String> PATH_PAINTING_OPERATORS = Set.of("b", "B", "f", "f*", "F", "B*", "b*", "n", "s",
+            "S");
 
     private int indentLevel;
+    private boolean isIndentingPath;
 
     /**
      * Creates a new IndentManager, with an initial indentation level of 0.
      */
     public IndentManager() {
         indentLevel = 0;
+        isIndentingPath = false;
     }
 
     /**
@@ -69,7 +74,18 @@ public class IndentManager {
      * @param operator The operator to check
      */
     public void indentIfNecessary(PdfObject operator) {
-        if (INDENTING_OPERATORS.contains(operator.toString())) {
+        String operatorString = operator.toString();
+        if (!INDENTING_OPERATORS.contains(operatorString)) {
+            return;
+        }
+        if (SUBPATH_CREATION_OPERATORS.contains(operatorString)) {
+            if (!isIndentingPath) {
+                // Only indent subpath creation operators if we're not already indenting a path
+                indentLevel++;
+                isIndentingPath = true;
+            }
+        } else {
+            // Always indent operators that don't create a new subpath
             indentLevel++;
         }
     }
@@ -81,8 +97,12 @@ public class IndentManager {
      * @param operator The operator to check
      */
     public void unindentIfNecessary(PdfObject operator) {
-        if (indentLevel > 0 && UNINDENTING_OPERATORS.contains(operator.toString())) {
+        String operatorString = operator.toString();
+        if (indentLevel > 0 && UNINDENTING_OPERATORS.contains(operatorString)) {
             indentLevel--;
+            if (PATH_PAINTING_OPERATORS.contains(operatorString)) {
+                isIndentingPath = false;
+            }
         }
     }
 
