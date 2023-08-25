@@ -259,7 +259,7 @@ public class PdfObjectPanel extends Observable implements Observer {
         @Override
         public void tableChanged(TableModelEvent e) {
             final int row = e.getFirstRow();
-            if (row != e.getLastRow()) {
+            if (row == TableModelEvent.HEADER_ROW || row != e.getLastRow()) {
                 return;
             }
             final PdfName key = (PdfName) table.getValueAt(row, 0);
