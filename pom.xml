@@ -89,6 +89,11 @@
       <version>${itext.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>search</artifactId>
+      <version>${itext.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.dom4j</groupId>
       <artifactId>dom4j</artifactId>
       <version>${dom4j.version}</version>

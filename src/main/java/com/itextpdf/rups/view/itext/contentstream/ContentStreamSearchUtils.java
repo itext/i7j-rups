@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 Apryse Group NV
-    Authors: Apryse Software.
+    Copyright (c) 1998-2022 iText Group NV
+    Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -40,50 +40,16 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.mock;
+package com.itextpdf.rups.view.itext.contentstream;
 
-import com.itextpdf.rups.controller.IRupsController;
-import com.itextpdf.search.ISearchHandler;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.search.model.ISearchFilter;
+import com.itextpdf.search.model.ISearchResult;
 
-import java.awt.Component;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 
-public class MockedRupsController implements IRupsController {
+final class ContentStreamSearchUtils {
+    static ISearchResult find(ByteArrayInputStream stream, ISearchFilter filter){
 
-    private int openCount = 0;
-
-    private PdfFile pdfFile;
-
-    public MockedRupsController() {
-    }
-
-    public MockedRupsController(PdfFile pdfFile) {
-        this.pdfFile = pdfFile;
-    }
-
-    @Override
-    public Component getMasterComponent() {
         return null;
-    }
-
-    @Override
-    public PdfFile getCurrentFile() {
-        return this.pdfFile;
-    }
-
-    @Override
-    public void openNewFile(File file) {
-        this.openCount++;
-    }
-
-    @Override
-    public void closeCurrentFile() {
-        this.openCount--;
-    }
-
-
-    public int getOpenedCount() {
-        return this.openCount;
     }
 }

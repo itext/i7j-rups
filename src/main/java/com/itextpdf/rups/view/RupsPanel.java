@@ -43,6 +43,7 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsInstanceController;
+import com.itextpdf.rups.controller.search.RupsSearchHandler;
 import com.itextpdf.rups.model.PdfFile;
 
 import java.awt.BorderLayout;
@@ -55,6 +56,7 @@ import javax.swing.JPanel;
 public class RupsPanel extends JPanel {
 
     private RupsInstanceController rupsInstanceController;
+    private RupsSearchHandler rupsSearchHandler;
 
     public RupsPanel() {
         setLayout(new BorderLayout());
@@ -70,5 +72,13 @@ public class RupsPanel extends JPanel {
 
     public RupsInstanceController getRupsInstanceController() {
         return this.rupsInstanceController;
+    }
+
+    public void setSearchContext(RupsSearchHandler instance) {
+        this.rupsSearchHandler = instance;
+    }
+
+    public RupsSearchHandler getRupsSearchHandler() {
+        return rupsSearchHandler;
     }
 }

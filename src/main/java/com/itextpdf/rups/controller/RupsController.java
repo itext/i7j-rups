@@ -43,6 +43,7 @@
 package com.itextpdf.rups.controller;
 
 import com.itextpdf.rups.RupsConfiguration;
+import com.itextpdf.search.ISearchHandler;
 import com.itextpdf.rups.event.AllFilesClosedEvent;
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -77,6 +78,8 @@ public class RupsController extends Observable
     public RupsController(Dimension dimension, RupsTabbedPane rupsTabbedPane) {
         this.rupsTabbedPane = rupsTabbedPane;
 
+        //TODO: SearchHandler -> TabbedPane -> InstanceController, SearchHandler -> SearchBar.handler
+
         this.dimension = dimension;
     }
 
@@ -88,6 +91,10 @@ public class RupsController extends Observable
     @Override
     public Component getMasterComponent() {
         return rupsTabbedPane.getJTabbedPane();
+    }
+
+    public ISearchHandler getSearchHandler(){
+        return rupsTabbedPane.getCurrentController().getSearchHandler();
     }
 
     @Override
@@ -126,6 +133,7 @@ public class RupsController extends Observable
             this.update(this, new AllFilesClosedEvent());
         }
     }
+
 
     @Override
     public final PdfFile getCurrentFile() {

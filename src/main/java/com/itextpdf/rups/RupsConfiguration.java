@@ -74,21 +74,27 @@ public enum RupsConfiguration {
     INSTANCE;
 
     private static final String DEFAULT_CONFIG_PATH = "/config/default.properties";
+    private static final String ICON_CONFIG_PATH = "/config/icon.properties";
     private static final String DEFAULT_HOME_VALUE = "home";
     private static final String CLOSE_OPERATION_KEY = "ui.closeoperation";
     private static final String DUPLICATE_OPEN_FILES_KEY = "rups.duplicatefiles";
     private static final String HOME_FOLDER_KEY = "user.home";
     private static final String LOCALE_KEY = "user.locale";
     private static final String LOOK_AND_FEEL_KEY = "ui.lookandfeel";
+    private static final String ICON_KEY = "ui.lookandfeel";
 
     private final Preferences systemPreferences;
     private final Properties defaultProperties;
     private final Properties temporaryProperties;
 
+    private final Properties iconProperties;
+
+
     RupsConfiguration() {
         this.defaultProperties = loadDefaultProperties();
         this.temporaryProperties = new Properties();
         this.systemPreferences = Preferences.userNodeForPackage(RupsConfiguration.class);
+        this.iconProperties = loadIconProperties();
 
         initializeSystemDefaults(this.defaultProperties, this.systemPreferences);
     }
@@ -307,6 +313,22 @@ public enum RupsConfiguration {
         return properties;
     }
 
+    private Properties loadIconProperties() {
+        final InputStream resourceAsStream = RupsConfiguration.class.getResourceAsStream(ICON_CONFIG_PATH);
+        final Properties properties = new Properties();
+
+        if (resourceAsStream != null) {
+            try {
+                properties.load(resourceAsStream);
+                resourceAsStream.close();
+            } catch (IOException e) {
+                LoggerHelper.error(Language.ERROR_LOADING_ICON_DEFINITIONS.getString(), e, RupsConfiguration.class);
+            }
+        }
+
+        return properties;
+    }
+
     private void initializeSystemDefaults(Properties defaultProperties, Preferences systemPreferences) {
         try {
             final String[] keys = systemPreferences.keys();
@@ -336,5 +358,9 @@ public enum RupsConfiguration {
 
     private String getValueFromSystemPreferences(String key) {
         return this.systemPreferences.get(key, this.defaultProperties.getProperty(key));
+    }
+
+    public String getIconFor(String key){
+        return this.iconProperties.getProperty(key, "default");
     }
 }

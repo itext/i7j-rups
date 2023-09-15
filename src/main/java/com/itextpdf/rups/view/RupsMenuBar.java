@@ -52,16 +52,13 @@ import com.itextpdf.rups.io.FileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
 
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
-import javax.swing.Box;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 
 public class RupsMenuBar extends JMenuBar implements Observer {
     /**
@@ -93,6 +90,8 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     private final PreferencesWindow preferencesWindow;
 
+    private final RupsSearchBar searchBar;
+
     /**
      * Creates a JMenuBar.
      */
@@ -109,6 +108,9 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                 new FileCompareAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
+
+        searchBar = new RupsSearchBar();
+
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(controller),
@@ -129,6 +131,15 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                     preferencesWindow.show(controller.getMasterComponent());
                 }
         );
+        addItem(edit, "Find", e -> {
+                    Window masterComponent = SwingUtilities.getWindowAncestor((JComponent)controller.getMasterComponent());
+                    Component target = masterComponent.getFocusOwner();
+                    if(target instanceof  JComponent) {
+                        searchBar.setSearchHandler(controller.getSearchHandler());
+                        searchBar.setTarget((JComponent) target);
+                    }
+                },
+                KeyStroke.getKeyStroke('F', InputEvent.CTRL_DOWN_MASK));
         add(edit);
 
         add(Box.createGlue());
