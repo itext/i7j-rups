@@ -345,7 +345,7 @@ public class RupsInstanceController extends Observable
             }
         });
         loader = new ObjectLoader(this, pdfFile, pdfFile.getFilename(), dialog);
-        loader.start();
+        loader.execute();
     }
 
     // tree selection

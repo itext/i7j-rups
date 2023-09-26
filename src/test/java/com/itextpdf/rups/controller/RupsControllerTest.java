@@ -45,11 +45,16 @@ package com.itextpdf.rups.controller;
 import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.SaveToFileEvent;
+import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.view.FileCloseChangeListener;
+import com.itextpdf.rups.view.FileOpenChangeListener;
+import com.itextpdf.rups.view.FileSaveChangeListener;
 import com.itextpdf.rups.view.RupsTabbedPane;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 
 public class RupsControllerTest {
@@ -59,7 +64,9 @@ public class RupsControllerTest {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
-        rupsController.update(null, new CloseDocumentEvent());
+        FileCloseChangeListener closeChangeListener = new FileCloseChangeListener(rupsController);
+        closeChangeListener.propertyChange(new PropertyChangeEvent(rupsController, "FILE_CLOSE", null, null));
+
         Assertions.assertTrue(rupsTabbedPane.closed);
         Assertions.assertFalse(rupsTabbedPane.opened);
         Assertions.assertFalse(rupsTabbedPane.saved);
@@ -69,8 +76,9 @@ public class RupsControllerTest {
     public void saveTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        FileSaveChangeListener saveChangeListener = new FileSaveChangeListener(rupsController);
+        saveChangeListener.propertyChange(new PropertyChangeEvent(rupsController, "FILE_SAVED", null, new File("")));
 
-        rupsController.update(null, new SaveToFileEvent(new File("")));
         Assertions.assertTrue(rupsTabbedPane.saved);
         Assertions.assertFalse(rupsTabbedPane.opened);
         Assertions.assertFalse(rupsTabbedPane.closed);
@@ -81,7 +89,9 @@ public class RupsControllerTest {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
-        rupsController.update(null, new OpenFileEvent(new File("test.pdf")));
+        FileOpenChangeListener openChangeListener = new FileOpenChangeListener(rupsController);
+        openChangeListener.propertyChange(new PropertyChangeEvent(rupsController, "FILE_OPEN", null, new File("")));
+
         Assertions.assertTrue(rupsTabbedPane.opened);
         Assertions.assertFalse(rupsTabbedPane.saved);
         Assertions.assertFalse(rupsTabbedPane.closed);
@@ -101,6 +111,12 @@ public class RupsControllerTest {
         }
 
         @Override
+        public PdfFile getCurrentFile() {
+            return null;
+        }
+
+
+            @Override
         public void saveCurrentFile(File file) {
             saved = true;
         }

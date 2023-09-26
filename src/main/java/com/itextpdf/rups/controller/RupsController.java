@@ -51,8 +51,11 @@ import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsTabbedPane;
 
+import javax.swing.event.SwingPropertyChangeSupport;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
@@ -62,11 +65,13 @@ import java.util.Observer;
  * the RUPS application: the menu bar, the panels,...
  */
 public class RupsController extends Observable
-        implements Observer, IRupsController {
+        implements IRupsController {
 
     private final RupsTabbedPane rupsTabbedPane;
 
     private final Dimension dimension;
+
+    private final PropertyChangeSupport propertyChangeSupport;
 
     /**
      * Constructs the GUI components of the RUPS application.
@@ -78,6 +83,8 @@ public class RupsController extends Observable
         this.rupsTabbedPane = rupsTabbedPane;
 
         this.dimension = dimension;
+
+        this.propertyChangeSupport = new SwingPropertyChangeSupport(this);
     }
 
     /**
@@ -90,41 +97,22 @@ public class RupsController extends Observable
         return rupsTabbedPane.getJTabbedPane();
     }
 
-    @Override
-    public final void update(Observable o, Object arg) {
-        //Events that have come from non observable classes: ObjectLoader and FileChooserAction
-        if (o == null && arg instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    this.closeCurrentFile();
-                    break;
-                case RupsEvent.OPEN_FILE_EVENT:
-                    this.openNewFile((File) event.getContent());
-                    break;
-                case RupsEvent.COMPARE_WITH_FILE_EVENT:
-                    break;
-                case RupsEvent.SAVE_TO_FILE_EVENT:
-                    this.rupsTabbedPane.saveCurrentFile((File) event.getContent());
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                default:
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
-            }
-        } else {
-            setChanged();
-            super.notifyObservers(arg);
-        }
+    public final void update(Object arg) {
+        setChanged();
+        super.notifyObservers(arg);
     }
 
     @Override
     public final void closeCurrentFile() {
+        PdfFile lastFile = this.rupsTabbedPane.getCurrentFile();
         final boolean lastOne = this.rupsTabbedPane.closeCurrentFile();
         if (lastOne) {
-            this.update(this, new AllFilesClosedEvent());
+            this.propertyChangeSupport.firePropertyChange("ALL_FILES_CLOSED", lastFile, null);
         }
+    }
+
+    public final void saveCurrentFile(File saveLocation) {
+        this.rupsTabbedPane.saveCurrentFile(saveLocation);
     }
 
     @Override
@@ -141,7 +129,16 @@ public class RupsController extends Observable
             }
 
             this.rupsTabbedPane.openNewFile(file, this.dimension, false);
-            this.update(this, new OpenFileEvent(file));
+            this.propertyChangeSupport.firePropertyChange("FILE_OPEN", null, file);
+            this.propertyChangeSupport.firePropertyChange("FILE_LOADED", null, file);
         }
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+        this.propertyChangeSupport.addPropertyChangeListener(propertyChangeListener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
+        this.propertyChangeSupport.removePropertyChangeListener(propertyChangeListener);
     }
 }

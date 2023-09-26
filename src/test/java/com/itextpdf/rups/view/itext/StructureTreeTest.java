@@ -92,8 +92,8 @@ public class StructureTreeTest extends ExtendedITextTest {
         PdfReaderController controller = new PdfReaderController(null, null);
         ObjectLoader loader = new ObjectLoader(controller, pdfFile, pdfFile.getFilename(), new DummyProgressDialog());
         // preload everything
-        loader.doTask();
-
+        loader.execute();
+        while (!loader.isDone()) {}
         // initialise the main PDF object tree view
         controller.update(controller, new PostOpenDocumentEvent(loader));
 

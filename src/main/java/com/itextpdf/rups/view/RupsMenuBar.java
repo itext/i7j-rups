@@ -63,7 +63,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-public class RupsMenuBar extends JMenuBar implements Observer {
+public class RupsMenuBar extends JMenuBar {
     /**
      * The action needed to open a file.
      */
@@ -101,17 +101,27 @@ public class RupsMenuBar extends JMenuBar implements Observer {
 
         preferencesWindow = new PreferencesWindow();
 
-        fileOpenAction = new FileOpenAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
-        fileCloseAction = new FileCloseAction(controller);
+        fileOpenAction = new FileOpenAction(PdfFilter.INSTANCE, controller.getMasterComponent());
+        fileOpenAction.addPropertyChangeListener(new FileOpenChangeListener(controller));
+
+        fileCloseAction = new FileCloseAction();
+        fileCloseAction.addPropertyChangeListener(new FileCloseChangeListener(controller));
+
+        fileSaverAction = new FileSaveAction(PdfFilter.INSTANCE, controller.getMasterComponent());
+        fileSaverAction.addPropertyChangeListener(new FileSaveChangeListener(controller));
+
         openInViewerAction = new OpenInViewerAction(controller);
-        fileSaverAction = new FileSaveAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
+
         fileCompareAction =
-                new FileCompareAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
+                new FileCompareAction(PdfFilter.INSTANCE, controller.getMasterComponent());
+        fileCompareAction.addPropertyChangeListener(new FileCompareChangeListener());
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
-        addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(controller),
+        FileCloseAction action = new FileCloseAction();
+        action.addPropertyChangeListener(new FileCloseChangeListener(controller));
+        addItem(file, Language.MENU_BAR_CLOSE.getString(), action,
                 KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_SAVE_AS.getString(), fileSaverAction,
                 KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
@@ -139,26 +149,6 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                 new MessageAction(ITextCoreProductData.getInstance().getVersion()));
         add(help);
         enableItems(false);
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof RupsController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.ALL_FILES_CLOSED:
-                    enableItems(false);
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                case RupsEvent.OPEN_FILE_EVENT:
-                    enableItems(true);
-                    break;
-                case RupsEvent.ROOT_NODE_CLICKED_EVENT:
-                    fileOpenAction.actionPerformed(null);
-            }
-        }
     }
 
     /**
