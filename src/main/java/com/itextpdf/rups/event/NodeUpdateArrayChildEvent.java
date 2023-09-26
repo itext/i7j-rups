@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 Apryse Group NV
-    Authors: Apryse Software.
+    Copyright (c) 1998-2022 iText Group NV
+    Authors: iText Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -40,30 +40,39 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups;
+package com.itextpdf.rups.event;
 
-import com.itextpdf.rups.model.FilePathPreProcessor;
+import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+public class NodeUpdateArrayChildEvent extends RupsEvent {
 
-/**
- * iText RUPS is a tool that allows you to inspect the internal structure
- * of a PDF file.
- */
-public class RupsLauncher {
-    /**
-     * Main method. Starts the RUPS application.
-     *
-     * @param args no arguments needed
-     */
-    public static void main(String[] args) {
-        final File f;
-        if (args.length > 0) {
-            f = new File(FilePathPreProcessor.process(args[0]));
-        } else {
-            f = null;
+    Content content;
+
+    public NodeUpdateArrayChildEvent(PdfObject value, PdfObjectTreeNode parent, int index) {
+        content = new Content(value, parent, index);
+    }
+
+    @Override
+    public int getType() {
+        return NODE_UPDATE_ARRAY_CHILD_EVENT;
+    }
+
+    @Override
+    public Object getContent() {
+        return content;
+    }
+
+    public class Content {
+        public PdfObject value;
+        public PdfObjectTreeNode parent;
+        public int index;
+
+        public Content(PdfObject value, PdfObjectTreeNode parent, int index) {
+            this.value = value;
+            this.parent = parent;
+            this.index = index;
         }
-        Rups.startNewApplication(f);
     }
 }

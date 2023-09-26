@@ -88,8 +88,6 @@ import javax.swing.undo.UndoManager;
 
 public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
 
-    private static final int MAX_NUMBER_OF_EDITS = 8192;
-
     private static Method pdfStreamGetInputStreamMethod;
 
     /**
@@ -102,6 +100,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     protected PdfObjectTreeNode target;
 
     protected UndoManager manager;
+
+    protected int MAX_NUMBER_OF_EDITS = 8192;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private final PdfReaderController controller;
@@ -132,8 +132,9 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         text.setComponentPopupMenu(popupMenu);
         text.addMouseListener(new ContextMenuMouseListener(popupMenu, text));
 
-        manager = new UndoManager();
-        manager.setLimit(MAX_NUMBER_OF_EDITS);
+        this.manager = new UndoManager();
+        this.manager.setLimit(MAX_NUMBER_OF_EDITS);
+
         text.getDocument().addUndoableEditListener(manager);
         text.registerKeyboardAction(new UndoAction(manager),
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);

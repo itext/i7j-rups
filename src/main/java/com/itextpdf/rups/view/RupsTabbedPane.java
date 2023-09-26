@@ -75,8 +75,8 @@ public class RupsTabbedPane {
             if (this.defaultTab.equals(this.jTabbedPane.getSelectedComponent())) {
                 this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
             }
-
             RupsPanel rupsPanel = new RupsPanel();
+            rupsPanel.setName(file.getName());
             RupsInstanceController rupsInstanceController = new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
             rupsInstanceController.loadFile(file, readonly);

@@ -141,14 +141,17 @@ public class RupsInstanceController extends Observable
         masterComponent.setDividerSize(2);
 
         final JSplitPane content = new JSplitPane();
+        content.setName("content");
         masterComponent.add(content, JSplitPane.TOP);
         final JSplitPane info = new JSplitPane();
+        info.setName("info");
         masterComponent.add(info, JSplitPane.BOTTOM);
 
         content.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
         content.setDividerLocation((int) (dimension.getWidth() * .6));
         content.setDividerSize(1);
         JPanel treePanel = new JPanel(new BorderLayout());
+        treePanel.setName("treePanel");
         treePanel.add(new JScrollPane(readerController.getPdfTree()), BorderLayout.CENTER);
         content.add(treePanel, JSplitPane.LEFT);
         content.add(readerController.getNavigationTabs(), JSplitPane.RIGHT);
@@ -157,7 +160,9 @@ public class RupsInstanceController extends Observable
         info.setDividerSize(1);
         info.add(readerController.getObjectPanel(), JSplitPane.LEFT);
         final JTabbedPane editorPane = readerController.getEditorTabs();
+        editorPane.setName("editorPane");
         final JScrollPane cons = new JScrollPane(console.getTextArea());
+        cons.setName("console");
         console.getTextArea().addMouseListener(
                 new ContextMenuMouseListener(ConsoleContextMenu.getPopupMenu(console.getTextArea()),
                         console.getTextArea()));

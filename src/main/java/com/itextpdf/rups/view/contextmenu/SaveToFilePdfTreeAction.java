@@ -102,7 +102,7 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
                         try (FileOutputStream fos = new FileOutputStream(path)) {
                             fos.write(array);
                         }
-                    } catch (IOException e) { // TODO : Catch this exception properly
+                    } catch (IOException e) {
                         LoggerHelper.error(Language.ERROR_WRITING_FILE.getString(), e, getClass());
                     }
                 }

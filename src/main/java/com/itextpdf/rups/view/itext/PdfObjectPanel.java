@@ -52,7 +52,10 @@ import com.itextpdf.rups.event.NodeAddArrayChildEvent;
 import com.itextpdf.rups.event.NodeAddDictChildEvent;
 import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
 import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
+import com.itextpdf.rups.event.NodeUpdateArrayChildEvent;
+import com.itextpdf.rups.event.NodeUpdateDictChildEvent;
 import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.io.PdfObjectTreeEdit;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
@@ -63,16 +66,26 @@ import com.itextpdf.rups.view.models.DictionaryTableModelButton;
 import com.itextpdf.rups.view.models.PdfArrayTableModel;
 
 import java.awt.CardLayout;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
 public class PdfObjectPanel extends Observable implements Observer {
 
@@ -89,11 +102,14 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     private static final String TEXT = Language.TEXT.getString();
 
+    private final PdfReaderController controller;
+
     /**
      * The layout that will show the info about the PDF object that is being analyzed.
      */
     protected CardLayout layout = new CardLayout();
 
+    protected UndoManager undoManager;
 
     /**
      * Table with dictionary entries.
@@ -112,22 +128,41 @@ public class PdfObjectPanel extends Observable implements Observer {
     /**
      * Creates a PDF object panel.
      */
-    public PdfObjectPanel() {
+    public PdfObjectPanel(PdfReaderController controller) {
+
+        this.controller = controller;
+
+        // panel name
+        panel.setName("PdfObjectPanel");
+
+        table.setName("PdfObjectTable");
+
         // layout
         panel.setLayout(layout);
 
         // dictionary / array / stream
         final JScrollPane dictScrollPane = new JScrollPane();
         dictScrollPane.setViewportView(table);
+        dictScrollPane.setName("dictScrollPane");
         panel.add(dictScrollPane, TABLE);
 
         // number / string / ...
         final JScrollPane textScrollPane = new JScrollPane();
         textScrollPane.setViewportView(text);
+        textScrollPane.setName("textScrollPane");
         text.setEditable(false);
         panel.add(textScrollPane, TEXT);
 
         table.addMouseListener(new JTableButtonMouseListener());
+
+        this.undoManager = new UndoManager();
+        this.undoManager.setLimit(8192);
+
+        //TODO: Check if WHEN_IN_FOCUSED_WINDOW bleeds across open docs
+        panel.registerKeyboardAction(new UndoAction(undoManager),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        panel.registerKeyboardAction(new RedoAction(undoManager),
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
     /**
@@ -160,8 +195,8 @@ public class PdfObjectPanel extends Observable implements Observer {
      */
     public void render(PdfObjectTreeNode node, PdfSyntaxParser parser) {
         target = node;
-        final PdfObject object = node.getPdfObject();
-        if (object == null) {
+        final PdfObject pdfObjectClone = node.getPdfObject().clone();
+        if (pdfObjectClone == null) {
             text.setText(null);
             layout.show(panel, TEXT);
             panel.repaint();
@@ -169,34 +204,36 @@ public class PdfObjectPanel extends Observable implements Observer {
             return;
         }
 
-        switch (object.getType()) {
+        DictionaryTableModelButton rowButtons = new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON));
+        rowButtons.setName("rowButton");
+        switch (pdfObjectClone.getType()) {
             case PdfObject.DICTIONARY:
             case PdfObject.STREAM:
                 final DictionaryTableModel model =
-                        new DictionaryTableModel((PdfDictionary) object, parser, panel);
+                        new DictionaryTableModel((PdfDictionary) pdfObjectClone, parser, panel);
                 model.addTableModelListener(new DictionaryModelListener());
                 table.setModel(model);
-                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(
-                        IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON)));
+                table.getColumn("").setCellRenderer(rowButtons);
                 layout.show(panel, TABLE);
                 panel.repaint();
+                table.revalidate();
                 break;
             case PdfObject.ARRAY:
                 final PdfArrayTableModel arrayModel =
-                        new PdfArrayTableModel((PdfArray) object, parser, panel);
+                        new PdfArrayTableModel((PdfArray) pdfObjectClone, parser, panel);
                 arrayModel.addTableModelListener(new ArrayModelListener());
                 table.setModel(arrayModel);
-                table.getColumn("").setCellRenderer(new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON),
-                        IconFetcher.getIcon(ADD_ICON)));
+                table.getColumn("").setCellRenderer(rowButtons);
                 layout.show(panel, TABLE);
                 panel.repaint();
+                table.revalidate();
                 break;
             case PdfObject.STRING:
-                text.setText(((PdfString) object).toUnicodeString());
+                text.setText(((PdfString) pdfObjectClone).toUnicodeString());
                 layout.show(panel, TEXT);
                 break;
             default:
-                text.setText(object.toString());
+                text.setText(pdfObjectClone.toString());
                 layout.show(panel, TEXT);
                 break;
         }
@@ -236,19 +273,27 @@ public class PdfObjectPanel extends Observable implements Observer {
                 return;
             }
             final PdfName key = (PdfName) table.getValueAt(row, 0);
-            final PdfObject value = ((PdfDictionary) target.getPdfObject()).get(key, false);
+            final PdfObject value;
+            RupsEvent notification = null;
             switch (e.getType()) {
-                case TableModelEvent.UPDATE:
-                    break;
                 case TableModelEvent.DELETE:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeDeleteDictChildEvent(key, target));
+                    notification = new NodeDeleteDictChildEvent(key, target);
+                    break;
+                case TableModelEvent.UPDATE:
+                    value = ((PdfDictionary) ((DictionaryTableModel) table.getModel()).getPdfObject()).get(key, false);
+                    notification = new NodeUpdateDictChildEvent(key, value, target, row);
                     break;
                 case TableModelEvent.INSERT:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeAddDictChildEvent(key, value, target, row));
+                    value = ((PdfDictionary) ((DictionaryTableModel) table.getModel()).getPdfObject()).get(key, false);
+                    notification = new NodeAddDictChildEvent(key, value, target, row);
                     break;
             }
+            if (notification == null) {
+                return;
+            }
+            undoManager.addEdit(new PdfObjectTreeEdit(controller, notification));
+            PdfObjectPanel.this.setChanged();
+            PdfObjectPanel.this.notifyObservers(notification);
         }
     }
 
@@ -262,19 +307,28 @@ public class PdfObjectPanel extends Observable implements Observer {
             if (row != e.getLastRow()) {
                 return;
             }
-            final PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);
+            // TODO: Maybe abstract the PDF object used for backing the UI elements from those backing the document tree.
+            RupsEvent notification = null;
+            final PdfObject value;
             switch (e.getType()) {
-                case TableModelEvent.UPDATE:
-                    break;
                 case TableModelEvent.DELETE:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeDeleteArrayChildEvent(row, target));
+                    notification = new NodeDeleteArrayChildEvent(row, target);
+                    break;
+                case TableModelEvent.UPDATE:
+                    value = ((PdfArray) ((PdfArrayTableModel) table.getModel()).getPdfObject()).get(row, false);
+                    notification = new NodeUpdateArrayChildEvent(value, target, row);
                     break;
                 case TableModelEvent.INSERT:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeAddArrayChildEvent(value, target, row));
+                    value = ((PdfArray) ((PdfArrayTableModel) table.getModel()).getPdfObject()).get(row, false);
+                    notification = new NodeAddArrayChildEvent(value, target, row);
                     break;
             }
+            if (notification == null) {
+                return;
+            }
+            undoManager.addEdit(new PdfObjectTreeEdit(controller, notification));
+            PdfObjectPanel.this.setChanged();
+            PdfObjectPanel.this.notifyObservers(notification);
         }
     }
 }

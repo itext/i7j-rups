@@ -168,8 +168,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
                 final PdfObject newValue = parser.parseString(value, parent);
                 if (newValue != null) {
                     final PdfName oldName = keys.get(rowIndex);
-                    removeRow(rowIndex);
-                    addRow(oldName, newValue);
+                    updateRow(rowIndex, newValue);
                 }
             }
         }
@@ -249,6 +248,12 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         fireTableRowsInserted(index, index);
     }
 
+    private void updateRow(int index, PdfObject value) {
+        PdfName key = keys.get(index);
+        dictionary.put(key, value);
+        fireTableRowsUpdated(index, index);
+    }
+
     private PdfName getCorrectKey(String value) {
         if (!value.startsWith("/")) {
             value = "/" + value;
@@ -261,5 +266,10 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
         LoggerHelper.error(Language.ERROR_KEY_IS_NOT_NAME.getString(), getClass());
         return null;
+    }
+
+    @Override
+    public PdfObject getPdfObject() {
+        return dictionary;
     }
 }
