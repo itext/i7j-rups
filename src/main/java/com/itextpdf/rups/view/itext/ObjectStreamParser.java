@@ -15,7 +15,6 @@ import java.util.Arrays;
  * Utility class to parse ObjectStreams to extract the offset of a given object id within the stream.
  */
 public class ObjectStreamParser {
-
     /**
      * Parses an ObjectStream to find the offset to the passed parameter, compressedObjectNumber. This offset is
      * relative to the ObjectStream and not to the complete file, as described in the specification.
@@ -26,7 +25,7 @@ public class ObjectStreamParser {
      * @param compressedObjectNumber the ID of the object of which you want the offset
      * @return the offset of the object or -1 if the object is not found
      */
-    public int parseObjectStream(PdfStream objStm, int compressedObjectNumber) {
+    public static int parseObjectStream(PdfStream objStm, int compressedObjectNumber) {
         byte[] objStmBytes = objStm.getBytes(true);
         int byteOffsetOfFirst = objStm.getAsInt(PdfName.First);
 

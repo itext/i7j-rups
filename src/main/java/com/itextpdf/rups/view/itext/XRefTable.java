@@ -42,9 +42,6 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.io.source.PdfTokenizer;
-import com.itextpdf.io.source.RandomAccessFileOrArray;
-import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
@@ -58,8 +55,6 @@ import com.itextpdf.rups.view.models.JTableAutoModelInterface;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -182,26 +177,32 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
         final PdfObject object = objects.getObjectByIndex(rowIndex);
         PdfIndirectReference indirectReference = object.getIndirectReference();
         if ( indirectReference != null ) {
-            long offset = indirectReference.getOffset();
-
-            if ( offset == -1 ) {
-                int objStreamNumber = indirectReference.getObjStreamNumber();
-                PdfObject refersTo = indirectReference.getRefersTo();
-                int compressedObjectNumber = refersTo.getIndirectReference().getObjNumber();
-                PdfObject objectByIndex = objects.loadObjectByReference(objStreamNumber);
-
-                PdfStream objStm = (PdfStream) objectByIndex;
-                int internalCompressedObjectOffset = new ObjectStreamParser().parseObjectStream(objStm, compressedObjectNumber);
+            if (isObjectStream(indirectReference)) {
+                int compressedObjectNumber = indirectReference.getObjNumber();
+                PdfStream objStm = getObjectStream(indirectReference);
+                int internalCompressedObjectOffset
+                        = ObjectStreamParser.parseObjectStream(objStm, compressedObjectNumber);
 
                 return String.format(
                         Language.XREF_BYTE_OFFSET_OBJECT_STREAM.getString(),
-                        objStreamNumber, internalCompressedObjectOffset
+                        objStm.getIndirectReference().getObjNumber(), internalCompressedObjectOffset
                 );
             }
 
-            return String.valueOf(offset);
+            return String.valueOf(indirectReference.getOffset());
         }
         return Language.XREF_NOT_LOADED_YET.getString();
+    }
+
+    private PdfStream getObjectStream(PdfIndirectReference indirectReference) {
+        int objStreamNumber = indirectReference.getObjStreamNumber();
+        PdfObject objectByIndex = objects.loadObjectByReference(objStreamNumber);
+
+        return (PdfStream) objectByIndex;
+    }
+
+    private boolean isObjectStream(PdfIndirectReference indirectReference) {
+        return indirectReference.getOffset() == -1;
     }
 
 
