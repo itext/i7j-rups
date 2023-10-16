@@ -188,38 +188,10 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
                 int objStreamNumber = indirectReference.getObjStreamNumber();
                 PdfObject refersTo = indirectReference.getRefersTo();
                 int compressedObjectNumber = refersTo.getIndirectReference().getObjNumber();
-                int internalCompressedObjectOffset = -1;
                 PdfObject objectByIndex = objects.loadObjectByReference(objStreamNumber);
 
                 PdfStream objStm = (PdfStream) objectByIndex;
-                byte[] objStmBytes = objStm.getBytes(true);
-                int byteOffsetOfFirst = objStm.getAsInt(PdfName.First);
-
-                PdfTokenizer pdfTokenizer = new PdfTokenizer(
-                        new RandomAccessFileOrArray( new RandomAccessSourceFactory().createSource(Arrays.copyOfRange(objStmBytes, 0, byteOffsetOfFirst)))
-                );
-
-                try {
-                    while (pdfTokenizer.nextToken()) {
-                        if ( pdfTokenizer.getTokenType().equals(PdfTokenizer.TokenType.Number )) {
-                            int objNumber = pdfTokenizer.getIntValue();
-                            pdfTokenizer.nextToken();
-                            int internalByteOffset = pdfTokenizer.getIntValue();
-                            if ( objNumber == compressedObjectNumber ) {
-                                internalCompressedObjectOffset = internalByteOffset;
-                                break;
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-
-
-
-                PdfIndirectReference streamIndRef = objectByIndex.getIndirectReference();
-                long streamOffset = streamIndRef.getOffset();
+                int internalCompressedObjectOffset = new ObjectStreamParser().parseObjectStream(objStm, compressedObjectNumber);
 
                 return String.format(
                         Language.XREF_BYTE_OFFSET_OBJECT_STREAM.getString(),
