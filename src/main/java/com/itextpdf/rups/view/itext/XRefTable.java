@@ -42,8 +42,7 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.kernel.pdf.PdfNull;
-import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IndirectObjectFactory;
@@ -114,7 +113,7 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
      * @see javax.swing.JTable#getColumnCount()
      */
     public int getColumnCount() {
-        return 2;
+        return 3;
     }
 
     /**
@@ -134,6 +133,8 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
                 return getObjectReferenceByRow(rowIndex);
             case 1:
                 return getObjectDescriptionByRow(rowIndex);
+            case 2:
+                return getByteOffSetByRow(rowIndex);
             default:
                 return null;
         }
@@ -165,6 +166,47 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
     }
 
     /**
+     * Returns the byte offset of the selected XREF entry. If the entry has no real, actual offset.
+     * i.e. it is compressed in a PDF Object Stream, then this shall return The ID of the Object Stream
+     * and the offset of the Object Stream.
+     *
+     * @param rowIndex the index of the selected XREF entry
+     * @return byte offset of the XREF entry or the ID and byte offset of the encompassing Object Stream
+     */
+    private String getByteOffSetByRow(int rowIndex) {
+        final PdfObject object = objects.getObjectByIndex(rowIndex);
+        PdfIndirectReference indirectReference = object.getIndirectReference();
+        if ( indirectReference != null ) {
+            if (isObjectStream(indirectReference)) {
+                int compressedObjectNumber = indirectReference.getObjNumber();
+                PdfStream objStm = getObjectStream(indirectReference);
+                int internalCompressedObjectOffset
+                        = ObjectStreamParser.parseObjectStream(objStm, compressedObjectNumber);
+
+                return String.format(
+                        Language.XREF_BYTE_OFFSET_OBJECT_STREAM.getString(),
+                        objStm.getIndirectReference().getObjNumber(), internalCompressedObjectOffset
+                );
+            }
+
+            return String.valueOf(indirectReference.getOffset());
+        }
+        return Language.XREF_NOT_LOADED_YET.getString();
+    }
+
+    private PdfStream getObjectStream(PdfIndirectReference indirectReference) {
+        int objStreamNumber = indirectReference.getObjStreamNumber();
+        PdfObject objectByIndex = objects.loadObjectByReference(objStreamNumber);
+
+        return (PdfStream) objectByIndex;
+    }
+
+    private boolean isObjectStream(PdfIndirectReference indirectReference) {
+        return indirectReference.getOffset() == -1;
+    }
+
+
+    /**
      * @see javax.swing.JTable#getColumnName(int)
      */
     public String getColumnName(int columnIndex) {
@@ -173,6 +215,8 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
                 return Language.XREF_NUMBER.getString();
             case 1:
                 return Language.XREF_OBJECT.getString();
+            case 2:
+                return Language.XREF_BYTE_OFFSET.getString();
             default:
                 return null;
         }
