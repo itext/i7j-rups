@@ -55,6 +55,7 @@ import com.itextpdf.rups.view.RupsTabbedPane;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
+import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.event.ChangeEvent;
@@ -136,8 +137,9 @@ public class RupsController extends Observable
     @Override
     public void reopenAsOwner() {
         final IPdfFile file = this.getCurrentFile();
-        // Should not happen (i.e. UI should not allow it), will silently ignore
+        // Should not happen (i.e. UI should not allow it), will just noop
         if (file == null) {
+            LoggerHelper.warn(Language.ERROR_NO_OPEN_DOCUMENT.getString(), getClass());
             return;
         }
 
@@ -172,7 +174,7 @@ public class RupsController extends Observable
     }
 
     private void openNewFileAsOwner(File file) {
-        assert file != null;
+        Objects.requireNonNull(file);
 
         // We don't check here for duplicate files, as we don't want to close
         // the already opened file, if we fail here

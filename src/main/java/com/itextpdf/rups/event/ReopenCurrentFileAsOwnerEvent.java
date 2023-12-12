@@ -43,6 +43,10 @@
 package com.itextpdf.rups.event;
 
 
+/**
+ * Event to signify, that a user requested to reopen the currently displayed
+ * protected PDF file as an owner.
+ */
 public class ReopenCurrentFileAsOwnerEvent extends RupsEvent {
     public ReopenCurrentFileAsOwnerEvent() {
         // Nothing to initialize
