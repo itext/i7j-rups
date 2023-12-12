@@ -53,19 +53,34 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
+/**
+ * Password provider implementation, which queries the user for a password via
+ * an interactive GUI dialog.
+ */
 public class DialogPasswordProvider implements IPasswordProvider {
     public static final int MAX_PASSWORD_BYTE_LENGTH = 127;
 
+    /**
+     * Title for the interactive GUI dialog.
+     */
     private final String title;
 
     public DialogPasswordProvider(String title) {
         this.title = title;
     }
 
+    /**
+     * Creates a dialog password provider, which will ask the user for a
+     * password without specifying a concrete type (user or owner).
+     */
     public static DialogPasswordProvider anyPassword() {
         return new DialogPasswordProvider(Language.ENTER_ANY_PASSWORD.getString());
     }
 
+    /**
+     * Creates a dialog password provider, which will ask the user
+     * specifically for an owner password.
+     */
     public static DialogPasswordProvider ownerPassword() {
         return new DialogPasswordProvider(Language.ENTER_OWNER_PASSWORD.getString());
     }

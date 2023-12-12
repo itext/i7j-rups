@@ -44,6 +44,10 @@ package com.itextpdf.rups.event;
 
 import com.itextpdf.rups.model.IPdfFile;
 
+/**
+ * Event to signify, that on the main window a different PDF file tab was
+ * selected and displayed (i.e. the displayed file was changed).
+ */
 public class DisplayedTabChanged extends RupsEvent {
     private final IPdfFile displayedFile;
 

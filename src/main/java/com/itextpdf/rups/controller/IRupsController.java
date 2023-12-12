@@ -63,7 +63,7 @@ public interface IRupsController {
     /**
      * Returns the currently loaded File.
      *
-     * @return PdfFile
+     * @return IPdfFile
      */
     IPdfFile getCurrentFile();
 
