@@ -52,7 +52,7 @@
     <itext.version>7.2.5</itext.version>
     <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
     <launch4j.version>2.0.1</launch4j.version>
-    <logback.version>1.2.11</logback.version>
+    <logback.version>1.2.13</logback.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.projectName>RUPS</sonar.projectName>
     <maven.compiler.target>11</maven.compiler.target>
