@@ -171,6 +171,7 @@ public class PreferencesWindow {
     private void createVisualSettingsTab() {
         this.localeBox = new JComboBox<>();
         this.localeBox.addItem("nl-NL");
+        this.localeBox.addItem("be-BY");
         this.localeBox.addItem("en-US");
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
         final JLabel localeLabel = new JLabel(Language.LOCALE.getString());
