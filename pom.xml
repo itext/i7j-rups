@@ -49,7 +49,7 @@
   <properties>
     <assembly-plugin.version>3.2.0</assembly-plugin.version>
     <dom4j.version>2.1.3</dom4j.version>
-    <itext.version>7.2.5</itext.version>
+    <itext.version>7.2.6</itext.version>
     <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
     <launch4j.version>2.0.1</launch4j.version>
     <logback.version>1.2.11</logback.version>
