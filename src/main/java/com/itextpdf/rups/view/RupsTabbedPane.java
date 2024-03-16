@@ -45,15 +45,13 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.view.diff.DiffViewer;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.io.File;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.io.File;
 
 /**
  * The class holding the JTabbedPane that holds the Rups tabs. This class is responsible for loading, closing, and
@@ -169,5 +167,11 @@ public class RupsTabbedPane {
         if (currentFile != null && !currentFile.isOpenedAsOwner()) {
             Snackbar.make(Rups.getMainFrame(), Language.WARNING_OPENED_IN_READ_ONLY_MODE.getString()).show();
         }
+    }
+
+    public void openDiffViewer(File fileA, File fileB) {
+        DiffViewer diffViewer = new DiffViewer(fileA,fileB);
+        this.jTabbedPane.addTab("DiffView", null, diffViewer);
+        this.jTabbedPane.setSelectedComponent(diffViewer);
     }
 }

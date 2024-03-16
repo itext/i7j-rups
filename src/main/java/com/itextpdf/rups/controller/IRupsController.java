@@ -91,4 +91,6 @@ public interface IRupsController {
      * Closes the current file and tries to open it as an owner again.
      */
     void reopenAsOwner();
+
+    void openDiffViewer(File fileA, File fileB);
 }

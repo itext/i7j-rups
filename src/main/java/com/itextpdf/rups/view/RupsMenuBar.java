@@ -56,6 +56,7 @@ import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -123,7 +124,13 @@ public class RupsMenuBar extends JMenuBar implements Observer {
                 }
         );
         add(edit);
-
+        final JMenu diffViewer = new JMenu("DiffViewer");
+        addItem(diffViewer, "DiffViewer", e -> {
+            File fileA = new File("src/main/resources/simpleParagraphTest.pdf");
+            File fileB = new File("src/main/resources/cmp_simpleParagraphTest.pdf");
+            controller.openDiffViewer(fileB,fileA);
+        } );
+        add(diffViewer);
         add(Box.createGlue());
 
         final JMenu help = new JMenu(Language.MENU_BAR_HELP.getString());

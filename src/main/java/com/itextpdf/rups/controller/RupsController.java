@@ -151,6 +151,11 @@ public class RupsController extends Observable
     }
 
     @Override
+    public void openDiffViewer(File fileA, File fileB) {
+        this.rupsTabbedPane.openDiffViewer(fileA, fileB);
+    }
+
+    @Override
     public final IPdfFile getCurrentFile() {
         return this.rupsTabbedPane.getCurrentFile();
     }
